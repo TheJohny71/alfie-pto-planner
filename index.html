@@ -44,14 +44,13 @@
       margin-top: 2em;
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
+      align-items: flex-start;
+      height: auto;
     }
     #calendar {
       max-width: 700px;
       width: 100%;
       height: 600px;
-      margin: 0 auto;
     }
     .summary {
       margin-top: 2em;
@@ -61,6 +60,21 @@
       background-color: #ffffff;
       text-align: center;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    .step-container {
+      margin-top: 2em;
+      display: none;
+    }
+    .step-card {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 2em;
+      border-radius: 10px;
+      background-color: #ffffff;
+      text-align: center;
+      margin-bottom: 2em;
+    }
+    .step-card h2 {
+      margin-bottom: 1em;
     }
   </style>
 </head>
@@ -85,9 +99,12 @@
         <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
       </div>
     </div>
-    
-    <div id="ptoForm" class="card" style="display: none;">
-      <div class="card-body">
+
+    <!-- Step Container -->
+    <div id="stepContainer" class="step-container">
+      <!-- Step 1: Select Year -->
+      <div id="step1" class="step-card">
+        <h2>Select Year</h2>
         <div class="mb-3">
           <label for="yearSelect" class="form-label">Select Year:</label>
           <select id="yearSelect" class="form-select">
@@ -96,6 +113,12 @@
             <option value="2027">2027</option>
           </select>
         </div>
+        <button class="btn btn-success" id="nextStep1Btn">Next</button>
+      </div>
+
+      <!-- Step 2: PTO Details -->
+      <div id="step2" class="step-card" style="display: none;">
+        <h2>PTO Details</h2>
         <div class="mb-3">
           <label for="totalPTO" class="form-label">Total PTO Days Available:</label>
           <input type="number" id="totalPTO" class="form-control" min="0">
@@ -108,17 +131,16 @@
           <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
           <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., January, March, July">
         </div>
-        <div class="text-center">
-          <button class="btn btn-success" id="submitFormBtn">Submit</button>
-        </div>
+        <button class="btn btn-success" id="nextStep2Btn">Next</button>
+      </div>
+
+      <!-- Step 3: Calendar & Summary -->
+      <div id="calendarContainer" class="step-card" style="display: none;">
+        <h2>Calendar and PTO Summary</h2>
+        <div id="calendar"></div>
+        <div id="summary" class="summary"></div>
       </div>
     </div>
   </div>
-
-  <div id="calendarContainer" class="alfie-app" style="display: none;">
-    <div id="calendar"></div>
-  </div>
-  
-  <div id="summary" class="summary" style="display: none;"></div>
 </body>
 </html>
