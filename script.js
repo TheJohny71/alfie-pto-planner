@@ -51,11 +51,14 @@ document.addEventListener("DOMContentLoaded", function() {
       suggestedPTO = suggestedPTO.slice(0, ptoThisYear);
       console.log("PTO Days Generated:", suggestedPTO);
 
-      // Display calendar with PTO dates using Flatpickr
+      // Hide PTO form
       document.getElementById("ptoForm").style.display = "none";
-      const calendarEl = document.getElementById("calendar");
-      calendarEl.style.display = "block";
+      
+      // Display calendar with PTO dates using Flatpickr
+      const calendarContainerEl = document.getElementById("calendarContainer");
+      calendarContainerEl.style.display = "block";
 
+      const calendarEl = document.getElementById("calendar");
       flatpickr(calendarEl, {
         mode: "multiple",
         defaultDate: suggestedPTO,
@@ -79,8 +82,37 @@ document.addEventListener("DOMContentLoaded", function() {
         <p><strong>PTO Days Requested:</strong> ${ptoThisYear}</p>
         <p><strong>PTO Days Scheduled:</strong> ${suggestedPTO.length}</p>
         <p><strong>Remaining PTO Days:</strong> ${totalPTO - ptoThisYear}</p>
+        <button class="btn btn-export" id="downloadPdfBtn">Download Summary as PDF</button>
+        <button class="btn btn-export" id="downloadExcelBtn">Download Summary as Excel</button>
       `;
       summaryEl.style.display = "block";
+
+      // Add event listeners for download buttons
+      document.getElementById("downloadPdfBtn").addEventListener("click", function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("PTO Summary", 10, 10);
+        doc.text(`Total PTO Days Available: ${totalPTO}`, 10, 20);
+        doc.text(`PTO Days Requested: ${ptoThisYear}`, 10, 30);
+        doc.text(`PTO Days Scheduled: ${suggestedPTO.length}`, 10, 40);
+        doc.text(`Remaining PTO Days: ${totalPTO - ptoThisYear}`, 10, 50);
+        doc.save("PTO_Summary.pdf");
+      });
+
+      document.getElementById("downloadExcelBtn").addEventListener("click", function() {
+        const wb = XLSX.utils.book_new();
+        const wsData = [
+          ["PTO Summary"],
+          ["Total PTO Days Available", totalPTO],
+          ["PTO Days Requested", ptoThisYear],
+          ["PTO Days Scheduled", suggestedPTO.length],
+          ["Remaining PTO Days", totalPTO - ptoThisYear]
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, "PTO Summary");
+        XLSX.writeFile(wb, "PTO_Summary.xlsx");
+      });
+
     } catch (error) {
       console.error("An error occurred:", error);
       alert("An error occurred while processing your request. Please try again.");
