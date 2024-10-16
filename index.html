@@ -24,7 +24,7 @@
     #calendar {
       margin-top: 2em;
       max-width: 100%;
-      height: 600px;
+      height: 500px;
     }
     .card {
       margin-bottom: 1.5em;
@@ -128,13 +128,14 @@
           // Generate PTO dates (distribute across the year more evenly)
           let suggestedPTO = [];
           let daysScheduled = 0;
+          const daysPerMonth = Math.ceil(ptoThisYear / preferredMonths.length);
 
-          // Loop through each preferred month and schedule PTO days evenly
           preferredMonths.forEach(month => {
             if (daysScheduled >= ptoThisYear) return;
             const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
             if (!isNaN(monthIndex)) {
-              for (let day = 1; day <= 28 && daysScheduled < ptoThisYear; day++) {
+              let day = 1;
+              while (daysScheduled < ptoThisYear && day <= 28) {
                 const date = new Date(year, monthIndex, day);
                 if (date.getDay() !== 0 && date.getDay() !== 6) { // Skip weekends
                   const formattedMonth = monthIndex < 9 ? `0${monthIndex + 1}` : monthIndex + 1;
@@ -145,6 +146,7 @@
                     daysScheduled++;
                   }
                 }
+                day++;
               }
             }
           });
@@ -184,7 +186,7 @@
           const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: "dayGridMonth",
             initialDate: `${year}-01-01`,
-            height: 600,
+            height: 500,
             events: [
               ...suggestedPTO.map(date => ({
                 title: "PTO Day",
@@ -210,7 +212,7 @@
           // Display PTO Summary
           const ptoSummaryEl = document.getElementById("ptoSummaryContent");
           const scheduledPTOCount = suggestedPTO.length;
-          const remainingPTO = totalPTO - scheduledPTOCount;
+          const remainingPTO = totalPTO - ptoThisYear;
           ptoSummaryEl.innerHTML = `
             <h2>PTO Summary</h2>
             <p>Total PTO Days Available: ${totalPTO}</p>
