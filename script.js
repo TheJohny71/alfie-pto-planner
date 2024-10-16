@@ -51,29 +51,36 @@ document.addEventListener("DOMContentLoaded", function() {
       suggestedPTO = suggestedPTO.slice(0, ptoThisYear);
       console.log("PTO Days Generated:", suggestedPTO);
 
-      // Display calendar with PTO dates
+      // Display calendar with PTO dates using Flatpickr
       document.getElementById("ptoForm").style.display = "none";
       const calendarEl = document.getElementById("calendar");
       calendarEl.style.display = "block";
 
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        initialDate: `${year}-01-01`,
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,dayGridWeek'
-        },
-        events: suggestedPTO.map(ptoDate => ({
-          title: 'PTO Day',
-          start: ptoDate,
-          backgroundColor: '#4caf50',
-          borderColor: '#4caf50',
-          textColor: '#ffffff'
-        }))
+      flatpickr(calendarEl, {
+        mode: "multiple",
+        defaultDate: suggestedPTO,
+        inline: true,
+        disable: [
+          function(date) {
+            // Disable weekends
+            return (date.getDay() === 0 || date.getDay() === 6);
+          }
+        ],
+        locale: {
+          firstDayOfWeek: 1 // Start the week on Monday
+        }
       });
 
-      calendar.render();
+      // Display PTO Summary
+      const summaryEl = document.getElementById("summary");
+      summaryEl.innerHTML = `
+        <h3>PTO Summary</h3>
+        <p><strong>Total PTO Days Available:</strong> ${totalPTO}</p>
+        <p><strong>PTO Days Requested:</strong> ${ptoThisYear}</p>
+        <p><strong>PTO Days Scheduled:</strong> ${suggestedPTO.length}</p>
+        <p><strong>Remaining PTO Days:</strong> ${totalPTO - ptoThisYear}</p>
+      `;
+      summaryEl.style.display = "block";
     } catch (error) {
       console.error("An error occurred:", error);
       alert("An error occurred while processing your request. Please try again.");
