@@ -51,22 +51,29 @@ document.addEventListener("DOMContentLoaded", function() {
       suggestedPTO = suggestedPTO.slice(0, ptoThisYear);
       console.log("PTO Days Generated:", suggestedPTO);
 
-      // Display weekly plan cards
+      // Display calendar with PTO dates
       document.getElementById("ptoForm").style.display = "none";
-      const weekPlanContainer = document.getElementById("weekPlanContainer");
-      weekPlanContainer.innerHTML = "";
-      suggestedPTO.forEach((ptoDate, index) => {
-        const weekCard = document.createElement("div");
-        weekCard.className = "week-card";
-        weekCard.innerHTML = `
-          <div class="week-card-header">PTO Week ${index + 1}</div>
-          <div class="week-card-content">
-            PTO Date: ${ptoDate}
-          </div>
-        `;
-        weekPlanContainer.appendChild(weekCard);
+      const calendarEl = document.getElementById("calendar");
+      calendarEl.style.display = "block";
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        initialDate: `${year}-01-01`,
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek'
+        },
+        events: suggestedPTO.map(ptoDate => ({
+          title: 'PTO Day',
+          start: ptoDate,
+          backgroundColor: '#4caf50',
+          borderColor: '#4caf50',
+          textColor: '#ffffff'
+        }))
       });
-      weekPlanContainer.style.display = "block";
+
+      calendar.render();
     } catch (error) {
       console.error("An error occurred:", error);
       alert("An error occurred while processing your request. Please try again.");
