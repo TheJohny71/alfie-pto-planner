@@ -32,77 +32,36 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function displayCalendar() {
-        const selectedYear = yearSelect.value;
+        const calendarEl = document.getElementById('calendar');
+        const year = parseInt(yearSelect.value);
         const totalPTO = parseInt(totalPTOInput.value);
-        const preferredMonths = preferredMonthsInput.value.split(',').map(month => month.trim().toLowerCase());
+        const ptoThisYear = parseInt(ptoThisYearInput.value);
+        const preferredMonths = preferredMonthsInput.value.split(',').map(month => month.trim());
 
-        const calendarEl = document.getElementById("calendar");
-        const events = [];
-
-        // Add Bank Holidays
-        const bankHolidays = [
-            { title: "New Year's Day", date: `${selectedYear}-01-01` },
-            { title: "Good Friday", date: `${selectedYear}-04-18` },
-            { title: "Easter Monday", date: `${selectedYear}-04-21` },
-            { title: "Early May Bank Holiday", date: `${selectedYear}-05-05` },
-            { title: "Spring Bank Holiday", date: `${selectedYear}-05-26` },
-            { title: "Summer Bank Holiday", date: `${selectedYear}-08-25` },
-            { title: "Christmas Day", date: `${selectedYear}-12-25` },
-            { title: "Boxing Day", date: `${selectedYear}-12-26` }
+        const weekends = [];
+        const holidays = [
+            { date: `${year}-01-01`, title: "New Year's Day" },
+            { date: `${year}-04-18`, title: "Good Friday" },
+            { date: `${year}-04-21`, title: "Easter Monday" },
+            { date: `${year}-05-05`, title: "Early May Bank Holiday" },
+            { date: `${year}-05-26`, title: "Spring Bank Holiday" },
+            { date: `${year}-08-25`, title: "Summer Bank Holiday" },
+            { date: `${year}-12-25`, title: "Christmas Day" },
+            { date: `${year}-12-26`, title: "Boxing Day" },
         ];
-        bankHolidays.forEach(holiday => {
-            events.push({
-                title: holiday.title,
-                start: holiday.date,
-                color: '#ffcccb'
-            });
-        });
 
-        // Highlight Weekends
-        let startDate = new Date(`${selectedYear}-01-01`);
-        let endDate = new Date(`${selectedYear}-12-31`);
-        while (startDate <= endDate) {
-            if (startDate.getDay() === 0 || startDate.getDay() === 6) { // Sunday or Saturday
-                events.push({
-                    title: 'Weekend',
-                    start: startDate.toISOString().split('T')[0],
-                    display: 'background',
-                    color: '#f0f0f0'
-                });
-            }
-            startDate.setDate(startDate.getDate() + 1);
-        }
-
-        // Add PTO Days with Better Distribution
-        const preferredMonthsIndices = preferredMonths.map(month => new Date(Date.parse(month + " 1, 2022")).getMonth());
-        let ptoDaysScheduled = 0;
-
-        for (let monthIndex of preferredMonthsIndices) {
-            if (ptoDaysScheduled >= totalPTO) break;
-            for (let day = 5; day <= 25; day += 7) { // Spread PTO days across the month
-                if (ptoDaysScheduled >= totalPTO) break;
-
-                let date = new Date(selectedYear, monthIndex, day);
-                if (date.getDay() !== 0 && date.getDay() !== 6) { // Skip weekends
-                    events.push({
-                        title: 'PTO Day',
-                        start: date.toISOString().split('T')[0],
-                        color: '#add8e6'
-                    });
-                    ptoDaysScheduled++;
-                }
-            }
-        }
+        const events = holidays.map(holiday => ({
+            title: holiday.title,
+            start: holiday.date,
+            className: 'highlight-holiday'
+        }));
 
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            height: 'auto',
-            contentHeight: 'auto',
+            initialDate: `${year}-06-01`,
             events: events,
-            eventContent: function (info) {
-                const customHtml = document.createElement("div");
-                customHtml.innerHTML = `<div class="fc-event-title">${info.event.title}</div>`;
-                return { domNodes: [customHtml] };
+            dateClick: function (info) {
+                console.log('Clicked on: ' + info.dateStr);
             }
         });
 
@@ -111,15 +70,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function displaySummary() {
         const totalPTO = parseInt(totalPTOInput.value);
-        const ptoRequested = parseInt(ptoThisYearInput.value);
-        const summaryEl = document.getElementById("summary");
+        const ptoThisYear = parseInt(ptoThisYearInput.value);
+        const summaryDiv = document.getElementById('summary');
 
-        summaryEl.innerHTML = `
+        summaryDiv.innerHTML = `
             <h3>PTO Summary</h3>
             <p>Total PTO Days Available: ${totalPTO}</p>
-            <p>PTO Days Requested: ${ptoRequested}</p>
-            <p>PTO Days Scheduled: ${ptoRequested}</p>
-            <p>Remaining PTO Days: ${totalPTO - ptoRequested}</p>
+            <p>PTO Days Requested: ${ptoThisYear}</p>
+            <p>PTO Days Scheduled: ${Math.min(totalPTO, ptoThisYear)}</p>
+            <p>Remaining PTO Days: ${Math.max(0, totalPTO - ptoThisYear)}</p>
         `;
     }
 });
