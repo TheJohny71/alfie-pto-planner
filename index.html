@@ -24,12 +24,24 @@
     #calendar {
       margin-top: 2em;
       max-width: 100%;
-      height: 450px;
+      height: 350px;
+    }
+    .card {
+      margin-bottom: 1.5em;
+    }
+    .btn-primary, .btn-success {
+      border-radius: 20px;
+    }
+    .btn-primary:hover, .btn-success:hover {
+      opacity: 0.9;
+    }
+    .form-label {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">Alfie PTO Planner</a>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -49,36 +61,44 @@
   </nav>
 
   <div class="alfie-app">
-    <h1 class="mb-4">Welcome to Alfie | Your PTO Companion</h1>
-    <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
+    <div class="card">
+      <div class="card-body">
+        <h1 class="mb-4">Welcome to Alfie | Your PTO Companion</h1>
+        <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
+      </div>
+    </div>
     
-    <div id="ptoForm" class="mt-4" style="display: none;">
-      <div class="mb-3">
-        <label for="yearSelect" class="form-label">Select Year:</label>
-        <select id="yearSelect" class="form-select">
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-          <option value="2027">2027</option>
-        </select>
+    <div id="ptoForm" class="card" style="display: none;">
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="yearSelect" class="form-label">Select Year:</label>
+          <select id="yearSelect" class="form-select">
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="totalPTO" class="form-label">Total PTO Days Available:</label>
+          <input type="number" id="totalPTO" class="form-control" min="0">
+        </div>
+        <div class="mb-3">
+          <label for="ptoThisYear" class="form-label">Number of PTO Days to Take This Year:</label>
+          <input type="number" id="ptoThisYear" class="form-control" min="0">
+        </div>
+        <div class="mb-3">
+          <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
+          <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., January, March, July">
+        </div>
+        <button class="btn btn-success" id="submitFormBtn">Submit</button>
       </div>
-      <div class="mb-3">
-        <label for="totalPTO" class="form-label">Total PTO Days Available:</label>
-        <input type="number" id="totalPTO" class="form-control" min="0">
-      </div>
-      <div class="mb-3">
-        <label for="ptoThisYear" class="form-label">Number of PTO Days to Take This Year:</label>
-        <input type="number" id="ptoThisYear" class="form-control" min="0">
-      </div>
-      <div class="mb-3">
-        <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
-        <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., January, March, July">
-      </div>
-      <button class="btn btn-success" id="submitFormBtn">Submit</button>
     </div>
   </div>
 
   <div id="calendar"></div>
-  <div id="ptoSummary" class="mt-4"></div>
+  <div id="ptoSummary" class="card mt-4">
+    <div class="card-body" id="ptoSummaryContent"></div>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -101,34 +121,37 @@
           return;
         }
 
-        // Generate PTO dates (spread out across preferred months, assuming multiple days per month if needed)
+        // Generate PTO dates (distribute across the year more evenly)
         let suggestedPTO = [];
-        const daysPerMonth = Math.ceil(ptoThisYear / preferredMonths.length);
+        let daysScheduled = 0;
+        const totalMonths = preferredMonths.length;
 
-        preferredMonths.forEach(month => {
-          const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
-          if (!isNaN(monthIndex)) {
-            for (let day = 1; day <= daysPerMonth; day++) {
+        while (daysScheduled < ptoThisYear) {
+          preferredMonths.forEach(month => {
+            if (daysScheduled >= ptoThisYear) return;
+            const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+            if (!isNaN(monthIndex)) {
+              const day = 15 + (daysScheduled % 5); // Distribute days around the 15th, adjusting for balance
               const formattedMonth = monthIndex < 9 ? `0${monthIndex + 1}` : monthIndex + 1;
               const formattedDay = day < 10 ? `0${day}` : day;
               suggestedPTO.push(`${year}-${formattedMonth}-${formattedDay}`);
-              if (suggestedPTO.length >= ptoThisYear) break;
+              daysScheduled++;
             }
-          }
-        });
+          });
+        }
 
         suggestedPTO = suggestedPTO.slice(0, ptoThisYear);
 
         // Generate Bank Holidays (for the UK)
         const bankHolidays = [
-          `${year}-01-01`, // New Year's Day
-          `${year}-04-18`, // Good Friday
-          `${year}-04-21`, // Easter Monday
-          `${year}-05-05`, // Early May bank holiday
-          `${year}-05-26`, // Spring bank holiday
-          `${year}-08-25`, // Summer bank holiday
-          `${year}-12-25`, // Christmas Day
-          `${year}-12-26`  // Boxing Day
+          { date: `${year}-01-01`, title: "New Year's Day" },
+          { date: `${year}-04-18`, title: "Good Friday" },
+          { date: `${year}-04-21`, title: "Easter Monday" },
+          { date: `${year}-05-05`, title: "Early May Bank Holiday" },
+          { date: `${year}-05-26`, title: "Spring Bank Holiday" },
+          { date: `${year}-08-25`, title: "Summer Bank Holiday" },
+          { date: `${year}-12-25`, title: "Christmas Day" },
+          { date: `${year}-12-26`, title: "Boxing Day" }
         ];
 
         // Generate Weekends for the year
@@ -147,17 +170,17 @@
         const calendar = new FullCalendar.Calendar(calendarEl, {
           initialView: "dayGridMonth",
           initialDate: `${year}-01-01`,
-          height: 450,
+          height: 350,
           events: [
             ...suggestedPTO.map(date => ({
               title: "PTO Day",
               start: date,
-              color: "#90caf9"
+              color: "#4caf50"
             })),
-            ...bankHolidays.map(date => ({
-              title: "Bank Holiday",
-              start: date,
-              color: "#ffeb3b"
+            ...bankHolidays.map(holiday => ({
+              title: holiday.title,
+              start: holiday.date,
+              color: "#ffcc00"
             })),
             ...weekends.map(date => ({
               title: "Weekend",
@@ -169,7 +192,7 @@
         calendar.render();
 
         // Display PTO Summary
-        const ptoSummaryEl = document.getElementById("ptoSummary");
+        const ptoSummaryEl = document.getElementById("ptoSummaryContent");
         const scheduledPTOCount = suggestedPTO.length;
         const remainingPTO = totalPTO - scheduledPTOCount;
         ptoSummaryEl.innerHTML = `
