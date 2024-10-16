@@ -24,7 +24,7 @@
     #calendar {
       margin-top: 2em;
       max-width: 100%;
-      height: 600px;
+      height: 500px;
     }
     .card {
       margin-bottom: 1.5em;
@@ -134,8 +134,7 @@
             if (daysScheduled >= ptoThisYear) return;
             const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
             if (!isNaN(monthIndex)) {
-              for (let day = 1; day <= 28; day += Math.ceil(28 / daysPerMonth)) {
-                if (daysScheduled >= ptoThisYear) break;
+              for (let day = 1; day <= 28 && daysScheduled < ptoThisYear; day += Math.ceil(28 / daysPerMonth)) {
                 const formattedMonth = monthIndex < 9 ? `0${monthIndex + 1}` : monthIndex + 1;
                 const formattedDay = day < 10 ? `0${day}` : day;
                 suggestedPTO.push(`${year}-${formattedMonth}-${formattedDay}`);
@@ -179,7 +178,7 @@
           const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: "dayGridMonth",
             initialDate: `${year}-01-01`,
-            height: 600,
+            height: 500,
             events: [
               ...suggestedPTO.map(date => ({
                 title: "PTO Day",
@@ -194,7 +193,7 @@
               ...weekends.map(date => ({
                 title: "Weekend",
                 start: date,
-                color: "#d3d3d3"
+                color: "#dcdcdc"
               }))
             ]
           });
