@@ -156,7 +156,7 @@
           const weekends = [];
           const startDate = new Date(`${year}-01-01`);
           const endDate = new Date(`${year}-12-31`);
-          for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+          for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
             if (date.getDay() === 0 || date.getDay() === 6) {
               weekends.push(date.toISOString().split('T')[0]);
             }
