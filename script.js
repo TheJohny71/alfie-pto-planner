@@ -73,13 +73,13 @@ document.addEventListener("DOMContentLoaded", function () {
             startDate.setDate(startDate.getDate() + 1);
         }
 
-        // Add PTO Days
+        // Add PTO Days with Better Distribution
         const preferredMonthsIndices = preferredMonths.map(month => new Date(Date.parse(month + " 1, 2022")).getMonth());
         let ptoDaysScheduled = 0;
 
         for (let monthIndex of preferredMonthsIndices) {
             if (ptoDaysScheduled >= totalPTO) break;
-            for (let day = 1; day <= 28; day++) {
+            for (let day = 5; day <= 25; day += 7) { // Spread PTO days across the month
                 if (ptoDaysScheduled >= totalPTO) break;
 
                 let date = new Date(selectedYear, monthIndex, day);
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     events.push({
                         title: 'PTO Day',
                         start: date.toISOString().split('T')[0],
-                        color: '#cce5ff'
+                        color: '#add8e6'
                     });
                     ptoDaysScheduled++;
                 }
@@ -97,8 +97,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             height: 'auto',
+            contentHeight: 'auto',
             events: events,
-            eventContent: function(info) {
+            eventContent: function (info) {
                 const customHtml = document.createElement("div");
                 customHtml.innerHTML = `<div class="fc-event-title">${info.event.title}</div>`;
                 return { domNodes: [customHtml] };
