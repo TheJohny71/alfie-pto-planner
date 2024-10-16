@@ -40,13 +40,12 @@
     .form-label {
       font-weight: bold;
     }
-    #calendarContainer {
-      margin-top: 2em;
-      text-align: center;
-    }
     #calendar {
-      max-width: 600px;
-      margin: 0 auto;
+      margin-top: 2em;
+      max-width: 800px;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
     }
     .summary {
       margin-top: 2em;
@@ -114,10 +113,25 @@
     </div>
   </div>
 
-  <div id="calendarContainer" style="display: none;">
-    <div id="calendar"></div>
+  <!-- Modal for Calendar and Summary -->
+  <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resultModalLabel">Calendar and PTO Summary</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="calendarContainer">
+            <div id="calendar"></div>
+          </div>
+          <div id="summary" class="summary"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
-  
-  <div id="summary" class="summary" style="display: none;"></div>
 </body>
 </html>
