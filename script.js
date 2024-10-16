@@ -66,7 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 events.push({
                     title: 'Weekend',
                     start: startDate.toISOString().split('T')[0],
-                    color: '#e6e6e6'
+                    display: 'background',
+                    color: '#f0f0f0'
                 });
             }
             startDate.setDate(startDate.getDate() + 1);
