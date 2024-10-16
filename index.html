@@ -36,10 +36,11 @@
     .form-label {
       font-weight: bold;
     }
-    #calendar {
+    #calendarContainer {
       margin-top: 2em;
-      max-width: 100%;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .summary {
       margin-top: 2em;
@@ -99,7 +100,9 @@
     </div>
   </div>
 
-  <div id="calendar" class="alfie-app" style="display: none;"></div>
+  <div id="calendarContainer" style="display: none;">
+    <div id="calendar"></div>
+  </div>
   
   <div id="summary" class="summary" style="display: none;"></div>
 </body>
