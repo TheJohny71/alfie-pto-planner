@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar View | Alfie PTO Planner</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Calendar and PTO Summary</h1>
+        <div id="calendar"></div>
+        <div id="ptoSummaryContent" class="mt-4"></div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const summaryData = JSON.parse(localStorage.getItem('ptoSummary'));
+            if (!summaryData) {
+                alert("No PTO data found. Please return to the form to submit your information.");
+                return;
+            }
+            
+            // Display Calendar
+            const calendarEl = document.getElementById("calendar");
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: "dayGridMonth",
+                initialDate: `${summaryData.suggestedPTO[0].split("-")[0]}-01-01`,
+                height: 500,
+                events: [
+                    ...summaryData.suggestedPTO.map(date => ({
+                        title: "PTO Day",
+                        start: date,
+                        color: "#4caf50"
+                    })),
+                    ...summaryData.bankHolidays.map(holiday => ({
+                        title: holiday.title,
+                        start: holiday.date,
+                        color: "#ff6347"
+                    })),
+                    ...summaryData.weekends.map(date => ({
+                        title: "Weekend",
+                        start: date,
+                        color: "#dcdcdc"
+                    }))
+                ]
+            });
+            calendar.render();
+
+            // Display PTO Summary
+            const ptoSummaryEl = document.getElementById("ptoSummaryContent");
+            ptoSummaryEl.innerHTML = `
+                <h2>PTO Summary</h2>
+                <p>Total PTO Days Available: ${summaryData.totalPTO}</p>
+                <p>PTO Days Requested: ${summaryData.ptoThisYear}</p>
+                <p>PTO Days Scheduled: ${summaryData.scheduledPTOCount}</p>
+                <p>Remaining PTO Days: ${summaryData.remainingPTO}</p>
+            `;
+        });
+    </script>
+</body>
+</html>
