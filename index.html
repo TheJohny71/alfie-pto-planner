@@ -24,7 +24,7 @@
     #calendar {
       margin-top: 2em;
       max-width: 100%;
-      height: 500px;
+      height: 400px;
     }
     .card {
       margin-bottom: 1.5em;
@@ -137,8 +137,11 @@
               for (let day = 1; day <= 28 && daysScheduled < ptoThisYear; day += Math.ceil(28 / daysPerMonth)) {
                 const formattedMonth = monthIndex < 9 ? `0${monthIndex + 1}` : monthIndex + 1;
                 const formattedDay = day < 10 ? `0${day}` : day;
-                suggestedPTO.push(`${year}-${formattedMonth}-${formattedDay}`);
-                daysScheduled++;
+                const ptoDate = `${year}-${formattedMonth}-${formattedDay}`;
+                if (!suggestedPTO.includes(ptoDate)) {
+                  suggestedPTO.push(ptoDate);
+                  daysScheduled++;
+                }
               }
             }
           });
@@ -178,7 +181,7 @@
           const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: "dayGridMonth",
             initialDate: `${year}-01-01`,
-            height: 500,
+            height: 400,
             events: [
               ...suggestedPTO.map(date => ({
                 title: "PTO Day",
@@ -193,7 +196,7 @@
               ...weekends.map(date => ({
                 title: "Weekend",
                 start: date,
-                color: "#dcdcdc"
+                color: "#f0f0f0"
               }))
             ]
           });
@@ -204,7 +207,7 @@
           // Display PTO Summary
           const ptoSummaryEl = document.getElementById("ptoSummaryContent");
           const scheduledPTOCount = suggestedPTO.length;
-          const remainingPTO = totalPTO - scheduledPTOCount;
+          const remainingPTO = totalPTO - ptoThisYear;
           ptoSummaryEl.innerHTML = `
             <h2>PTO Summary</h2>
             <p>Total PTO Days Available: ${totalPTO}</p>
