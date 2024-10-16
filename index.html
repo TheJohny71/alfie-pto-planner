@@ -53,11 +53,10 @@
       margin-top: 2em;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
     }
     #calendar {
-      max-width: 100%;
-      width: 90%;
+      max-width: 90%;
       margin: 0 auto;
     }
   </style>
@@ -123,6 +122,10 @@
         <h2>Calendar and PTO Summary</h2>
         <div id="calendar"></div>
         <div id="summary" class="summary"></div>
+        <div class="btn-export">
+          <button class="btn btn-secondary" id="downloadPdfBtn">Download Summary as PDF</button>
+          <button class="btn btn-secondary" id="downloadExcelBtn">Download Summary as Excel</button>
+        </div>
       </div>
     </div>
   </div>
