@@ -13,8 +13,8 @@
   <script src="script.js" defer></script>
   <style>
     body {
-      background-color: #ffffff;
-      color: #333333;
+      background-color: #f8f9fa;
+      color: #212529;
     }
     .alfie-app {
       font-family: Arial, sans-serif;
@@ -30,7 +30,7 @@
     }
     .card {
       margin-bottom: 1.5em;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     .btn-primary, .btn-success {
       border-radius: 20px;
@@ -44,18 +44,18 @@
     .summary {
       margin-top: 2em;
       padding: 1em;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 10px;
       background-color: #ffffff;
       text-align: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
     .step-container {
       margin-top: 2em;
       display: none;
     }
     .step-card {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       padding: 2em;
       border-radius: 10px;
       background-color: #ffffff;
@@ -73,25 +73,25 @@
       flex-direction: column;
     }
     #calendar {
-      max-width: 90%;
-      width: 100%;
+      max-width: 100%;
+      width: 90%;
       margin: 0 auto;
       padding: 20px;
       background-color: #ffffff;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    .highlight-weekend {
-      background-color: #f0f0f0;
-      color: #666666;
+    .fc-daygrid-day.fc-day-sun, .fc-daygrid-day.fc-day-sat {
+      background-color: #f0e68c !important;
+      color: #000000;
     }
     .highlight-holiday {
-      background-color: #ffcccb;
-      color: #000000;
+      background-color: #ff6347 !important;
+      color: #ffffff;
     }
     .highlight-pto {
-      background-color: #87cefa;
-      color: #000000;
+      background-color: #4682b4 !important;
+      color: #ffffff;
     }
   </style>
 </head>
