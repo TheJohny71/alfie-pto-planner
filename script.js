@@ -67,28 +67,30 @@ document.addEventListener("DOMContentLoaded", function () {
                     title: 'Weekend',
                     start: startDate.toISOString().split('T')[0],
                     display: 'background',
-                    color: '#e0e0e0'
+                    color: '#f0f0f0'
                 });
             }
             startDate.setDate(startDate.getDate() + 1);
         }
 
         // Add PTO Days
+        const preferredMonthsIndices = preferredMonths.map(month => new Date(Date.parse(month + " 1, 2022")).getMonth());
         let ptoDaysScheduled = 0;
-        for (let i = 0; i < totalPTO; i++) {
-            let monthIndex = i % preferredMonths.length;
-            let monthName = preferredMonths[monthIndex];
-            let month = new Date(Date.parse(monthName + " 1, " + selectedYear)).getMonth() + 1;
 
-            // Schedule PTO day in the middle of the month
-            let date = new Date(`${selectedYear}-${month < 10 ? '0' + month : month}-15`);
-            if (!isNaN(date.getTime())) {
-                events.push({
-                    title: 'PTO Day',
-                    start: date.toISOString().split('T')[0],
-                    color: '#add8e6'
-                });
-                ptoDaysScheduled++;
+        for (let monthIndex of preferredMonthsIndices) {
+            if (ptoDaysScheduled >= totalPTO) break;
+            for (let day = 1; day <= 28; day++) {
+                if (ptoDaysScheduled >= totalPTO) break;
+
+                let date = new Date(selectedYear, monthIndex, day);
+                if (date.getDay() !== 0 && date.getDay() !== 6) { // Skip weekends
+                    events.push({
+                        title: 'PTO Day',
+                        start: date.toISOString().split('T')[0],
+                        color: '#cce5ff'
+                    });
+                    ptoDaysScheduled++;
+                }
             }
         }
 
@@ -97,9 +99,8 @@ document.addEventListener("DOMContentLoaded", function () {
             height: 'auto',
             events: events,
             eventContent: function(info) {
-                // Custom rendering for events to ensure labels are visible
                 const customHtml = document.createElement("div");
-                customHtml.innerHTML = `<div class="fc-event-title fc-sticky">${info.event.title}</div>`;
+                customHtml.innerHTML = `<div class="fc-event-title">${info.event.title}</div>`;
                 return { domNodes: [customHtml] };
             }
         });
