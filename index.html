@@ -130,19 +130,21 @@
           const daysPerMonth = Math.ceil(ptoThisYear / preferredMonths.length);
           let daysScheduled = 0;
 
-          for (let i = 0; i < preferredMonths.length && daysScheduled < ptoThisYear; i++) {
-            const month = preferredMonths[i];
+          preferredMonths.forEach(month => {
+            if (daysScheduled >= ptoThisYear) return;
             const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
             if (!isNaN(monthIndex)) {
-              for (let day = 1; day <= 28 && daysScheduled < ptoThisYear; day += Math.ceil(28 / daysPerMonth)) {
+              for (let day = 1; day <= 28; day += Math.ceil(28 / daysPerMonth)) {
+                if (daysScheduled >= ptoThisYear) break;
                 const formattedMonth = monthIndex < 9 ? `0${monthIndex + 1}` : monthIndex + 1;
                 const formattedDay = day < 10 ? `0${day}` : day;
                 suggestedPTO.push(`${year}-${formattedMonth}-${formattedDay}`);
                 daysScheduled++;
               }
             }
-          }
+          });
 
+          suggestedPTO = suggestedPTO.slice(0, ptoThisYear);
           console.log("PTO Days Generated:", suggestedPTO);
 
           // Generate Bank Holidays (for the UK)
