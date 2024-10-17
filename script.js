@@ -37,6 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function initializeCalendar(year, totalPTO, ptoThisYear, preferredMonths) {
+    if (typeof FullCalendar === 'undefined') {
+      console.error('FullCalendar library not loaded.');
+      return;
+    }
     const calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       initialDate: `${year}-01-01`,
