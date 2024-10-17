@@ -73,8 +73,8 @@
       flex-direction: column;
     }
     #calendar {
-      max-width: 100%;
-      width: 90%;
+      max-width: 90%;
+      width: 100%;
       margin: 0 auto;
       padding: 20px;
       background-color: #ffffff;
@@ -82,16 +82,43 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     .fc-daygrid-day.fc-day-sun, .fc-daygrid-day.fc-day-sat {
-      background-color: #f0e68c !important;
+      background-color: #f9e79f !important;
       color: #000000;
     }
     .highlight-holiday {
-      background-color: #ff6347 !important;
+      background-color: #ff7f7f !important;
       color: #ffffff;
+      font-weight: bold;
     }
     .highlight-pto {
-      background-color: #4682b4 !important;
+      background-color: #5dade2 !important;
       color: #ffffff;
+      font-weight: bold;
+    }
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 120px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
     }
   </style>
 </head>
