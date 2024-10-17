@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
         center: 'title',
         right: 'dayGridMonth,timeGridWeek'
       },
-      events: generateEvents(year, ptoThisYear, preferredMonths)
+      events: generateEvents(year, ptoThisYear, preferredMonths),
+      eventDisplay: 'auto',
     });
     calendar.render();
   }
@@ -69,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
       events.push({
         title: holiday.title,
         start: holiday.date,
-        display: 'background',
         classNames: ['highlight-holiday']
       });
     });
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let month = 0; month < 12 && ptoDaysScheduled < ptoThisYear; month++) {
       const date = new Date(year, month, 1);
       while (date.getMonth() === month && ptoDaysScheduled < ptoThisYear) {
-        if (date.getDay() !== 0 && date.getDay() !== 6 && preferredMonths.includes(date.toLocaleString('default', { month: 'long' }))) {
+        if (date.getDay() !== 0 && date.getDay() !== 6 && (preferredMonths.length === 0 || preferredMonths.includes(date.toLocaleString('default', { month: 'long' })))) {
           events.push({
             title: 'PTO Day',
             start: date.toISOString().split('T')[0],
