@@ -12,16 +12,19 @@ document.addEventListener('DOMContentLoaded', function() {
   const calendarEl = document.getElementById('calendar');
 
   startPlanningBtn.addEventListener('click', function() {
+    console.log('Start Planning button clicked');
     startPlanningBtn.style.display = 'none';
     step1.style.display = 'block';
   });
 
   nextStep1Btn.addEventListener('click', function() {
+    console.log('Next Step 1 button clicked');
     step1.style.display = 'none';
     step2.style.display = 'block';
   });
 
   nextStep2Btn.addEventListener('click', function() {
+    console.log('Next Step 2 button clicked');
     const totalPTO = parseInt(totalPTOInput.value);
     const ptoThisYear = parseInt(ptoThisYearInput.value);
     const preferredMonths = preferredMonthsInput.value.split(',').map(month => month.trim());
@@ -37,10 +40,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function initializeCalendar(year, totalPTO, ptoThisYear, preferredMonths) {
+    console.log('Initializing Calendar for year:', year);
     if (typeof FullCalendar === 'undefined') {
       console.error('FullCalendar library not loaded.');
       return;
     }
+    console.log('FullCalendar library loaded successfully.');
+
     const calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       initialDate: `${year}-01-01`,
@@ -56,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function generateEvents(year, ptoThisYear, preferredMonths) {
+    console.log('Generating events for the calendar');
     const events = [];
 
     // Add UK bank holidays
@@ -112,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    console.log('Events generated:', events.concat(weekends));
     return events.concat(weekends);
   }
 });
