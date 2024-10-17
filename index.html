@@ -6,38 +6,10 @@
   <title>Alfie | Your PTO Companion</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
   <script src="script.js" defer></script>
-  <style>
-    .alfie-app {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2em;
-    }
-    #ptoForm {
-      margin-top: 1em;
-    }
-    .btn-export {
-      margin-top: 20px;
-    }
-    #calendar {
-      margin-top: 2em;
-    }
-    .highlight-weekend {
-      background-color: #f2f2f2;
-      color: #333;
-    }
-    .highlight-holiday {
-      background-color: #ffcccb;
-      color: #333;
-    }
-    .highlight-pto {
-      background-color: #90ee90;
-      color: #333;
-    }
-  </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -46,24 +18,27 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="#ptoForm">Plan PTO</a>
+            <a class="nav-link" href="#step1">Plan PTO</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#calendar">Calendar View</a>
+            <a class="nav-link" href="#calendarContainer">Calendar View</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#ptoSuggestions">PTO Summary</a>
+            <a class="nav-link" href="#summary">PTO Summary</a>
           </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="alfie-app">
-    <h1 class="mb-4">Welcome to Alfie | Your PTO Companion</h1>
-    <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
-    
-    <div id="ptoForm" class="mt-4" style="display: none;">
+  <div class="alfie-app container mt-5">
+    <h1 class="text-center mb-5">Welcome to Alfie | Your PTO Companion</h1>
+    <div class="text-center">
+      <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
+    </div>
+
+    <div id="step1" class="mt-5" style="display: none;">
+      <h2>Step 1: Select Year</h2>
       <div class="mb-3">
         <label for="yearSelect" class="form-label">Select Year:</label>
         <select id="yearSelect" class="form-select">
@@ -72,6 +47,13 @@
           <option value="2027">2027</option>
         </select>
       </div>
+      <div class="text-center">
+        <button class="btn btn-success" id="nextStep1Btn">Next</button>
+      </div>
+    </div>
+
+    <div id="step2" class="mt-5" style="display: none;">
+      <h2>Step 2: PTO Details</h2>
       <div class="mb-3">
         <label for="totalPTO" class="form-label">Total PTO Days Available:</label>
         <input type="number" id="totalPTO" class="form-control" min="0">
@@ -84,10 +66,34 @@
         <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
         <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., January, March, July">
       </div>
-      <button class="btn btn-success" id="submitFormBtn">Submit</button>
+      <div class="text-center">
+        <button class="btn btn-success" id="nextStep2Btn">Submit</button>
+      </div>
+    </div>
+
+    <div id="calendarContainer" class="mt-5" style="display: none;">
+      <h2 class="text-center">Calendar and PTO Summary</h2>
+      <div id="calendar" class="mx-auto mb-5"></div>
+      <div id="summary" class="text-center"></div>
     </div>
   </div>
 
-  <div id="calendar"></div>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .highlight-holiday {
+      background-color: #ffcccc !important;
+    }
+    .highlight-pto {
+      background-color: #cce5ff !important;
+    }
+    .highlight-weekend {
+      background-color: #e9ecef;
+    }
+    #calendar {
+      max-width: 900px;
+    }
+  </style>
 </body>
 </html>
