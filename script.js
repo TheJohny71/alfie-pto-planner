@@ -1,125 +1,109 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const startPlanningBtn = document.getElementById('startPlanningBtn');
-  const nextStep1Btn = document.getElementById('nextStep1Btn');
-  const nextStep2Btn = document.getElementById('nextStep2Btn');
-  const yearSelect = document.getElementById('yearSelect');
-  const totalPTOInput = document.getElementById('totalPTO');
-  const ptoThisYearInput = document.getElementById('ptoThisYear');
-  const preferredMonthsInput = document.getElementById('preferredMonths');
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  const calendarContainer = document.getElementById('calendarContainer');
-  const calendarEl = document.getElementById('calendar');
-
-  startPlanningBtn.addEventListener('click', function() {
-    console.log('Start Planning button clicked');
-    startPlanningBtn.style.display = 'none';
-    step1.style.display = 'block';
-  });
-
-  nextStep1Btn.addEventListener('click', function() {
-    console.log('Next Step 1 button clicked');
-    step1.style.display = 'none';
-    step2.style.display = 'block';
-  });
-
-  nextStep2Btn.addEventListener('click', function() {
-    console.log('Next Step 2 button clicked');
-    const totalPTO = parseInt(totalPTOInput.value);
-    const ptoThisYear = parseInt(ptoThisYearInput.value);
-    const preferredMonths = preferredMonthsInput.value.split(',').map(month => month.trim());
-
-    if (isNaN(totalPTO) || isNaN(ptoThisYear) || ptoThisYear > totalPTO) {
-      alert('Please enter valid PTO details. PTO days to take should not exceed total PTO days available.');
-      return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alfie | Your PTO Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js" defer></script>
+  <script src="script.js" defer></script>
+  <style>
+    .alfie-app {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2em;
+      text-align: center;
     }
-
-    step2.style.display = 'none';
-    calendarContainer.style.display = 'block';
-    initializeCalendar(yearSelect.value, totalPTO, ptoThisYear, preferredMonths);
-  });
-
-  function initializeCalendar(year, totalPTO, ptoThisYear, preferredMonths) {
-    console.log('Initializing Calendar for year:', year);
-    if (typeof FullCalendar === 'undefined') {
-      console.error('FullCalendar library not loaded.');
-      return;
+    #ptoForm {
+      margin-top: 1em;
     }
-    console.log('FullCalendar library loaded successfully.');
-
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'dayGridMonth',
-      initialDate: `${year}-01-01`,
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek'
-      },
-      events: generateEvents(year, ptoThisYear, preferredMonths),
-      eventDisplay: 'auto',
-    });
-    calendar.render();
-  }
-
-  function generateEvents(year, ptoThisYear, preferredMonths) {
-    console.log('Generating events for the calendar');
-    const events = [];
-
-    // Add UK bank holidays
-    const bankHolidays = [
-      { date: `${year}-01-01`, title: "New Year's Day" },
-      { date: `${year}-04-18`, title: "Good Friday" },
-      { date: `${year}-04-21`, title: "Easter Monday" },
-      { date: `${year}-05-05`, title: "Early May Bank Holiday" },
-      { date: `${year}-05-26`, title: "Spring Bank Holiday" },
-      { date: `${year}-08-25`, title: "Summer Bank Holiday" },
-      { date: `${year}-12-25`, title: "Christmas Day" },
-      { date: `${year}-12-26`, title: "Boxing Day" }
-    ];
-
-    bankHolidays.forEach(holiday => {
-      events.push({
-        title: holiday.title,
-        start: holiday.date,
-        classNames: ['highlight-holiday']
-      });
-    });
-
-    // Add PTO days
-    let ptoDaysScheduled = 0;
-    for (let month = 0; month < 12 && ptoDaysScheduled < ptoThisYear; month++) {
-      const date = new Date(year, month, 1);
-      while (date.getMonth() === month && ptoDaysScheduled < ptoThisYear) {
-        if (date.getDay() !== 0 && date.getDay() !== 6 && (preferredMonths.length === 0 || preferredMonths.includes(date.toLocaleString('default', { month: 'long' })))) {
-          events.push({
-            title: 'PTO Day',
-            start: date.toISOString().split('T')[0],
-            classNames: ['highlight-pto']
-          });
-          ptoDaysScheduled++;
-        }
-        date.setDate(date.getDate() + 1);
-      }
+    .btn-export {
+      margin-top: 20px;
     }
-
-    // Highlight weekends
-    const weekends = [];
-    for (let month = 0; month < 12; month++) {
-      const date = new Date(year, month, 1);
-      while (date.getMonth() === month) {
-        if (date.getDay() === 0 || date.getDay() === 6) {
-          weekends.push({
-            title: 'Weekend',
-            start: date.toISOString().split('T')[0],
-            display: 'background',
-            classNames: ['highlight-weekend']
-          });
-        }
-        date.setDate(date.getDate() + 1);
-      }
+    #calendar {
+      margin-top: 2em;
     }
+    .loading-icon {
+      display: none;
+      margin: 0 auto;
+    }
+    .alfie-header-icon {
+      width: 50px;
+      height: 50px;
+    }
+    .watermark {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      opacity: 0.1;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img src="alfie-icon.png" alt="Alfie Icon" class="alfie-header-icon"> Alfie PTO Planner
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#ptoForm">Plan PTO</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#calendar">Calendar View</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#ptoSuggestions">PTO Summary</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-    console.log('Events generated:', events.concat(weekends));
-    return events.concat(weekends);
-  }
-});
+  <div class="alfie-app">
+    <h1 class="mb-4">Welcome to Alfie | Your PTO Companion</h1>
+    <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
+    <div class="loading-icon">
+      <img src="alfie-icon.png" alt="Loading..." width="80">
+    </div>
+    
+    <div id="ptoForm" class="mt-4" style="display: none;">
+      <div class="mb-3">
+        <label for="yearSelect" class="form-label">Select Year:</label>
+        <select id="yearSelect" class="form-select">
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="totalPTO" class="form-label">Total PTO Days Available:</label>
+        <input type="number" id="totalPTO" class="form-control" min="0">
+      </div>
+      <div class="mb-3">
+        <label for="ptoThisYear" class="form-label">Number of PTO Days to Take This Year:</label>
+        <input type="number" id="ptoThisYear" class="form-control" min="0">
+      </div>
+      <div class="mb-3">
+        <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
+        <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., January, March, July">
+      </div>
+      <button class="btn btn-success" id="submitFormBtn">Submit</button>
+    </div>
+  </div>
+
+  <div id="calendarContainer" style="display: none;">
+    <div id="calendar"></div>
+  </div>
+
+  <div class="watermark">
+    <img src="alfie-icon.png" alt="Watermark" width="100">
+  </div>
+</body>
+</html>
