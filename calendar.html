@@ -8,18 +8,49 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <style>
+        #calendar {
+            height: 70vh;
+            max-height: 600px;
+        }
+    </style>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Alfie PTO Planner</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Calendar View</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="container mt-5">
         <h1>Calendar and PTO Summary</h1>
-        <div id="calendar"></div>
+        <div id="calendar" class="mb-4"></div>
         <div id="ptoSummaryContent" class="mt-4"></div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const summaryData = JSON.parse(localStorage.getItem('ptoSummary'));
-            if (!summaryData) {
-                alert("No PTO data found. Please return to the form to submit your information.");
+            let summaryData;
+            try {
+                summaryData = JSON.parse(localStorage.getItem('ptoSummary'));
+                if (!summaryData || !summaryData.suggestedPTO) {
+                    throw new Error("Invalid PTO data");
+                }
+            } catch (error) {
+                alert("No valid PTO data found. Please return to the form to submit your information.");
                 return;
             }
             
@@ -28,7 +59,7 @@
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: "dayGridMonth",
                 initialDate: `${summaryData.suggestedPTO[0].split("-")[0]}-01-01`,
-                height: 500,
+                height: '100%',
                 events: [
                     ...summaryData.suggestedPTO.map(date => ({
                         title: "PTO Day",
@@ -57,6 +88,7 @@
                 <p>PTO Days Requested: ${summaryData.ptoThisYear}</p>
                 <p>PTO Days Scheduled: ${summaryData.scheduledPTOCount}</p>
                 <p>Remaining PTO Days: ${summaryData.remainingPTO}</p>
+                <p>Last Updated: ${new Date().toLocaleString()}</p>
             `;
         });
     </script>
