@@ -58,5 +58,46 @@
     <button class="btn btn-secondary" id="exportPDF">Download Summary as PDF</button>
     <button class="btn btn-secondary" id="exportExcel">Download Summary as Excel</button>
   </div>
+
+  <script>
+    document.getElementById('startPlanningBtn').addEventListener('click', function() {
+      document.getElementById('ptoForm').style.display = 'block';
+    });
+
+    document.getElementById('submitFormBtn').addEventListener('click', function() {
+      const year = document.getElementById('yearSelect').value;
+      const totalPTO = parseInt(document.getElementById('totalPTO').value);
+      const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
+      const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
+
+      document.getElementById('ptoForm').style.display = 'none';
+      document.getElementById('calendarContainer').style.display = 'block';
+      document.getElementById('ptoSummary').style.display = 'block';
+
+      initializeCalendar(year, preferredMonths);
+
+      document.getElementById('totalPTOAvailable').textContent = totalPTO;
+      document.getElementById('ptoRequested').textContent = ptoThisYear;
+      document.getElementById('ptoScheduled').textContent = ptoThisYear;
+      document.getElementById('remainingPTO').textContent = totalPTO - ptoThisYear;
+    });
+
+    function initializeCalendar(year, preferredMonths) {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        initialDate: year + '-01-01',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek'
+        },
+        events: [
+          // Example to populate bank holidays, weekends, and PTO days dynamically
+        ]
+      });
+      calendar.render();
+    }
+  </script>
 </body>
 </html>
