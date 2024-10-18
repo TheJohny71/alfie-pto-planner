@@ -100,3 +100,16 @@ body {
 .pto {
     background-color: #90EE90;
 }
+
+.legend {
+    display: flex;
+    gap: 10px;
+}
+
+.legend-item {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
