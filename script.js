@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
         center: 'title',
         right: 'dayGridMonth,dayGridWeek'
       },
-      events: generatePTOEvents(year, preferredMonths)
+      events: generatePTOEvents(year, preferredMonths),
+      eventColor: '#378006'
     });
     calendar.render();
   }
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Example to populate bank holidays, weekends, and PTO days dynamically
     events.push({
-      title: 'New Year\'s Day',
+      title: 'New Year's Day',
       start: `${year}-01-01`,
       backgroundColor: 'red',
       borderColor: 'red'
@@ -83,4 +84,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return weekends;
   }
+
+  // Download Summary as PDF
+  document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+    const summary = document.getElementById('ptoSummary').innerText;
+    const pdfWindow = window.open('', '_blank');
+    pdfWindow.document.write('<pre>' + summary + '</pre>');
+    pdfWindow.document.close();
+    pdfWindow.print();
+  });
+
+  // Download Summary as Excel
+  document.getElementById('downloadExcelBtn').addEventListener('click', function() {
+    let table = '<table><tr><th>PTO Summary</th></tr>';
+    table += '<tr><td>Total PTO Days Available</td><td>' + document.getElementById('totalPTOAvailable').textContent + '</td></tr>';
+    table += '<tr><td>PTO Days Requested</td><td>' + document.getElementById('ptoRequested').textContent + '</td></tr>';
+    table += '<tr><td>PTO Days Scheduled</td><td>' + document.getElementById('ptoScheduled').textContent + '</td></tr>';
+    table += '<tr><td>Remaining PTO Days</td><td>' + document.getElementById('remainingPTO').textContent + '</td></tr>';
+    table += '</table>';
+
+    const data = 'data:application/vnd.ms-excel,' + encodeURIComponent(table);
+    const link = document.createElement('a');
+    link.href = data;
+    link.download = 'PTO_Summary.xls';
+    link.click();
+  });
 });
