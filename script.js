@@ -24,7 +24,7 @@ function handleFormSubmission() {
     const totalPTO = parseInt(document.getElementById('totalPTO').value);
     const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
     const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
-    const customHolidays = document.getElementById('customHolidays').value.split(',').map(d => d.trim());
+    const customHolidays = document.getElementById('customHolidays') ? document.getElementById('customHolidays').value.split(',').map(d => d.trim()) : [];
 
     if (isNaN(totalPTO) || isNaN(ptoThisYear) || totalPTO < 0 || ptoThisYear < 0) {
         alert('Please enter valid numbers for PTO days.');
@@ -167,4 +167,37 @@ function createMonthGrid(year, month, ptoDates, holidays) {
         gridHTML += '<span class="day"></span>';
     }
 
-    for (let day = 1; day <= days
+    for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const dateString = formatDate(currentDate);
+        let classes = 'day';
+        
+        if (currentDate.getDay() === 0 || currentDate.getDay() === 6) classes += ' weekend';
+        if (holidays.includes(dateString)) classes += ' holiday';
+        if (ptoDates.includes(dateString)) classes += ' pto';
+        
+        gridHTML += `<span class="${classes}">${day}</span>`;
+    }
+
+    return gridHTML;
+}
+
+function downloadSummaryAsPDF() {
+    const element = document.getElementById('ptoSummary');
+    html2pdf().from(element).save('PTO_Summary.pdf');
+}
+
+function downloadSummaryAsExcel() {
+    const summaryContent = document.getElementById('ptoSummaryContent').innerText;
+    const blob = new Blob([summaryContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "PTO_Summary.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
