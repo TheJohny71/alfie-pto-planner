@@ -29,6 +29,10 @@
       display: none;
       margin-top: 2em;
     }
+    #calendarContainer.visible,
+    #ptoSummary.visible {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -80,11 +84,11 @@
     </div>
   </div>
 
-  <div id="calendarContainer">
+  <div id="calendarContainer" class="mt-4">
     <div id="calendar"></div>
   </div>
 
-  <div id="ptoSummary">
+  <div id="ptoSummary" class="mt-4">
     <h2>PTO Summary</h2>
     <p>Total PTO Days Available: <span id="totalPTOAvailable"></span></p>
     <p>PTO Days Requested: <span id="ptoRequested"></span></p>
