@@ -54,7 +54,7 @@ function calculatePTO(totalPTO, ptoThisYear, preferredMonths) {
 
 function generateRandomPTODates(count) {
     const dates = [];
-    const year = new Date().getFullYear();
+    const year = document.getElementById('yearSelect').value;
     for (let i = 0; i < count; i++) {
         const month = Math.floor(Math.random() * 12);
         const day = Math.floor(Math.random() * 28) + 1;
@@ -74,15 +74,16 @@ function updatePTOSummary(ptoData) {
 }
 
 function updateCalendar(ptoDates) {
-    const calendar = document.getElementById('calendar').FullCalendar;
-    calendar.removeAllEvents();
-    ptoDates.forEach(date => {
-        calendar.addEvent({
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        initialDate: ptoDates[0],
+        events: ptoDates.map(date => ({
             title: 'PTO Day',
             start: date,
             allDay: true,
             color: '#4caf50'
-        });
+        }))
     });
     calendar.render();
 }
