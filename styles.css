@@ -1,1 +1,59 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;
+    color: #2D3E4E;
+}
 
+.navbar {
+    background-color: #B8D8D8;
+}
+
+.navbar-brand, .nav-link {
+    color: #2D3E4E !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: #2D3E4E;
+    border-color: #2D3E4E;
+}
+
+.btn-primary:hover {
+    background-color: #1c2b3a;
+    border-color: #1c2b3a;
+}
+
+#calendar {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#ptoSummary {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #B8D8D8;
+    box-shadow: 0 0 0 0.2rem rgba(184, 216, 216, 0.25);
+}
+
+.btn-secondary {
+    background-color: #B8D8D8;
+    border-color: #B8D8D8;
+    color: #2D3E4E;
+}
+
+.btn-secondary:hover {
+    background-color: #9ac2c2;
+    border-color: #9ac2c2;
+    color: #2D3E4E;
+}
