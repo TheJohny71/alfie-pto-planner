@@ -23,12 +23,12 @@ function handleFormSubmission(e) {
     const customHolidays = document.getElementById('customHolidays').value.split(',').map(d => d.trim());
 
     if (isNaN(totalPTO) || isNaN(ptoThisYear) || totalPTO < 0 || ptoThisYear < 0) {
-        alert('Please enter valid numbers for PTO days.');
+        alert('Please enter valid numbers for leave days.');
         return;
     }
 
     if (ptoThisYear > totalPTO) {
-        alert('PTO days to take this year cannot exceed total available PTO days.');
+        alert('Leave days to take this year cannot exceed total available leave days.');
         return;
     }
 
@@ -68,8 +68,13 @@ function calculatePTO(totalPTO, ptoThisYear, preferredMonths, customHolidays) {
 function getHolidays(year, customHolidays) {
     const defaultHolidays = [
         { date: `${year}-01-01`, name: "New Year's Day" },
-        { date: `${year}-07-04`, name: "Independence Day" },
-        { date: `${year}-12-25`, name: "Christmas Day" }
+        { date: `${year}-12-25`, name: "Christmas Day" },
+        { date: `${year}-12-26`, name: "Boxing Day" },
+        { date: `${year}-04-15`, name: "Good Friday" },
+        { date: `${year}-04-18`, name: "Easter Monday" },
+        { date: `${year}-05-02`, name: "Early May Bank Holiday" },
+        { date: `${year}-06-02`, name: "Spring Bank Holiday" },
+        { date: `${year}-08-29`, name: "Summer Bank Holiday" }
     ];
     const customHolidayObjects = customHolidays.map(date => ({ date, name: "Custom Holiday" }));
     return [...defaultHolidays, ...customHolidayObjects];
@@ -106,10 +111,10 @@ function formatDate(date) {
 function updatePTOSummary(ptoData) {
     const summaryEl = document.getElementById('ptoSummaryContent');
     summaryEl.innerHTML = `
-        <p>Total PTO Days Available: ${ptoData.totalPTO}</p>
-        <p>PTO Days Requested: ${ptoData.ptoThisYear}</p>
-        <p>PTO Days Scheduled: ${ptoData.suggestedPTODates.length}</p>
-        <p>Remaining PTO Days: ${ptoData.remainingPTO}</p>
+        <p>Total Leave Days Available: ${ptoData.totalPTO}</p>
+        <p>Leave Days Requested: ${ptoData.ptoThisYear}</p>
+        <p>Leave Days Scheduled: ${ptoData.suggestedPTODates.length}</p>
+        <p>Remaining Leave Days: ${ptoData.remainingPTO}</p>
     `;
 }
 
@@ -120,7 +125,7 @@ function updateCalendar(ptoDates, holidays) {
         initialDate: ptoDates[0],
         events: [
             ...ptoDates.map(date => ({
-                title: 'PTO Day',
+                title: 'Leave Day',
                 start: date,
                 allDay: true,
                 color: '#90EE90'
@@ -188,7 +193,7 @@ function createMonthGrid(year, month, ptoDates, holidays) {
 
 function downloadSummaryAsPDF() {
     const element = document.getElementById('ptoSummary');
-    html2pdf().from(element).save('PTO_Summary.pdf');
+    html2pdf().from(element).save('Leave_Summary.pdf');
 }
 
 function downloadSummaryAsExcel() {
@@ -198,7 +203,7 @@ function downloadSummaryAsExcel() {
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", "PTO_Summary.csv");
+        link.setAttribute("download", "Leave_Summary.csv");
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
