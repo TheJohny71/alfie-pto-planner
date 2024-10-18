@@ -41,26 +41,65 @@ function handleFormSubmission() {
 }
 
 function calculatePTO(totalPTO, ptoThisYear, preferredMonths) {
-    // This is a placeholder for the PTO calculation logic
-    // In a real application, this would be more complex and consider weekends, holidays, etc.
-    const suggestedPTODates = generateRandomPTODates(ptoThisYear);
+    const year = document.getElementById('yearSelect').value;
+    const holidays = getHolidays(year);
+    const weekends = getWeekends(year);
+    const preferredMonthIndices = preferredMonths.map(month => new Date(Date.parse(month + " 1, 2022")).getMonth());
+
+    let suggestedPTODates = [];
+    let currentDate = new Date(year, 0, 1);
+
+    while (suggestedPTODates.length < ptoThisYear && currentDate.getFullYear() === parseInt(year)) {
+        if (isPreferredMonth(currentDate, preferredMonthIndices) &&
+            !isWeekend(currentDate, weekends) &&
+            !isHoliday(currentDate, holidays)) {
+            suggestedPTODates.push(formatDate(currentDate));
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
     return {
         totalPTO,
         ptoThisYear,
         suggestedPTODates,
-        remainingPTO: totalPTO - ptoThisYear
+        remainingPTO: totalPTO - suggestedPTODates.length
     };
 }
 
-function generateRandomPTODates(count) {
-    const dates = [];
-    const year = document.getElementById('yearSelect').value;
-    for (let i = 0; i < count; i++) {
-        const month = Math.floor(Math.random() * 12);
-        const day = Math.floor(Math.random() * 28) + 1;
-        dates.push(`${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`);
+function getHolidays(year) {
+    // Example holidays (replace with actual holidays)
+    return [
+        `${year}-01-01`, // New Year's Day
+        `${year}-12-25`  // Christmas Day
+    ];
+}
+
+function getWeekends(year) {
+    const weekends = [];
+    let date = new Date(year, 0, 1);
+    while (date.getFullYear() === parseInt(year)) {
+        if (date.getDay() === 0 || date.getDay() === 6) {
+            weekends.push(formatDate(date));
+        }
+        date.setDate(date.getDate() + 1);
     }
-    return dates;
+    return weekends;
+}
+
+function isPreferredMonth(date, preferredMonthIndices) {
+    return preferredMonthIndices.includes(date.getMonth());
+}
+
+function isWeekend(date, weekends) {
+    return weekends.includes(formatDate(date));
+}
+
+function isHoliday(date, holidays) {
+    return holidays.includes(formatDate(date));
+}
+
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
 }
 
 function updatePTOSummary(ptoData) {
