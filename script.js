@@ -1,81 +1,84 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const startPlanningBtn = document.getElementById('startPlanningBtn');
-  const submitFormBtn = document.getElementById('submitFormBtn');
-  const ptoForm = document.getElementById('ptoForm');
-  const calendarContainer = document.getElementById('calendarContainer');
-  const ptoSummary = document.getElementById('ptoSummary');
-  const totalPTOAvailable = document.getElementById('totalPTOAvailable');
-  const ptoRequested = document.getElementById('ptoRequested');
-  const ptoScheduled = document.getElementById('ptoScheduled');
-  const remainingPTO = document.getElementById('remainingPTO');
+// Alfie Script File
 
-  startPlanningBtn.addEventListener('click', function () {
-    ptoForm.style.display = 'block';
+// Function to initialize the calendar
+function initializeCalendar() {
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    selectable: true,
+    events: [], // Placeholder for events
   });
+  calendar.render();
+}
 
-  submitFormBtn.addEventListener('click', function () {
-    const year = document.getElementById('yearSelect').value;
-    const totalPTO = parseInt(document.getElementById('totalPTO').value, 10);
-    const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value, 10);
-    const preferredMonths = document.getElementById('preferredMonths').value;
+// Event listener for the Start Planning button
+document.getElementById('startPlanningBtn').addEventListener('click', function() {
+  document.getElementById('ptoForm').style.display = 'block';
+  initializeCalendar();
+});
 
-    if (isNaN(totalPTO) || isNaN(ptoThisYear) || totalPTO < 0 || ptoThisYear < 0) {
-      alert('Please enter valid PTO values.');
-      return;
-    }
+// Event listener for the Submit button
+document.getElementById('submitFormBtn').addEventListener('click', function() {
+  const totalPTO = parseInt(document.getElementById('totalPTO').value);
+  const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
+  const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
 
-    const remainingDays = totalPTO - ptoThisYear;
+  // Placeholder logic for PTO scheduling (to be improved)
+  console.log('Form submitted');
+  console.log({ totalPTO, ptoThisYear, preferredMonths });
 
-    totalPTOAvailable.textContent = totalPTO;
-    ptoRequested.textContent = ptoThisYear;
-    ptoScheduled.textContent = ptoThisYear;
-    remainingPTO.textContent = remainingDays;
-
-    calendarContainer.classList.add('visible');
-    ptoSummary.classList.add('visible');
-
-    initializeCalendar(year, preferredMonths.split(','));
-  });
-
-  function initializeCalendar(year, preferredMonths) {
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'dayGridMonth',
-      initialDate: `${year}-01-01`,
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,dayGridWeek'
-      },
-      events: generatePTOEvents(year, preferredMonths),
-      eventColor: '#007bff',
-      eventTextColor: '#ffffff'
-    });
-    calendar.render();
-  }
-
-  function generatePTOEvents(year, preferredMonths) {
-    const events = [];
-    const weekends = [0, 6];
-    const ptoDays = parseInt(document.getElementById('ptoThisYear').value, 10);
-
-    let scheduledPTO = 0;
-    for (let month = 0; month < 12; month++) {
-      if (scheduledPTO >= ptoDays) break;
-      const date = new Date(year, month, 1);
-      while (date.getMonth() === month && scheduledPTO < ptoDays) {
-        if (!weekends.includes(date.getDay()) && preferredMonths.includes(date.toLocaleString('default', { month: 'long' }).toLowerCase())) {
-          events.push({
-            title: 'PTO Day',
-            start: date.toISOString().split('T')[0],
-            allDay: true
-          });
-          scheduledPTO++;
-        }
-        date.setDate(date.getDate() + 1);
-      }
-    }
-
-    return events;
+  // PTO Summary - Placeholder
+  const ptoSummaryEl = document.getElementById('ptoSuggestions');
+  if (ptoSummaryEl) {
+    ptoSummaryEl.innerHTML = `
+      <h2>PTO Summary</h2>
+      <p>Total PTO Days Available: ${totalPTO}</p>
+      <p>PTO Days Requested: ${ptoThisYear}</p>
+      <p>PTO Days Scheduled: ${ptoThisYear}</p>
+      <p>Remaining PTO Days: ${totalPTO - ptoThisYear}</p>
+    `;
   }
 });
+
+// Download summary as PDF
+function downloadSummaryAsPDF() {
+  const element = document.getElementById('ptoSuggestions');
+  if (element) {
+    const opt = {
+      margin: 1,
+      filename: 'PTO_Summary.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  }
+}
+
+// Download summary as Excel
+function downloadSummaryAsExcel() {
+  const data = [
+    ['Total PTO Days Available', document.getElementById('totalPTO').value],
+    ['PTO Days Requested', document.getElementById('ptoThisYear').value],
+    ['PTO Days Scheduled', document.getElementById('ptoThisYear').value],
+    ['Remaining PTO Days', document.getElementById('totalPTO').value - document.getElementById('ptoThisYear').value]
+  ];
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+  data.forEach(function(rowArray) {
+    let row = rowArray.join(",");
+    csvContent += row + "\r\n";
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "PTO_Summary.csv");
+  document.body.appendChild(link);
+
+  link.click();
+}
+
+// Event listeners for download buttons
+document.getElementById('downloadPDFBtn')?.addEventListener('click', downloadSummaryAsPDF);
+document.getElementById('downloadExcelBtn')?.addEventListener('click', downloadSummaryAsExcel);
