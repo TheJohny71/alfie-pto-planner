@@ -68,6 +68,7 @@ function calculatePTO(totalPTO, ptoThisYear, preferredMonths, customHolidays) {
 function getHolidays(year, customHolidays) {
     const defaultHolidays = [
         { date: `${year}-01-01`, name: "New Year's Day" },
+        { date: `${year}-07-04`, name: "Independence Day" },
         { date: `${year}-12-25`, name: "Christmas Day" },
         { date: `${year}-12-26`, name: "Boxing Day" },
         { date: `${year}-04-15`, name: "Good Friday" },
