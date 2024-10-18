@@ -6,19 +6,18 @@
     <title>Calendar View | Alfie PTO Planner</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
-    <style>
-        #calendar {
-            height: 70vh;
-            max-height: 600px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-alfie-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Alfie PTO Planner</a>
+            <a class="navbar-brand" href="index.html">
+                <img src="alfie-icon.png" alt="Alfie Icon" width="30" height="30" class="d-inline-block align-top">
+                Alfie PTO Planner
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -35,12 +34,28 @@
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <h1>Calendar and PTO Summary</h1>
-        <div id="calendar" class="mb-4"></div>
-        <div id="ptoSummaryContent" class="mt-4"></div>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4 text-alfie-dark">Calendar and PTO Summary</h1>
+        <div class="row">
+            <div class="col-md-8">
+                <div id="calendar" class="bg-white p-3 rounded shadow-sm"></div>
+            </div>
+            <div class="col-md-4">
+                <div id="ptoSummaryContent" class="bg-white p-3 rounded shadow-sm">
+                    <h2 class="h4 mb-3 text-alfie-dark">PTO Summary</h2>
+                    <!-- PTO summary content will be dynamically inserted here -->
+                </div>
+                <div class="mt-3">
+                    <button id="downloadPDFBtn" class="btn btn-alfie-secondary">Download PDF</button>
+                    <button id="downloadExcelBtn" class="btn btn-alfie-secondary ms-2">Download Excel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let summaryData;
@@ -59,7 +74,7 @@
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: "dayGridMonth",
                 initialDate: `${summaryData.suggestedPTO[0].split("-")[0]}-01-01`,
-                height: '100%',
+                height: 'auto',
                 events: [
                     ...summaryData.suggestedPTO.map(date => ({
                         title: "PTO Day",
@@ -82,15 +97,38 @@
 
             // Display PTO Summary
             const ptoSummaryEl = document.getElementById("ptoSummaryContent");
-            ptoSummaryEl.innerHTML = `
-                <h2>PTO Summary</h2>
-                <p>Total PTO Days Available: ${summaryData.totalPTO}</p>
-                <p>PTO Days Requested: ${summaryData.ptoThisYear}</p>
-                <p>PTO Days Scheduled: ${summaryData.scheduledPTOCount}</p>
-                <p>Remaining PTO Days: ${summaryData.remainingPTO}</p>
-                <p>Last Updated: ${new Date().toLocaleString()}</p>
+            ptoSummaryEl.innerHTML += `
+                <p><strong>Total PTO Days Available:</strong> ${summaryData.totalPTO}</p>
+                <p><strong>PTO Days Requested:</strong> ${summaryData.ptoThisYear}</p>
+                <p><strong>PTO Days Scheduled:</strong> ${summaryData.scheduledPTOCount}</p>
+                <p><strong>Remaining PTO Days:</strong> ${summaryData.remainingPTO}</p>
+                <p class="text-muted"><small>Last Updated: ${new Date().toLocaleString()}</small></p>
             `;
         });
+
+        // Download functions (you can move these to a separate JS file if preferred)
+        function downloadSummaryAsPDF() {
+            const element = document.getElementById('ptoSummaryContent');
+            html2pdf().from(element).save('PTO_Summary.pdf');
+        }
+
+        function downloadSummaryAsExcel() {
+            const summaryContent = document.getElementById('ptoSummaryContent').innerText;
+            const blob = new Blob([summaryContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "PTO_Summary.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        document.getElementById('downloadPDFBtn').addEventListener('click', downloadSummaryAsPDF);
+        document.getElementById('downloadExcelBtn').addEventListener('click', downloadSummaryAsExcel);
     </script>
 </body>
 </html>
