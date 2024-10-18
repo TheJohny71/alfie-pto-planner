@@ -67,11 +67,12 @@ function calculatePTO(totalPTO, ptoThisYear, preferredMonths, customHolidays) {
 
 function getHolidays(year, customHolidays) {
     const defaultHolidays = [
-        `${year}-01-01`, // New Year's Day
-        `${year}-07-04`, // Independence Day
-        `${year}-12-25`  // Christmas Day
+        { date: `${year}-01-01`, name: "New Year's Day" },
+        { date: `${year}-07-04`, name: "Independence Day" },
+        { date: `${year}-12-25`, name: "Christmas Day" }
     ];
-    return [...new Set([...defaultHolidays, ...customHolidays])];
+    const customHolidayObjects = customHolidays.map(date => ({ date, name: "Custom Holiday" }));
+    return [...defaultHolidays, ...customHolidayObjects];
 }
 
 function getWeekends(year) {
@@ -95,7 +96,7 @@ function isWeekend(date, weekends) {
 }
 
 function isHoliday(date, holidays) {
-    return holidays.includes(formatDate(date));
+    return holidays.some(holiday => holiday.date === formatDate(date));
 }
 
 function formatDate(date) {
@@ -124,13 +125,20 @@ function updateCalendar(ptoDates, holidays) {
                 allDay: true,
                 color: '#90EE90'
             })),
-            ...holidays.map(date => ({
-                title: 'Holiday',
-                start: date,
+            ...holidays.map(holiday => ({
+                title: holiday.name,
+                start: holiday.date,
                 allDay: true,
                 color: '#ffcccb'
             }))
-        ]
+        ],
+        dayCellClassNames: function(arg) {
+            const date = formatDate(arg.date);
+            if (getWeekends(arg.date.getFullYear()).includes(date)) {
+                return 'weekend';
+            }
+            return '';
+        }
     });
     calendar.render();
 }
@@ -169,7 +177,7 @@ function createMonthGrid(year, month, ptoDates, holidays) {
         let classes = 'day';
         
         if (currentDate.getDay() === 0 || currentDate.getDay() === 6) classes += ' weekend';
-        if (holidays.includes(dateString)) classes += ' holiday';
+        if (holidays.some(holiday => holiday.date === dateString)) classes += ' holiday';
         if (ptoDates.includes(dateString)) classes += ' pto';
         
         gridHTML += `<span class="${classes}">${day}</span>`;
