@@ -19,6 +19,12 @@ body {
 .card {
     border: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary {
@@ -31,14 +37,7 @@ body {
     border-color: #1c2b3a;
 }
 
-#calendar {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-#ptoSummary {
+#calendar, #yearAtGlance {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -60,4 +59,44 @@ body {
     background-color: #9ac2c2;
     border-color: #9ac2c2;
     color: #2D3E4E;
+}
+
+.year-at-glance {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.month {
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.month-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.day {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    margin: 2px;
+    border-radius: 50%;
+}
+
+.weekend {
+    background-color: #f0f0f0;
+}
+
+.holiday {
+    background-color: #ffcccb;
+}
+
+.pto {
+    background-color: #90EE90;
 }
