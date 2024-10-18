@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfie | Your PTO Companion</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="alfie-icon.png">
 </head>
 <body>
@@ -22,7 +22,7 @@
     <div class="container mt-4">
         <h1 class="text-center mb-4">Welcome to Alfie | Your PTO Companion</h1>
         <div class="row">
-            <div class="col-md-6 offset-md-3">
+            <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">PTO Planning</h5>
@@ -47,26 +47,34 @@
                                 <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
                                 <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., June, July, August">
                             </div>
+                            <div class="mb-3">
+                                <label for="customHolidays" class="form-label">Custom Holidays (YYYY-MM-DD):</label>
+                                <input type="text" id="customHolidays" class="form-control" placeholder="e.g., 2025-12-25, 2025-01-01">
+                            </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div id="ptoSummary" class="mt-4">
-            <h2>PTO Summary</h2>
-            <div id="ptoSummaryContent"></div>
-            <div class="mt-3">
-                <button id="downloadPDFBtn" class="btn btn-secondary">Download PDF</button>
-                <button id="downloadExcelBtn" class="btn btn-secondary ms-2">Download Excel</button>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">PTO Summary</h5>
+                        <div id="ptoSummaryContent"></div>
+                        <div class="mt-3">
+                            <button id="downloadPDFBtn" class="btn btn-secondary">Download PDF</button>
+                            <button id="downloadExcelBtn" class="btn btn-secondary ms-2">Download Excel</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="calendar" class="mt-4"></div>
+        <div id="yearAtGlance" class="mt-4"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="script.js"></script>
