@@ -1,109 +1,139 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alfie | Your PTO Companion</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css">
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js" defer></script>
-  <script src="script.js" defer></script>
-  <style>
-    .alfie-app {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2em;
-      text-align: center;
-    }
-    #ptoForm {
-      margin-top: 1em;
-    }
-    .btn-export {
-      margin-top: 20px;
-    }
-    #calendar {
-      margin-top: 2em;
-    }
-    .loading-icon {
-      display: none;
-      margin: 0 auto;
-    }
-    .alfie-header-icon {
-      width: 50px;
-      height: 50px;
-    }
-    .watermark {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      opacity: 0.1;
-      z-index: -1;
-    }
-  </style>
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <img src="alfie-icon.png" alt="Alfie Icon" class="alfie-header-icon"> Alfie PTO Planner
-      </a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="#ptoForm">Plan PTO</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#calendar">Calendar View</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#ptoSuggestions">PTO Summary</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+// JavaScript for Alfie PTO Planner
 
-  <div class="alfie-app">
-    <h1 class="mb-4">Welcome to Alfie | Your PTO Companion</h1>
-    <button class="btn btn-primary" id="startPlanningBtn">Start Planning</button>
-    <div class="loading-icon">
-      <img src="alfie-icon.png" alt="Loading..." width="80">
-    </div>
-    
-    <div id="ptoForm" class="mt-4" style="display: none;">
-      <div class="mb-3">
-        <label for="yearSelect" class="form-label">Select Year:</label>
-        <select id="yearSelect" class="form-select">
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-          <option value="2027">2027</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="totalPTO" class="form-label">Total PTO Days Available:</label>
-        <input type="number" id="totalPTO" class="form-control" min="0">
-      </div>
-      <div class="mb-3">
-        <label for="ptoThisYear" class="form-label">Number of PTO Days to Take This Year:</label>
-        <input type="number" id="ptoThisYear" class="form-control" min="0">
-      </div>
-      <div class="mb-3">
-        <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
-        <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., January, March, July">
-      </div>
-      <button class="btn btn-success" id="submitFormBtn">Submit</button>
-    </div>
-  </div>
+let calendar;
 
-  <div id="calendarContainer" style="display: none;">
-    <div id="calendar"></div>
-  </div>
+document.addEventListener("DOMContentLoaded", function() {
+  const startPlanningBtn = document.getElementById("startPlanningBtn");
+  const submitFormBtn = document.getElementById("submitFormBtn");
+  const ptoForm = document.getElementById("ptoForm");
+  const calendarContainer = document.getElementById("calendarContainer");
+  const loadingIcon = document.querySelector(".loading-icon");
 
-  <div class="watermark">
-    <img src="alfie-icon.png" alt="Watermark" width="100">
-  </div>
-</body>
-</html>
+  startPlanningBtn.addEventListener("click", () => {
+    ptoForm.style.display = "block";
+    startPlanningBtn.style.display = "none";
+  });
+
+  submitFormBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    loadingIcon.style.display = "block";
+
+    setTimeout(() => {
+      loadingIcon.style.display = "none";
+      calendarContainer.style.display = "block";
+      initializeCalendar();
+      displayPtoSummary();
+    }, 1000);
+  });
+
+  function initializeCalendar() {
+    const calendarEl = document.getElementById("calendar");
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth'
+      },
+      events: getPtoEvents()
+    });
+    calendar.render();
+  }
+
+  function getPtoEvents() {
+    const year = parseInt(document.getElementById("yearSelect").value);
+    const totalPtoDays = parseInt(document.getElementById("totalPTO").value);
+    const ptoDaysRequested = parseInt(document.getElementById("ptoThisYear").value);
+    const preferredMonths = document.getElementById("preferredMonths").value.split(",").map(month => month.trim().toLowerCase());
+
+    const bankHolidays = getBankHolidays(year);
+    const weekends = getWeekends(year);
+
+    const ptoEvents = [];
+
+    // Adding bank holidays
+    bankHolidays.forEach(holiday => {
+      ptoEvents.push({
+        title: holiday.name,
+        start: holiday.date,
+        color: 'red'
+      });
+    });
+
+    // Adding weekends
+    weekends.forEach(weekend => {
+      ptoEvents.push({
+        title: 'Weekend',
+        start: weekend,
+        color: 'lightgrey'
+      });
+    });
+
+    // Adding PTO days
+    let addedPtoDays = 0;
+    let currentDate = new Date(year, 0, 1);
+    while (addedPtoDays < ptoDaysRequested) {
+      if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6 && !isBankHoliday(currentDate, bankHolidays)) {
+        const monthName = currentDate.toLocaleString('default', { month: 'long' }).toLowerCase();
+        if (preferredMonths.includes(monthName) || preferredMonths.length === 0) {
+          ptoEvents.push({
+            title: 'PTO Day',
+            start: currentDate.toISOString().split('T')[0],
+            color: 'blue'
+          });
+          addedPtoDays++;
+        }
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return ptoEvents;
+  }
+
+  function getBankHolidays(year) {
+    return [
+      { name: "New Year's Day", date: `${year}-01-01` },
+      { name: "Good Friday", date: `${year}-04-18` },
+      { name: "Easter Monday", date: `${year}-04-21` },
+      { name: "Early May Bank Holiday", date: `${year}-05-05` },
+      { name: "Spring Bank Holiday", date: `${year}-05-26` },
+      { name: "Summer Bank Holiday", date: `${year}-08-25` },
+      { name: "Christmas Day", date: `${year}-12-25` },
+      { name: "Boxing Day", date: `${year}-12-26` }
+    ];
+  }
+
+  function getWeekends(year) {
+    const weekends = [];
+    let currentDate = new Date(year, 0, 1);
+    while (currentDate.getFullYear() === year) {
+      if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+        weekends.push(currentDate.toISOString().split('T')[0]);
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return weekends;
+  }
+
+  function isBankHoliday(date, bankHolidays) {
+    return bankHolidays.some(holiday => new Date(holiday.date).toDateString() === date.toDateString());
+  }
+
+  function displayPtoSummary() {
+    const totalPtoDays = parseInt(document.getElementById("totalPTO").value);
+    const ptoDaysRequested = parseInt(document.getElementById("ptoThisYear").value);
+    const ptoDaysScheduled = Math.min(totalPtoDays, ptoDaysRequested);
+    const remainingPtoDays = totalPtoDays - ptoDaysScheduled;
+
+    const summaryHtml = `
+      <div class="pto-summary">
+        <h3>PTO Summary</h3>
+        <p>Total PTO Days Available: ${totalPtoDays}</p>
+        <p>PTO Days Requested: ${ptoDaysRequested}</p>
+        <p>PTO Days Scheduled: ${ptoDaysScheduled}</p>
+        <p>Remaining PTO Days: ${remainingPtoDays}</p>
+      </div>
+    `;
+    calendarContainer.insertAdjacentHTML("afterend", summaryHtml);
+  }
+});
