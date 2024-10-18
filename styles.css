@@ -5,11 +5,15 @@ body {
 }
 
 .navbar {
-    background-color: #B8D8D8;
+    background-color: #B8D8D8 !important;
 }
 
 .navbar-brand, .nav-link {
     color: #2D3E4E !important;
+}
+
+.navbar-brand img {
+    margin-right: 10px;
 }
 
 .card {
