@@ -1,5 +1,3 @@
-// Alfie Script File
-
 // Function to initialize the calendar
 function initializeCalendar() {
   const calendarEl = document.getElementById('calendar');
@@ -14,7 +12,6 @@ function initializeCalendar() {
 // Event listener for the Start Planning button
 document.getElementById('startPlanningBtn').addEventListener('click', function() {
   document.getElementById('ptoForm').style.display = 'block';
-  initializeCalendar();
 });
 
 // Event listener for the Submit button
@@ -23,11 +20,27 @@ document.getElementById('submitFormBtn').addEventListener('click', function() {
   const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
   const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
 
+  if (isNaN(totalPTO) || isNaN(ptoThisYear) || totalPTO < 0 || ptoThisYear < 0) {
+    alert('Please enter valid numbers for PTO days.');
+    return;
+  }
+
+  if (ptoThisYear > totalPTO) {
+    alert('PTO days to take this year cannot exceed total available PTO days.');
+    return;
+  }
+
   // Placeholder logic for PTO scheduling (to be improved)
   console.log('Form submitted');
   console.log({ totalPTO, ptoThisYear, preferredMonths });
 
-  // PTO Summary - Placeholder
+  // TODO: Implement PTO scheduling logic here
+
+  // PTO Summary
+  updatePTOSummary(totalPTO, ptoThisYear);
+});
+
+function updatePTOSummary(totalPTO, ptoThisYear) {
   const ptoSummaryEl = document.getElementById('ptoSuggestions');
   if (ptoSummaryEl) {
     ptoSummaryEl.innerHTML = `
@@ -38,7 +51,7 @@ document.getElementById('submitFormBtn').addEventListener('click', function() {
       <p>Remaining PTO Days: ${totalPTO - ptoThisYear}</p>
     `;
   }
-});
+}
 
 // Download summary as PDF
 function downloadSummaryAsPDF() {
@@ -57,11 +70,13 @@ function downloadSummaryAsPDF() {
 
 // Download summary as Excel
 function downloadSummaryAsExcel() {
+  const totalPTO = document.getElementById('totalPTO').value;
+  const ptoThisYear = document.getElementById('ptoThisYear').value;
   const data = [
-    ['Total PTO Days Available', document.getElementById('totalPTO').value],
-    ['PTO Days Requested', document.getElementById('ptoThisYear').value],
-    ['PTO Days Scheduled', document.getElementById('ptoThisYear').value],
-    ['Remaining PTO Days', document.getElementById('totalPTO').value - document.getElementById('ptoThisYear').value]
+    ['Total PTO Days Available', totalPTO],
+    ['PTO Days Requested', ptoThisYear],
+    ['PTO Days Scheduled', ptoThisYear],
+    ['Remaining PTO Days', totalPTO - ptoThisYear]
   ];
 
   let csvContent = "data:text/csv;charset=utf-8,";
@@ -82,3 +97,6 @@ function downloadSummaryAsExcel() {
 // Event listeners for download buttons
 document.getElementById('downloadPDFBtn')?.addEventListener('click', downloadSummaryAsPDF);
 document.getElementById('downloadExcelBtn')?.addEventListener('click', downloadSummaryAsExcel);
+
+// Initialize calendar when the page loads
+initializeCalendar();
