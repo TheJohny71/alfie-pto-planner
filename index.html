@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alfie | Your PTO Companion</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -46,6 +47,16 @@
 
   <div id="calendarContainer" class="container mt-5" style="display: none;">
     <div id="calendar"></div>
+  </div>
+
+  <div id="ptoSummary" class="container mt-4" style="display: none;">
+    <h2>PTO Summary</h2>
+    <p>Total PTO Days Available: <span id="totalPTOAvailable"></span></p>
+    <p>PTO Days Requested: <span id="ptoRequested"></span></p>
+    <p>PTO Days Scheduled: <span id="ptoScheduled"></span></p>
+    <p>Remaining PTO Days: <span id="remainingPTO"></span></p>
+    <button class="btn btn-secondary" id="exportPDF">Download Summary as PDF</button>
+    <button class="btn btn-secondary" id="exportExcel">Download Summary as Excel</button>
   </div>
 </body>
 </html>
