@@ -1,11 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('ptoForm');
-    const calendar = initializeCalendar();
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleFormSubmission();
-    });
+    form.addEventListener('submit', handleFormSubmission);
 
     document.getElementById('downloadPDFBtn').addEventListener('click', downloadSummaryAsPDF);
     document.getElementById('downloadExcelBtn').addEventListener('click', downloadSummaryAsExcel);
@@ -20,11 +15,12 @@ function initializeCalendar() {
     });
 }
 
-function handleFormSubmission() {
+function handleFormSubmission(e) {
+    e.preventDefault();
     const totalPTO = parseInt(document.getElementById('totalPTO').value);
     const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
     const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
-    const customHolidays = document.getElementById('customHolidays') ? document.getElementById('customHolidays').value.split(',').map(d => d.trim()) : [];
+    const customHolidays = document.getElementById('customHolidays').value.split(',').map(d => d.trim());
 
     if (isNaN(totalPTO) || isNaN(ptoThisYear) || totalPTO < 0 || ptoThisYear < 0) {
         alert('Please enter valid numbers for PTO days.');
