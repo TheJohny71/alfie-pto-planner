@@ -24,6 +24,7 @@ function handleFormSubmission() {
     const totalPTO = parseInt(document.getElementById('totalPTO').value);
     const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
     const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
+    const customHolidays = document.getElementById('customHolidays').value.split(',').map(d => d.trim());
 
     if (isNaN(totalPTO) || isNaN(ptoThisYear) || totalPTO < 0 || ptoThisYear < 0) {
         alert('Please enter valid numbers for PTO days.');
@@ -35,16 +36,17 @@ function handleFormSubmission() {
         return;
     }
 
-    const ptoData = calculatePTO(totalPTO, ptoThisYear, preferredMonths);
+    const ptoData = calculatePTO(totalPTO, ptoThisYear, preferredMonths, customHolidays);
     updatePTOSummary(ptoData);
-    updateCalendar(ptoData.suggestedPTODates);
+    updateCalendar(ptoData.suggestedPTODates, ptoData.holidays);
+    createYearAtGlanceView(ptoData);
 }
 
-function calculatePTO(totalPTO, ptoThisYear, preferredMonths) {
+function calculatePTO(totalPTO, ptoThisYear, preferredMonths, customHolidays) {
     const year = document.getElementById('yearSelect').value;
-    const holidays = getHolidays(year);
+    const holidays = getHolidays(year, customHolidays);
     const weekends = getWeekends(year);
-    const preferredMonthIndices = preferredMonths.map(month => new Date(Date.parse(month + " 1, 2022")).getMonth());
+    const preferredMonthIndices = preferredMonths.map(month => new Date(Date.parse(month + " 1, " + year)).getMonth());
 
     let suggestedPTODates = [];
     let currentDate = new Date(year, 0, 1);
@@ -62,16 +64,18 @@ function calculatePTO(totalPTO, ptoThisYear, preferredMonths) {
         totalPTO,
         ptoThisYear,
         suggestedPTODates,
-        remainingPTO: totalPTO - suggestedPTODates.length
+        remainingPTO: totalPTO - suggestedPTODates.length,
+        holidays: holidays
     };
 }
 
-function getHolidays(year) {
-    // Example holidays (replace with actual holidays)
-    return [
+function getHolidays(year, customHolidays) {
+    const defaultHolidays = [
         `${year}-01-01`, // New Year's Day
+        `${year}-07-04`, // Independence Day
         `${year}-12-25`  // Christmas Day
     ];
+    return [...new Set([...defaultHolidays, ...customHolidays])];
 }
 
 function getWeekends(year) {
@@ -112,37 +116,55 @@ function updatePTOSummary(ptoData) {
     `;
 }
 
-function updateCalendar(ptoDates) {
+function updateCalendar(ptoDates, holidays) {
     const calendarEl = document.getElementById('calendar');
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         initialDate: ptoDates[0],
-        events: ptoDates.map(date => ({
-            title: 'PTO Day',
-            start: date,
-            allDay: true,
-            color: '#4caf50'
-        }))
+        events: [
+            ...ptoDates.map(date => ({
+                title: 'PTO Day',
+                start: date,
+                allDay: true,
+                color: '#90EE90'
+            })),
+            ...holidays.map(date => ({
+                title: 'Holiday',
+                start: date,
+                allDay: true,
+                color: '#ffcccb'
+            }))
+        ]
     });
     calendar.render();
 }
 
-function downloadSummaryAsPDF() {
-    const element = document.getElementById('ptoSummary');
-    html2pdf().from(element).save('PTO_Summary.pdf');
+function createYearAtGlanceView(ptoData) {
+    const yearAtGlanceEl = document.getElementById('yearAtGlance');
+    const year = document.getElementById('yearSelect').value;
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    let yearAtGlanceHTML = '<div class="year-at-glance">';
+    months.forEach((month, index) => {
+        yearAtGlanceHTML += `
+            <div class="month">
+                <div class="month-title">${month}</div>
+                ${createMonthGrid(year, index, ptoData.suggestedPTODates, ptoData.holidays)}
+            </div>
+        `;
+    });
+    yearAtGlanceHTML += '</div>';
+
+    yearAtGlanceEl.innerHTML = yearAtGlanceHTML;
 }
 
-function downloadSummaryAsExcel() {
-    const summaryContent = document.getElementById('ptoSummaryContent').innerText;
-    const blob = new Blob([summaryContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "PTO_Summary.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+function createMonthGrid(year, month, ptoDates, holidays) {
+    const date = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let gridHTML = '';
+
+    for (let i = 0; i < date.getDay(); i++) {
+        gridHTML += '<span class="day"></span>';
     }
-}
+
+    for (let day = 1; day <= days
