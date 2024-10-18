@@ -1,139 +1,86 @@
-// JavaScript for Alfie PTO Planner
-
-let calendar;
-
-document.addEventListener("DOMContentLoaded", function() {
-  const startPlanningBtn = document.getElementById("startPlanningBtn");
-  const submitFormBtn = document.getElementById("submitFormBtn");
-  const ptoForm = document.getElementById("ptoForm");
-  const calendarContainer = document.getElementById("calendarContainer");
-  const loadingIcon = document.querySelector(".loading-icon");
-
-  startPlanningBtn.addEventListener("click", () => {
-    ptoForm.style.display = "block";
-    startPlanningBtn.style.display = "none";
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('startPlanningBtn').addEventListener('click', function() {
+    document.getElementById('ptoForm').style.display = 'block';
   });
 
-  submitFormBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    loadingIcon.style.display = "block";
+  document.getElementById('submitFormBtn').addEventListener('click', function() {
+    const year = document.getElementById('yearSelect').value;
+    const totalPTO = parseInt(document.getElementById('totalPTO').value);
+    const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
+    const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
 
-    setTimeout(() => {
-      loadingIcon.style.display = "none";
-      calendarContainer.style.display = "block";
-      initializeCalendar();
-      displayPtoSummary();
-    }, 1000);
+    document.getElementById('ptoForm').style.display = 'none';
+    document.getElementById('calendarContainer').style.display = 'block';
+    document.getElementById('ptoSummary').style.display = 'block';
+
+    initializeCalendar(year, preferredMonths);
+
+    document.getElementById('totalPTOAvailable').textContent = totalPTO;
+    document.getElementById('ptoRequested').textContent = ptoThisYear;
+    document.getElementById('ptoScheduled').textContent = ptoThisYear;
+    document.getElementById('remainingPTO').textContent = totalPTO - ptoThisYear;
   });
 
-  function initializeCalendar() {
-    const calendarEl = document.getElementById("calendar");
-    calendar = new FullCalendar.Calendar(calendarEl, {
+  function initializeCalendar(year, preferredMonths) {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
+      initialDate: year + '-01-01',
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
-        right: 'dayGridMonth'
+        right: 'dayGridMonth,dayGridWeek'
       },
-      events: getPtoEvents()
+      events: generatePTOEvents(year, preferredMonths)
     });
     calendar.render();
   }
 
-  function getPtoEvents() {
-    const year = parseInt(document.getElementById("yearSelect").value);
-    const totalPtoDays = parseInt(document.getElementById("totalPTO").value);
-    const ptoDaysRequested = parseInt(document.getElementById("ptoThisYear").value);
-    const preferredMonths = document.getElementById("preferredMonths").value.split(",").map(month => month.trim().toLowerCase());
+  function generatePTOEvents(year, preferredMonths) {
+    const events = [];
 
-    const bankHolidays = getBankHolidays(year);
-    const weekends = getWeekends(year);
-
-    const ptoEvents = [];
-
-    // Adding bank holidays
-    bankHolidays.forEach(holiday => {
-      ptoEvents.push({
-        title: holiday.name,
-        start: holiday.date,
-        color: 'red'
-      });
+    // Example to populate bank holidays, weekends, and PTO days dynamically
+    events.push({
+      title: 'New Year\'s Day',
+      start: `${year}-01-01`,
+      backgroundColor: 'red',
+      borderColor: 'red'
     });
 
-    // Adding weekends
+    // Generate weekends and add as events
+    const weekends = getWeekends(year);
     weekends.forEach(weekend => {
-      ptoEvents.push({
+      events.push({
         title: 'Weekend',
         start: weekend,
-        color: 'lightgrey'
+        color: 'gray'
       });
     });
 
-    // Adding PTO days
-    let addedPtoDays = 0;
-    let currentDate = new Date(year, 0, 1);
-    while (addedPtoDays < ptoDaysRequested) {
-      if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6 && !isBankHoliday(currentDate, bankHolidays)) {
-        const monthName = currentDate.toLocaleString('default', { month: 'long' }).toLowerCase();
-        if (preferredMonths.includes(monthName) || preferredMonths.length === 0) {
-          ptoEvents.push({
-            title: 'PTO Day',
-            start: currentDate.toISOString().split('T')[0],
-            color: 'blue'
-          });
-          addedPtoDays++;
-        }
-      }
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
+    // Add PTO days
+    preferredMonths.forEach(month => {
+      const monthIndex = new Date(`${month} 1, ${year}`).getMonth() + 1;
+      events.push({
+        title: 'PTO Day',
+        start: `${year}-${String(monthIndex).padStart(2, '0')}-15`,
+        backgroundColor: 'blue',
+        borderColor: 'blue'
+      });
+    });
 
-    return ptoEvents;
-  }
-
-  function getBankHolidays(year) {
-    return [
-      { name: "New Year's Day", date: `${year}-01-01` },
-      { name: "Good Friday", date: `${year}-04-18` },
-      { name: "Easter Monday", date: `${year}-04-21` },
-      { name: "Early May Bank Holiday", date: `${year}-05-05` },
-      { name: "Spring Bank Holiday", date: `${year}-05-26` },
-      { name: "Summer Bank Holiday", date: `${year}-08-25` },
-      { name: "Christmas Day", date: `${year}-12-25` },
-      { name: "Boxing Day", date: `${year}-12-26` }
-    ];
+    return events;
   }
 
   function getWeekends(year) {
     const weekends = [];
-    let currentDate = new Date(year, 0, 1);
-    while (currentDate.getFullYear() === year) {
-      if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
-        weekends.push(currentDate.toISOString().split('T')[0]);
+    for (let month = 0; month < 12; month++) {
+      for (let day = 1; day <= 31; day++) {
+        const date = new Date(year, month, day);
+        if (date.getFullYear() === parseInt(year) && (date.getDay() === 0 || date.getDay() === 6)) {
+          weekends.push(date.toISOString().split('T')[0]);
+        }
       }
-      currentDate.setDate(currentDate.getDate() + 1);
     }
     return weekends;
-  }
-
-  function isBankHoliday(date, bankHolidays) {
-    return bankHolidays.some(holiday => new Date(holiday.date).toDateString() === date.toDateString());
-  }
-
-  function displayPtoSummary() {
-    const totalPtoDays = parseInt(document.getElementById("totalPTO").value);
-    const ptoDaysRequested = parseInt(document.getElementById("ptoThisYear").value);
-    const ptoDaysScheduled = Math.min(totalPtoDays, ptoDaysRequested);
-    const remainingPtoDays = totalPtoDays - ptoDaysScheduled;
-
-    const summaryHtml = `
-      <div class="pto-summary">
-        <h3>PTO Summary</h3>
-        <p>Total PTO Days Available: ${totalPtoDays}</p>
-        <p>PTO Days Requested: ${ptoDaysRequested}</p>
-        <p>PTO Days Scheduled: ${ptoDaysScheduled}</p>
-        <p>Remaining PTO Days: ${remainingPtoDays}</p>
-      </div>
-    `;
-    calendarContainer.insertAdjacentHTML("afterend", summaryHtml);
   }
 });
