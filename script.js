@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to initialize the calendar
   function initializeCalendar(events = []) {
     const calendarEl = document.getElementById('calendar');
-    if (calendarEl) {
+    if (calendarEl && typeof FullCalendar !== 'undefined') {
       const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         selectable: true,
@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
       calendar.render();
+    } else {
+      console.error('FullCalendar is not available.');
     }
   }
 
@@ -46,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const ptoSummaryEl = document.getElementById('ptoSummary');
       if (ptoSummaryEl) {
         ptoSummaryEl.innerHTML = `
+          <h2>Leave Summary</h2>
           <p>Total Leave Days Available: ${totalPTO}</p>
           <p>Leave Days Requested: ${ptoThisYear}</p>
           <p>Leave Days Scheduled: ${ptoThisYear}</p>
