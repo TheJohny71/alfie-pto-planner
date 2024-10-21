@@ -1,111 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alfie | Your Leave Companion</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
-  <script src="script.js" defer></script>
-  <style>
-    body {
-      background-color: #f0f4f7;
-    }
-    .alfie-app {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 20px;
-    }
-    #ptoForm {
-      margin-top: 1em;
-    }
-    .btn-export {
-      margin-top: 20px;
-    }
-    #calendar {
-      margin-top: 2em;
-    }
-    .card {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alfie | Your Leave Companion</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.10.1/main.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.10.1/main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.10.1/main.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+        }
+        #ptoForm, #calendar, #ptoSummary {
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        .btn-export {
+            margin-top: 10px;
+            display: block;
+        }
+        #calendar {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Alfie Leave Planner</a>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="#ptoForm">Plan Leave</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#calendar">Calendar View</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#ptoSummary">Leave Summary</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+    <h1 class="text-center">Welcome to Alfie | Your Leave Companion</h1>
 
-  <div class="alfie-app">
-    <h1 class="text-center mb-4">Welcome to Alfie | Your Leave Companion</h1>
+    <button id="startPlanningBtn" class="btn btn-primary">Start Planning</button>
 
-    <div class="row">
-      <div class="col-md-6">
-        <div class="card p-3 mb-3">
-          <h3 class="card-title">Leave Planning</h3>
-          <div class="card-body">
-            <form id="ptoForm">
-              <div class="mb-3">
-                <label for="yearSelect" class="form-label">Select Year:</label>
-                <select id="yearSelect" class="form-select">
-                  <option value="2025">2025</option>
-                  <option value="2026">2026</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="totalPTO" class="form-label">Total Leave Days Available:</label>
-                <input type="number" id="totalPTO" class="form-control" min="0">
-              </div>
-              <div class="mb-3">
-                <label for="ptoThisYear" class="form-label">Number of Leave Days to Take This Year:</label>
-                <input type="number" id="ptoThisYear" class="form-control" min="0">
-              </div>
-              <div class="mb-3">
-                <label for="preferredMonths" class="form-label">Preferred Months for Holidays:</label>
-                <input type="text" id="preferredMonths" class="form-control" placeholder="e.g., June, July, August">
-              </div>
-              <div class="mb-3">
-                <label for="customHolidays" class="form-label">Custom Holidays (YYYY-MM-DD):</label>
-                <input type="text" id="customHolidays" class="form-control" placeholder="e.g., 2025-12-25, 2025-01-01">
-              </div>
-              <button type="button" class="btn btn-primary w-100" id="submitFormBtn">Submit</button>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-3 mb-3">
-          <h3 class="card-title">Leave Summary</h3>
-          <div id="ptoSummary" class="card-body">
-            <!-- Leave Summary will be displayed here -->
-            <button id="downloadPDFBtn" class="btn btn-secondary btn-export">Download PDF</button>
-            <button id="downloadExcelBtn" class="btn btn-secondary btn-export">Download Excel</button>
-          </div>
-        </div>
-      </div>
+    <div id="ptoForm" style="display:none;">
+        <form>
+            <label for="year">Select Year:</label>
+            <input type="text" id="year" value="2025">
+            <label for="totalPTO">Total Leave Days Available:</label>
+            <input type="number" id="totalPTO" value="30">
+            <label for="ptoThisYear">Number of Leave Days to Take This Year:</label>
+            <input type="number" id="ptoThisYear" value="16">
+            <label for="preferredMonths">Preferred Months for Holidays:</label>
+            <input type="text" id="preferredMonths" placeholder="June, July, August">
+            <label for="customHolidays">Custom Holidays (YYYY-MM-DD):</label>
+            <input type="text" id="customHolidays" placeholder="e.g., 2025-12-25, 2025-01-01">
+            <button type="button" id="submitFormBtn" class="btn btn-success">Submit</button>
+        </form>
     </div>
 
-    <div class="card p-3">
-      <h3>Calendar View</h3>
-      <div id="calendar"></div>
-    </div>
-  </div>
+    <div id="calendar"></div>
+
+    <div id="ptoSummary"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>
