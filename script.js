@@ -22,14 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             leaveSummaryContent.parentElement.style.display = 'block';
 
-            // Initialize the calendar
-            initializeCalendar();
+            // Initialize the calendar after verifying FullCalendar is loaded
+            if (typeof FullCalendar !== 'undefined') {
+                initializeCalendar();
+            } else {
+                console.error("FullCalendar is not defined. Please ensure the FullCalendar script is loaded correctly.");
+            }
         });
     }
 
     function initializeCalendar() {
-        // Check if FullCalendar is available
-        if (typeof FullCalendar !== 'undefined' && calendarEl) {
+        if (calendarEl) {
             // Clear any previously rendered calendar
             calendarEl.innerHTML = "";
 
@@ -52,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error initializing FullCalendar:', error);
             }
         } else {
-            console.error('FullCalendar is not defined. Please ensure the FullCalendar script is loaded correctly.');
+            console.error('Calendar element is not found.');
         }
     }
 
