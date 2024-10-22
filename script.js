@@ -41,6 +41,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,dayGridWeek'
+                },
+                dayCellClassNames: function(arg) {
+                    var date = new Date(arg.date);
+                    if (date.getDay() === 0 || date.getDay() === 6) {
+                        // Sunday or Saturday - mark as weekend
+                        return ['weekend-day'];
+                    }
+                },
+                eventContent: function(arg) {
+                    if (arg.event.extendedProps.type === 'holiday') {
+                        return { html: `<span class="holiday-event">${arg.event.title}</span>` };
+                    }
                 }
             });
             calendar.render();
@@ -53,9 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var leaveEvents = [];
         var leaveThisYear = parseInt(document.getElementById('leaveThisYear').value) || 0;
         var preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
+        var currentYear = document.getElementById('selectYear').value;
 
         if (preferredMonths.length && leaveThisYear > 0) {
-            var currentYear = document.getElementById('selectYear').value;
             var daysPerMonth = Math.ceil(leaveThisYear / preferredMonths.length);
 
             preferredMonths.forEach(function(month) {
@@ -65,11 +77,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         title: 'Leave Day',
                         start: new Date(currentYear, monthIndex, i),
                         backgroundColor: '#28a745',
-                        borderColor: '#28a745'
+                        borderColor: '#28a745',
+                        textColor: 'white',
+                        type: 'leave'
                     });
                 }
             });
         }
+
+        // Adding a bank holiday for demonstration purposes
+        leaveEvents.push({
+            title: 'Spring Bank Holiday',
+            start: new Date(currentYear, 4, 27), // May 27th as an example
+            backgroundColor: '#ff6347',
+            borderColor: '#ff6347',
+            textColor: 'white',
+            type: 'holiday'
+        });
 
         return leaveEvents;
     }
