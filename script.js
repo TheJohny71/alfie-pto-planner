@@ -35,16 +35,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initializeCalendar() {
         if (typeof FullCalendar !== 'undefined' && calendarEl) {
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                events: generateLeaveEvents(),
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,dayGridWeek'
-                }
-            });
-            calendar.render();
+            // Clear any previously rendered calendar
+            if (calendarEl.innerHTML.trim() !== "") {
+                calendarEl.innerHTML = "";
+            }
+
+            // Initialize the calendar
+            try {
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    events: generateLeaveEvents(),
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,dayGridWeek'
+                    },
+                    eventColor: '#28a745',
+                    eventTextColor: '#ffffff'
+                });
+                calendar.render();
+            } catch (error) {
+                console.error('Error initializing FullCalendar:', error);
+            }
         } else {
             console.error('FullCalendar is not defined. Please ensure the FullCalendar script is loaded correctly.');
         }
