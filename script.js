@@ -37,6 +37,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,dayGridWeek'
+                },
+                dayRender: function(info) {
+                    var day = info.date.getDay();
+                    if (day === 0 || day === 6) {
+                        info.el.style.backgroundColor = '#f0f0f0';
+                    }
                 }
             });
             calendar.render();
@@ -51,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
         var customHolidays = document.getElementById('customHolidays').value.split(',').map(h => h.trim());
 
+        // Add Leave Days based on Preferred Months
         if (preferredMonths.length && leaveThisYear > 0) {
             var currentYear = document.getElementById('selectYear').value;
             var daysPerMonth = Math.ceil(leaveThisYear / preferredMonths.length);
@@ -68,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        // Add Custom Holidays
         customHolidays.forEach(function (holiday) {
             if (holiday) {
                 leaveEvents.push({
@@ -77,6 +85,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     borderColor: '#007bff'
                 });
             }
+        });
+
+        // Add Bank Holidays for Current Year (Sample Data)
+        var bankHolidays = [
+            { title: 'New Year\'s Day', date: '2025-01-01' },
+            { title: 'Spring Bank Holiday', date: '2025-05-26' },
+            { title: 'Christmas Day', date: '2025-12-25' }
+        ];
+
+        bankHolidays.forEach(function (holiday) {
+            leaveEvents.push({
+                title: holiday.title,
+                start: holiday.date,
+                backgroundColor: '#ff5733',
+                borderColor: '#ff5733'
+            });
         });
 
         return leaveEvents;
