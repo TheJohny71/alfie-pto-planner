@@ -5,51 +5,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfie | Your Leave Companion</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.0/main.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="alfie-icon.png" type="image/png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
     <div class="container">
-        <header>
+        <header class="header">
             <img src="alfie-icon.png" alt="Alfie Icon" class="alfie-icon">
             <h1>Welcome to Alfie | Your Leave Companion</h1>
-            <button id="startPlanningBtn">Start Planning</button>
+            <button id="startPlanningBtn" class="start-button">Start Planning</button>
         </header>
 
-        <div id="ptoForm" style="display: none;">
+        <div id="ptoForm" class="pto-form" style="display: none;">
             <h2>Leave Planning</h2>
             <label for="selectYear">Select Year:</label>
             <select id="selectYear">
                 <option value="2025">2025</option>
-                <option value="2026">2026</option>
             </select>
+
             <label for="totalLeave">Total Leave Days Available:</label>
-            <input type="number" id="totalLeave" placeholder="30">
+            <input type="number" id="totalLeave">
+
             <label for="leaveThisYear">Number of Leave Days to Take This Year:</label>
-            <input type="number" id="leaveThisYear" placeholder="15">
+            <input type="number" id="leaveThisYear">
+
             <label for="preferredMonths">Preferred Months for Holidays:</label>
             <input type="text" id="preferredMonths" placeholder="e.g., June, July, August">
+
             <label for="customHolidays">Custom Holidays (YYYY-MM-DD):</label>
             <input type="text" id="customHolidays" placeholder="e.g., 2025-12-25, 2025-01-01">
-            <button id="submitFormBtn">Submit</button>
+
+            <button id="submitFormBtn" class="submit-button">Submit</button>
         </div>
 
-        <div id="calendarContainer" style="display: none;">
-            <h2>Calendar and PTO Summary</h2>
+        <div id="calendarContainer" class="calendar-container" style="display: none;">
             <div id="calendar"></div>
         </div>
 
-        <div id="leaveSummary" class="summary-container">
-            <h3>Leave Summary</h3>
-            <button id="downloadPDFBtn">Download PDF</button>
-            <button id="downloadExcelBtn">Download Excel</button>
+        <div id="leaveSummary" class="leave-summary"></div>
+
+        <div class="download-buttons">
+            <button id="downloadPDFBtn" class="download-button">Download PDF</button>
+            <button id="downloadExcelBtn" class="download-button">Download Excel</button>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5.11.0/main.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 
