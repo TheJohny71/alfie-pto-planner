@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarContainer = document.getElementById('calendarContainer');
     var calendarEl = document.getElementById('calendar');
     var leaveSummary = document.getElementById('leaveSummary');
+    var leaveSummaryContent = document.getElementById('leaveSummaryContent');
     var downloadPDFBtn = document.getElementById('downloadPDFBtn');
     var downloadExcelBtn = document.getElementById('downloadExcelBtn');
 
@@ -35,6 +36,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,dayGridWeek'
+                },
+                dayCellDidMount: function(info) {
+                    var day = info.date.getDay();
+                    if (day === 0 || day === 6) {
+                        info.el.style.backgroundColor = '#f8d7da'; // Light red for weekends
+                    }
                 }
             });
             calendar.render();
@@ -47,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var leaveEvents = [];
         var leaveThisYear = parseInt(document.getElementById('leaveThisYear').value) || 0;
         var preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
+        var customHolidays = document.getElementById('customHolidays').value.split(',').map(h => h.trim());
 
         if (preferredMonths.length && leaveThisYear > 0) {
             var currentYear = document.getElementById('selectYear').value;
@@ -56,14 +64,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 var monthIndex = new Date(`${month} 1, ${currentYear}`).getMonth();
                 for (var i = 1; i <= daysPerMonth; i++) {
                     leaveEvents.push({
-                        title: 'Leave Day',
+                        title: 'PTO Day',
                         start: new Date(currentYear, monthIndex, i),
-                        backgroundColor: '#28a745',
+                        backgroundColor: '#28a745', // Green for PTO days
                         borderColor: '#28a745'
                     });
                 }
             });
         }
+
+        // Add custom holidays to events
+        customHolidays.forEach(function(holiday) {
+            if (holiday) {
+                leaveEvents.push({
+                    title: 'Bank Holiday',
+                    start: holiday,
+                    backgroundColor: '#ffc107', // Yellow for bank holidays
+                    borderColor: '#ffc107'
+                });
+            }
+        });
 
         return leaveEvents;
     }
