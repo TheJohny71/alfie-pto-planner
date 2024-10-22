@@ -1,115 +1,74 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f8ff;
-    color: #2D3E4E;
+    color: #333;
+    text-align: center;
 }
 
-.navbar {
-    background-color: #B8D8D8 !important;
+header {
+    margin-top: 20px;
 }
 
-.navbar-brand, .nav-link {
-    color: #2D3E4E !important;
-}
-
-.navbar-brand img {
-    margin-right: 10px;
-}
-
-.card {
+button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
     border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+button:hover {
+    background-color: #0056b3;
 }
 
-.btn-primary {
-    background-color: #2D3E4E;
-    border-color: #2D3E4E;
+.form-container {
+    margin: 20px auto;
+    width: 300px;
+    text-align: left;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
 }
 
-.btn-primary:hover {
-    background-color: #1c2b3a;
-    border-color: #1c2b3a;
+.summary-container {
+    margin: 20px auto;
+    width: 300px;
+    text-align: left;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
 }
 
-#calendar, #yearAtGlance {
-    background-color: white;
+#calendarContainer {
+    margin: 20px auto;
+    width: 80%;
+    background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.form-control:focus, .form-select:focus {
-    border-color: #B8D8D8;
-    box-shadow: 0 0 0 0.2rem rgba(184, 216, 216, 0.25);
+#calendar {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-.btn-secondary {
-    background-color: #B8D8D8;
-    border-color: #B8D8D8;
-    color: #2D3E4E;
-}
-
-.btn-secondary:hover {
-    background-color: #9ac2c2;
-    border-color: #9ac2c2;
-    color: #2D3E4E;
-}
-
-.year-at-glance {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-.month {
-    background-color: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.month-title {
+label {
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-top: 10px;
+    display: block;
 }
 
-.day {
-    display: inline-block;
-    width: 25px;
-    height: 25px;
-    line-height: 25px;
-    text-align: center;
-    margin: 2px;
-    border-radius: 50%;
-}
-
-.weekend {
-    background-color: #f0f0f0; /* Light gray for weekends */
-}
-
-.holiday {
-    background-color: #ffcccb; /* Light pink for holidays */
-}
-
-.pto {
-    background-color: #90EE90; /* Light green for PTO days */
-}
-
-.legend {
-    display: flex;
-    gap: 10px;
-}
-
-.legend-item {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    margin-right: 5px;
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
