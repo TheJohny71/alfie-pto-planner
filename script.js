@@ -1,126 +1,96 @@
-// Alfie Script File
+document.addEventListener('DOMContentLoaded', function() {
+    var startPlanningBtn = document.getElementById('startPlanningBtn');
+    var ptoForm = document.getElementById('ptoForm');
+    var submitFormBtn = document.getElementById('submitFormBtn');
+    var calendarContainer = document.getElementById('calendarContainer');
+    var calendarEl = document.getElementById('calendar');
+    var leaveSummary = document.getElementById('leaveSummary');
+    var downloadPDFBtn = document.getElementById('downloadPDFBtn');
+    var downloadExcelBtn = document.getElementById('downloadExcelBtn');
 
-document.addEventListener("DOMContentLoaded", function () {
-  // Function to initialize the calendar
-  function initializeCalendar(events = []) {
-    const calendarEl = document.getElementById('calendar');
-    if (calendarEl && typeof FullCalendar !== 'undefined') {
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        selectable: true,
-        events: events,
-        eventContent: function (arg) {
-          let italicEl = document.createElement('span');
-          italicEl.innerHTML = `<strong>${arg.event.title}</strong>`;
-          let arrayOfDomNodes = [italicEl];
-          return { domNodes: arrayOfDomNodes };
-        }
-      });
-      calendar.render();
-    } else {
-      console.error('FullCalendar is not available.');
-    }
-  }
-
-  // Event listener for the Start Planning button
-  const startPlanningBtn = document.getElementById('startPlanningBtn');
-  if (startPlanningBtn) {
-    startPlanningBtn.addEventListener('click', function () {
-      document.getElementById('ptoForm').style.display = 'block';
-      initializeCalendar();
+    startPlanningBtn.addEventListener('click', function() {
+        ptoForm.style.display = 'block';
+        calendarContainer.style.display = 'block';
     });
-  }
 
-  // Event listener for the Submit button
-  const submitFormBtn = document.getElementById('submitFormBtn');
-  if (submitFormBtn) {
-    submitFormBtn.addEventListener('click', function () {
-      const totalPTO = parseInt(document.getElementById('totalPTO').value);
-      const ptoThisYear = parseInt(document.getElementById('ptoThisYear').value);
-      const preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
-      const customHolidays = document.getElementById('customHolidays').value.split(',').map(d => d.trim());
+    submitFormBtn.addEventListener('click', function() {
+        var totalLeave = parseInt(document.getElementById('totalLeave').value) || 0;
+        var leaveThisYear = parseInt(document.getElementById('leaveThisYear').value) || 0;
+        var remainingLeave = totalLeave - leaveThisYear;
 
-      // Placeholder logic for PTO scheduling (to be improved)
-      console.log('Form submitted');
-      console.log({ totalPTO, ptoThisYear, preferredMonths, customHolidays });
-
-      // PTO Summary
-      const ptoSummaryEl = document.getElementById('ptoSummary');
-      if (ptoSummaryEl) {
-        ptoSummaryEl.innerHTML = `
-          <h2>Leave Summary</h2>
-          <p>Total Leave Days Available: ${totalPTO}</p>
-          <p>Leave Days Requested: ${ptoThisYear}</p>
-          <p>Leave Days Scheduled: ${ptoThisYear}</p>
-          <p>Remaining Leave Days: ${totalPTO - ptoThisYear}</p>
-          <button id="downloadPDFBtn" class="btn btn-secondary btn-export">Download PDF</button>
-          <button id="downloadExcelBtn" class="btn btn-secondary btn-export">Download Excel</button>
+        leaveSummary.innerHTML = `
+            <p>Total Leave Days Available: ${totalLeave}</p>
+            <p>Leave Days Requested: ${leaveThisYear}</p>
+            <p>Leave Days Scheduled: ${leaveThisYear}</p>
+            <p>Remaining Leave Days: ${remainingLeave}</p>
         `;
-      }
 
-      // Placeholder for events in calendar (e.g., leave days)
-      let events = customHolidays.map(holiday => ({
-        title: "Custom Holiday",
-        start: holiday,
-        color: "#FF6F61"
-      }));
+        initializeCalendar();
+    });
 
-      // Add leave days to the calendar
-      let today = new Date();
-      let year = today.getFullYear();
-      for (let i = 0; i < ptoThisYear; i++) {
-        let leaveDate = new Date(year, i % 12, 10 + i);  // Randomized for demo
-        events.push({
-          title: "Leave Day",
-          start: leaveDate.toISOString().split('T')[0],
-          color: "#90EE90"
+    function initializeCalendar() {
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: generateLeaveEvents(),
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            }
         });
-      }
-
-      initializeCalendar(events);
-
-      // Adding event listeners to download buttons after the DOM is updated
-      document.getElementById('downloadPDFBtn')?.addEventListener('click', downloadSummaryAsPDF);
-      document.getElementById('downloadExcelBtn')?.addEventListener('click', downloadSummaryAsExcel);
-    });
-  }
-
-  // Download summary as PDF
-  function downloadSummaryAsPDF() {
-    const element = document.getElementById('ptoSummary');
-    if (element) {
-      const opt = {
-        margin: 1,
-        filename: 'Leave_Summary.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
+        calendar.render();
     }
-  }
 
-  // Download summary as Excel
-  function downloadSummaryAsExcel() {
-    const data = [
-      ['Total Leave Days Available', document.getElementById('totalPTO').value],
-      ['Leave Days Requested', document.getElementById('ptoThisYear').value],
-      ['Leave Days Scheduled', document.getElementById('ptoThisYear').value],
-      ['Remaining Leave Days', document.getElementById('totalPTO').value - document.getElementById('ptoThisYear').value]
-    ];
+    function generateLeaveEvents() {
+        var leaveEvents = [];
+        var leaveThisYear = parseInt(document.getElementById('leaveThisYear').value) || 0;
+        var preferredMonths = document.getElementById('preferredMonths').value.split(',').map(m => m.trim());
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    data.forEach(function (rowArray) {
-      let row = rowArray.join(",");
-      csvContent += row + "\r\n";
+        if (preferredMonths.length && leaveThisYear > 0) {
+            var currentYear = document.getElementById('selectYear').value;
+            var daysPerMonth = Math.ceil(leaveThisYear / preferredMonths.length);
+
+            preferredMonths.forEach(function(month) {
+                var monthIndex = new Date(`${month} 1, ${currentYear}`).getMonth();
+                for (var i = 1; i <= daysPerMonth; i++) {
+                    leaveEvents.push({
+                        title: 'Leave Day',
+                        start: new Date(currentYear, monthIndex, i),
+                        backgroundColor: '#28a745',
+                        borderColor: '#28a745'
+                    });
+                }
+            });
+        }
+
+        return leaveEvents;
+    }
+
+    downloadPDFBtn.addEventListener('click', function() {
+        var element = document.getElementById('leaveSummary');
+        html2pdf().from(element).save('leave_summary.pdf');
     });
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Leave_Summary.csv");
-    document.body.appendChild(link);
+    downloadExcelBtn.addEventListener('click', function() {
+        var summaryData = [
+            ['Total Leave Days Available', document.getElementById('totalLeave').value],
+            ['Leave Days Requested', document.getElementById('leaveThisYear').value],
+            ['Leave Days Scheduled', document.getElementById('leaveThisYear').value],
+            ['Remaining Leave Days', parseInt(document.getElementById('totalLeave').value) - parseInt(document.getElementById('leaveThisYear').value)]
+        ];
 
-    link.click();
-  }
+        var csvContent = "data:text/csv;charset=utf-8,";
+        summaryData.forEach(function(rowArray) {
+            let row = rowArray.join(",");
+            csvContent += row + "\r\n";
+        });
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "leave_summary.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
 });
