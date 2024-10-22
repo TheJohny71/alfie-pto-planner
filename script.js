@@ -29,16 +29,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function initializeCalendar() {
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: generateLeaveEvents(),
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,dayGridWeek'
-            }
-        });
-        calendar.render();
+        if (typeof FullCalendar !== 'undefined') {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: generateLeaveEvents(),
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
+                }
+            });
+            calendar.render();
+        } else {
+            console.error('FullCalendar is not defined. Please ensure the FullCalendar script is loaded correctly.');
+        }
     }
 
     function generateLeaveEvents() {
