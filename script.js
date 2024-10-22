@@ -1,4 +1,4 @@
-window.onload = function () {
+document.addEventListener('DOMContentLoaded', function () {
     var startPlanningBtn = document.getElementById('startPlanningBtn');
     var ptoForm = document.getElementById('ptoForm');
     var submitFormBtn = document.getElementById('submitFormBtn');
@@ -132,4 +132,4 @@ window.onload = function () {
             document.body.removeChild(link);
         });
     }
-};
+});
