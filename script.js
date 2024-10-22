@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     startPlanningBtn.addEventListener('click', function() {
         ptoForm.style.display = 'block';
         calendarContainer.style.display = 'block';
+        leaveSummary.style.display = 'block';
+        downloadButtons.style.display = 'block';
     });
 
     submitFormBtn.addEventListener('click', function() {
