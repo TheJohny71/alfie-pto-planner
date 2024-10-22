@@ -1,47 +1,75 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f8ff;
+    background-color: #f0f7ff;
+    color: #333;
 }
 
-h1 {
+.container {
+    width: 80%;
+    margin: 0 auto;
     text-align: center;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
     padding-top: 20px;
 }
 
-button {
-    margin: 10px;
+.alfie-icon {
+    width: 60px;
+    height: 60px;
 }
 
-.form-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px auto;
-    width: 50%;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.summary-container {
-    margin: 20px auto;
-    padding: 20px;
-    width: 50%;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.weekend-day {
-    background-color: #f0f0f0 !important;
-}
-
-.holiday-event {
-    background-color: #ff6347;
+.start-button {
+    background-color: #007bff;
     color: white;
-    padding: 3px;
-    border-radius: 4px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.fc-event {
-    font-size: 0.9em;
+.start-button:hover {
+    background-color: #0056b3;
+}
+
+.pto-form {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-container {
+    margin-top: 20px;
+}
+
+.leave-summary {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.download-buttons {
+    margin-top: 20px;
+}
+
+.download-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background-color: #5a6268;
 }
