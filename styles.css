@@ -1,75 +1,92 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f7ff;
+    background-color: #f9fafc;
     color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
-    width: 80%;
+    max-width: 900px;
     margin: 0 auto;
-    text-align: center;
+    padding: 20px;
 }
 
 .header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding-top: 20px;
+    padding: 20px;
 }
 
 .alfie-icon {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
 }
 
-.start-button {
+h1 {
+    font-size: 2rem;
+    color: #007bff;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-card {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.primary-button {
     background-color: #007bff;
     color: white;
-    padding: 10px 20px;
     border: none;
+    padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 10px;
+    transition: background-color 0.3s ease;
 }
 
-.start-button:hover {
+.primary-button:hover {
     background-color: #0056b3;
 }
 
-.pto-form {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.calendar-container {
-    margin-top: 20px;
-}
-
-.leave-summary {
-    margin-top: 20px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.download-buttons {
-    margin-top: 20px;
-}
-
-.download-button {
+.secondary-button {
     background-color: #6c757d;
     color: white;
-    padding: 10px 20px;
     border: none;
+    padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
 }
 
-.download-button:hover {
+.secondary-button:hover {
     background-color: #5a6268;
+}
+
+.calendar-card, .summary-card {
+    text-align: center;
+}
+
+#calendar {
+    margin-top: 20px;
+}
+
+.summary-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
