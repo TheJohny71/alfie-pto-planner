@@ -5,57 +5,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfie | Your Leave Companion</title>
-    
-    <!-- FullCalendar Stylesheet -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css" />
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="alfie-icon.png" type="image/png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
-    <header>
-        <h1>Welcome to Alfie | Your Leave Companion</h1>
-        <button id="startPlanningBtn">Start Planning</button>
-    </header>
+    <div class="container">
+        <header>
+            <img src="alfie-icon.png" alt="Alfie Icon" class="alfie-icon">
+            <h1>Welcome to Alfie | Your Leave Companion</h1>
+            <button id="startPlanningBtn">Start Planning</button>
+        </header>
 
-    <main>
-        <div id="ptoForm" class="form-container" style="display:none;">
+        <div id="ptoForm" style="display: none;">
             <h2>Leave Planning</h2>
-            <form>
-                <label for="selectYear">Select Year:</label>
-                <select id="selectYear">
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                </select>
-                <label for="totalLeave">Total Leave Days Available:</label>
-                <input type="number" id="totalLeave" placeholder="30">
-                <label for="leaveThisYear">Number of Leave Days to Take This Year:</label>
-                <input type="number" id="leaveThisYear" placeholder="15">
-                <label for="preferredMonths">Preferred Months for Holidays:</label>
-                <input type="text" id="preferredMonths" placeholder="e.g., June, July, August">
-                <label for="customHolidays">Custom Holidays (YYYY-MM-DD):</label>
-                <input type="text" id="customHolidays" placeholder="e.g., 2025-12-25, 2025-01-01">
-                <button type="button" id="submitFormBtn">Submit</button>
-            </form>
+            <label for="selectYear">Select Year:</label>
+            <select id="selectYear">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+            </select>
+            <label for="totalLeave">Total Leave Days Available:</label>
+            <input type="number" id="totalLeave" placeholder="30">
+            <label for="leaveThisYear">Number of Leave Days to Take This Year:</label>
+            <input type="number" id="leaveThisYear" placeholder="15">
+            <label for="preferredMonths">Preferred Months for Holidays:</label>
+            <input type="text" id="preferredMonths" placeholder="e.g., June, July, August">
+            <label for="customHolidays">Custom Holidays (YYYY-MM-DD):</label>
+            <input type="text" id="customHolidays" placeholder="e.g., 2025-12-25, 2025-01-01">
+            <button id="submitFormBtn">Submit</button>
         </div>
 
-        <div id="calendarContainer" style="display:none;">
+        <div id="calendarContainer" style="display: none;">
+            <h2>Calendar and PTO Summary</h2>
             <div id="calendar"></div>
         </div>
 
         <div id="leaveSummary" class="summary-container">
-            <h2>Leave Summary</h2>
-            <div id="leaveSummaryContent"></div>
+            <h3>Leave Summary</h3>
             <button id="downloadPDFBtn">Download PDF</button>
             <button id="downloadExcelBtn">Download Excel</button>
         </div>
-    </main>
+    </div>
 
-    <!-- FullCalendar and Other Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-    <!-- Custom Script -->
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
