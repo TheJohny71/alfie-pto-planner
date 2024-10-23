@@ -1,11 +1,15 @@
 // Global Constants
 const CONFIG = {
-    LEAVE_TYPES: {
-        ANNUAL: { color: '#10b981', title: 'Annual Leave' },
-        BANK_HOLIDAY: { color: '#f59e0b', title: 'Bank Holiday' },
-        WEEKEND: { color: '#e5e7eb', title: 'Weekend' }
+    COLORS: {
+        ANNUAL_LEAVE: '#10b981',    // Green
+        BANK_HOLIDAY: '#f59e0b',    // Orange
+        WEEKEND: '#e5e7eb'          // Light Gray
     },
-    DEFAULT_ANNUAL_LEAVE: 25
+    DEFAULT_LEAVE: 25,
+    CALENDAR_SETTINGS: {
+        DEFAULT_VIEW: 'dayGridMonth',
+        FIRST_DAY: 1 // Monday
+    }
 };
 
 // Bank Holidays 2024
@@ -23,207 +27,191 @@ const BANK_HOLIDAYS = [
 // State Management
 let calendar;
 let selectedDates = [];
-let isLoading = false;
 
 // Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
-    showLoading();
-    initializeApp();
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved dates first
+    loadSavedDates();
+    
+    // Initialize calendar
+    initializeCalendar();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Update summary display
+    updateSummary();
 });
 
-async function initializeApp() {
-    try {
-        selectedDates = loadSelectedDates();
-        await initializeCalendar();
-        setupEventListeners();
-        loadSettings();
-        updateSummary();
-        updateQuickStats();
-    } catch (error) {
-        console.error('Initialization error:', error);
-        showError('Failed to initialize the application');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Loading State Management
-function showLoading() {
-    isLoading = true;
-    document.getElementById('loadingIndicator').style.display = 'block';
-}
-
-function hideLoading() {
-    isLoading = false;
-    document.getElementById('loadingIndicator').style.display = 'none';
-}
-
-// Calendar Initialization
-async function initializeCalendar() {
+function initializeCalendar() {
     const calendarEl = document.getElementById('calendar');
     
     calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        firstDay: 1,
+        initialView: CONFIG.CALENDAR_SETTINGS.DEFAULT_VIEW,
+        firstDay: CONFIG.CALENDAR_SETTINGS.FIRST_DAY,
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,dayGridWeek'
         },
         selectable: true,
-        selectMirror: true,
         select: handleDateSelection,
         eventClick: handleEventClick,
         events: getBankHolidayEvents(),
-        eventDidMount: handleEventMount,
+        weekends: true,
         height: 'auto',
-        buttonText: {
-            today: 'Today',
-            month: 'Month',
-            week: 'Week'
-        },
-        // Enhanced calendar options
-        weekNumbers: true,
-        weekNumberFormat: { week: 'numeric' },
-        dayMaxEvents: true,
-        eventTimeFormat: {
-            hour: 'numeric',
-            minute: '2-digit',
-            meridiem: 'short'
+        eventDidMount: function(info) {
+            // Add tooltips to events
+            if (info.event.title) {
+                info.el.setAttribute('title', info.event.title);
+            }
         }
     });
 
-    await calendar.render();
-    
-    // Add saved leave days
-    if (selectedDates.length > 0) {
-        selectedDates.forEach(date => {
-            calendar.addEvent({
-                title: 'Annual Leave',
-                start: date,
-                backgroundColor: CONFIG.LEAVE_TYPES.ANNUAL.color,
-                borderColor: CONFIG.LEAVE_TYPES.ANNUAL.color
-            });
+    calendar.render();
+
+    // Add any saved leave days
+    selectedDates.forEach(date => {
+        calendar.addEvent({
+            title: 'Annual Leave',
+            start: date,
+            backgroundColor: CONFIG.COLORS.ANNUAL_LEAVE,
+            borderColor: CONFIG.COLORS.ANNUAL_LEAVE
         });
-    }
+    });
 }
 
-// Event Listeners
 function setupEventListeners() {
     // Settings Modal
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsModal = document.getElementById('settingsModal');
     const closeSettings = document.getElementById('closeSettings');
     const cancelSettings = document.getElementById('cancelSettings');
-    const settingsForm = document.getElementById('settingsForm');
+    
+    settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
+    closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
+    cancelSettings.addEventListener('click', () => settingsModal.style.display = 'none');
 
-    settingsBtn.addEventListener('click', () => toggleModal('settingsModal', true));
-    closeSettings.addEventListener('click', () => toggleModal('settingsModal', false));
-    cancelSettings.addEventListener('click', () => toggleModal('settingsModal', false));
-    settingsForm.addEventListener('submit', handleSettingsSubmit);
-
-    // Reports Modal
-    const reportBtn = document.getElementById('reportBtn');
-    const reportsModal = document.getElementById('reportsModal');
-    const closeReports = document.getElementById('closeReports');
-
-    reportBtn.addEventListener('click', () => toggleModal('reportsModal', true));
-    closeReports.addEventListener('click', () => toggleModal('reportsModal', false));
+    // Settings Form
+    document.getElementById('settingsForm').addEventListener('submit', handleSettingsSubmit);
 
     // Export Button
     document.getElementById('exportBtn').addEventListener('click', exportCalendar);
 
-    // Report Options
-    document.querySelectorAll('.report-options button').forEach(button => {
-        button.addEventListener('click', () => generateReport(button.dataset.report));
-    });
-
-    // Close modals when clicking outside
+    // Close modal on outside click
     window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            toggleModal(e.target.id, false);
+        if (e.target === settingsModal) {
+            settingsModal.style.display = 'none';
         }
     });
+}
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal').forEach(modal => {
-                if (modal.style.display === 'flex') {
-                    toggleModal(modal.id, false);
-                }
+function handleDateSelection(selectInfo) {
+    const startDate = selectInfo.start;
+    const endDate = selectInfo.end;
+
+    // Check for weekends
+    if (isWeekend(startDate) || isWeekend(endDate)) {
+        Swal.fire({
+            title: 'Invalid Selection',
+            text: 'Weekends cannot be selected as leave days.',
+            icon: 'error'
+        });
+        return;
+    }
+
+    // Check for bank holidays
+    if (isBankHoliday(startDate) || isBankHoliday(endDate)) {
+        Swal.fire({
+            title: 'Invalid Selection',
+            text: 'Bank holidays cannot be selected as leave days.',
+            icon: 'error'
+        });
+        return;
+    }
+
+    // Calculate working days
+    const workingDays = calculateWorkingDays(startDate, endDate);
+    
+    // Check remaining leave
+    if (selectedDates.length + workingDays > CONFIG.DEFAULT_LEAVE) {
+        Swal.fire({
+            title: 'Insufficient Leave',
+            text: `You only have ${CONFIG.DEFAULT_LEAVE - selectedDates.length} days remaining.`,
+            icon: 'warning'
+        });
+        return;
+    }
+
+    // Add leave days
+    let currentDate = new Date(startDate);
+    while (currentDate < endDate) {
+        if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
+            const dateStr = formatDate(currentDate);
+            selectedDates.push(dateStr);
+            
+            calendar.addEvent({
+                title: 'Annual Leave',
+                start: dateStr,
+                backgroundColor: CONFIG.COLORS.ANNUAL_LEAVE,
+                borderColor: CONFIG.COLORS.ANNUAL_LEAVE
             });
         }
-    });
-}
-
-// Modal Management
-function toggleModal(modalId, show) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = show ? 'flex' : 'none';
+        currentDate.setDate(currentDate.getDate() + 1);
     }
+
+    saveDates();
+    updateSummary();
 }
 
-// Date Selection Handler
-async function handleDateSelection(selectInfo) {
-    try {
-        showLoading();
-
-        if (isInvalidSelection(selectInfo.start, selectInfo.end)) {
-            showError('Invalid Selection', 'Weekends and bank holidays cannot be selected.');
-            return;
-        }
-
-        const workingDays = calculateWorkingDays(selectInfo.start, selectInfo.end);
-        
-        if (!hasEnoughLeaveDays(workingDays)) {
-            showWarning('Insufficient Leave', 
-                `You only have ${CONFIG.DEFAULT_ANNUAL_LEAVE - selectedDates.length} days remaining.`);
-            return;
-        }
-
-        await addLeaveDays(selectInfo.start, selectInfo.end);
-        updateSummary();
-        updateQuickStats();
-        
-    } catch (error) {
-        console.error('Date selection error:', error);
-        showError('Failed to add leave days');
-    } finally {
-        hideLoading();
-    }
-}
-
-// Event Click Handler
-async function handleEventClick(info) {
+function handleEventClick(info) {
     if (info.event.title === 'Annual Leave') {
-        const result = await Swal.fire({
+        Swal.fire({
             title: 'Remove Leave Day?',
             text: 'Do you want to remove this leave day?',
             icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, remove it'
+            showCancelButton: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const dateStr = formatDate(info.event.start);
+                selectedDates = selectedDates.filter(date => date !== dateStr);
+                info.event.remove();
+                saveDates();
+                updateSummary();
+            }
         });
-
-        if (result.isConfirmed) {
-            await removeLeaveDayEvent(info.event);
-            updateSummary();
-            updateQuickStats();
-        }
     }
 }
 
-// Helper Functions
-function isInvalidSelection(start, end) {
-    return isWeekend(start) || isWeekend(end) || 
-           isBankHoliday(start) || isBankHoliday(end);
+function handleSettingsSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    
+    const newSettings = {
+        annualLeave: parseInt(form.annualLeave.value),
+        weekStart: parseInt(form.weekStart.value),
+        defaultView: form.defaultView.value
+    };
+
+    // Update calendar settings
+    calendar.setOption('firstDay', newSettings.weekStart);
+    calendar.setOption('initialView', newSettings.defaultView);
+    
+    // Save settings
+    localStorage.setItem('calendarSettings', JSON.stringify(newSettings));
+    
+    // Close modal and show confirmation
+    document.getElementById('settingsModal').style.display = 'none';
+    Swal.fire({
+        title: 'Settings Saved',
+        icon: 'success',
+        timer: 1500
+    });
 }
 
+// Helper Functions
 function isWeekend(date) {
-    const day = date.getDay();
+    const day = new Date(date).getDay();
     return day === 0 || day === 6;
 }
 
@@ -250,94 +238,30 @@ function calculateWorkingDays(start, end) {
     return count;
 }
 
-function hasEnoughLeaveDays(workingDays) {
-    return selectedDates.length + workingDays <= CONFIG.DEFAULT_ANNUAL_LEAVE;
+function getBankHolidayEvents() {
+    return BANK_HOLIDAYS.map(holiday => ({
+        title: holiday.title,
+        start: holiday.date,
+        display: 'background',
+        backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
+    }));
 }
 
-// Leave Management
-async function addLeaveDays(start, end) {
-    let current = new Date(start);
-    
-    while (current < end) {
-        if (!isWeekend(current) && !isBankHoliday(current)) {
-            const dateStr = formatDate(current);
-            selectedDates.push(dateStr);
-            
-            calendar.addEvent({
-                title: 'Annual Leave',
-                start: dateStr,
-                backgroundColor: CONFIG.LEAVE_TYPES.ANNUAL.color,
-                borderColor: CONFIG.LEAVE_TYPES.ANNUAL.color
-            });
-        }
-        current.setDate(current.getDate() + 1);
-    }
-    
-    saveSelectedDates();
-}
-
-async function removeLeaveDayEvent(event) {
-    const dateStr = formatDate(event.start);
-    selectedDates = selectedDates.filter(date => date !== dateStr);
-    event.remove();
-    saveSelectedDates();
-}
-
-// State Management
-function saveSelectedDates() {
-    localStorage.setItem('selectedDates', JSON.stringify(selectedDates));
-}
-
-function loadSelectedDates() {
-    const saved = localStorage.getItem('selectedDates');
-    return saved ? JSON.parse(saved) : [];
-}
-
-// UI Updates
 function updateSummary() {
-    document.getElementById('totalLeaveDays').textContent = CONFIG.DEFAULT_ANNUAL_LEAVE;
+    document.getElementById('totalLeaveDays').textContent = CONFIG.DEFAULT_LEAVE;
     document.getElementById('usedDays').textContent = selectedDates.length;
-    document.getElementById('remainingDays').textContent = CONFIG.DEFAULT_ANNUAL_LEAVE - selectedDates.length;
+    document.getElementById('remainingDays').textContent = CONFIG.DEFAULT_LEAVE - selectedDates.length;
     document.getElementById('bankHolidays').textContent = BANK_HOLIDAYS.length;
 }
 
-function updateQuickStats() {
-    // Calculate longest leave period
-    let longestStreak = calculateLongestStreak();
-    document.getElementById('longestLeave').textContent = `${longestStreak} days`;
-
-    // Calculate average leave length
-    let averageLength = selectedDates.length > 0 ? 
-        (selectedDates.length / findLeavePeriods().length).toFixed(1) : 0;
-    document.getElementById('averageLeave').textContent = `${averageLength} days`;
+// Data Persistence
+function saveDates() {
+    localStorage.setItem('selectedDates', JSON.stringify(selectedDates));
 }
 
-// Notifications
-function showError(title, text = '') {
-    Swal.fire({
-        title,
-        text,
-        icon: 'error',
-        confirmButtonColor: '#ef4444'
-    });
-}
-
-function showWarning(title, text = '') {
-    Swal.fire({
-        title,
-        text,
-        icon: 'warning',
-        confirmButtonColor: '#f59e0b'
-    });
-}
-
-function showSuccess(title, text = '') {
-    Swal.fire({
-        title,
-        text,
-        icon: 'success',
-        confirmButtonColor: '#10b981'
-    });
+function loadSavedDates() {
+    const saved = localStorage.getItem('selectedDates');
+    selectedDates = saved ? JSON.parse(saved) : [];
 }
 
 // Export Functionality
@@ -350,7 +274,11 @@ function exportCalendar() {
         }));
 
     if (events.length === 0) {
-        showWarning('No Data', 'There are no leave days to export.');
+        Swal.fire({
+            title: 'No Data',
+            text: 'There are no leave days to export.',
+            icon: 'info'
+        });
         return;
     }
 
@@ -366,70 +294,10 @@ function exportCalendar() {
     link.click();
     document.body.removeChild(link);
 
-    showSuccess('Export Complete', 'Your calendar has been exported successfully.');
+    Swal.fire({
+        title: 'Export Complete',
+        text: 'Your calendar has been exported successfully.',
+        icon: 'success',
+        timer: 1500
+    });
 }
-
-// Report Generation
-function generateReport(type) {
-    switch (type) {
-        case 'summary':
-            generateSummaryReport();
-            break;
-        case 'calendar':
-            generateCalendarReport();
-            break;
-        case 'detailed':
-            generateDetailedReport();
-            break;
-    }
-    toggleModal('reportsModal', false);
-}
-
-// Additional Helper Functions
-function calculateLongestStreak() {
-    if (selectedDates.length === 0) return 0;
-    
-    const sortedDates = [...selectedDates].sort();
-    let currentStreak = 1;
-    let maxStreak = 1;
-    
-    for (let i = 1; i < sortedDates.length; i++) {
-        const prevDate = new Date(sortedDates[i-1]);
-        const currDate = new Date(sortedDates[i]);
-        
-        if ((currDate - prevDate) / (1000 * 60 * 60 * 24) === 1) {
-            currentStreak++;
-            maxStreak = Math.max(maxStreak, currentStreak);
-        } else {
-            currentStreak = 1;
-        }
-    }
-    
-    return maxStreak;
-}
-
-function findLeavePeriods() {
-    if (selectedDates.length === 0) return [];
-    
-    const sortedDates = [...selectedDates].sort();
-    const periods = [];
-    let currentPeriod = [sortedDates[0]];
-    
-    for (let i = 1; i < sortedDates.length; i++) {
-        const prevDate = new Date(sortedDates[i-1]);
-        const currDate = new Date(sortedDates[i]);
-        
-        if ((currDate - prevDate) / (1000 * 60 * 60 * 24) === 1) {
-            currentPeriod.push(sortedDates[i]);
-        } else {
-            periods.push([...currentPeriod]);
-            currentPeriod = [sortedDates[i]];
-        }
-    }
-    
-    periods.push(currentPeriod);
-    return periods;
-}
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', initializeApp);
