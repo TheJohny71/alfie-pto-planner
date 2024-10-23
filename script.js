@@ -1,212 +1,184 @@
-// Global Constants
+// Configuration & Constants
 const CONFIG = {
     COLORS: {
-        ANNUAL_LEAVE: '#10b981',    // Green
-        BANK_HOLIDAY: '#f59e0b',    // Orange
-        WEEKEND: '#e5e7eb'          // Light Gray
+        PTO: '#059669',
+        BANK_HOLIDAY: '#f59e0b',
+        WEEKEND: '#e5e7eb'
     },
-    DEFAULT_LEAVE: 25,
-    CALENDAR_SETTINGS: {
-        DEFAULT_VIEW: 'dayGridMonth',
-        FIRST_DAY: 1 // Monday
-    }
+    INITIAL_YEAR: 2024,
+    MAX_PTO: 50
 };
 
-// Bank Holidays 2024
-const BANK_HOLIDAYS = [
-    { date: '2024-01-01', title: "New Year's Day" },
-    { date: '2024-03-29', title: "Good Friday" },
-    { date: '2024-04-01', title: "Easter Monday" },
-    { date: '2024-05-06', title: "Early May Bank Holiday" },
-    { date: '2024-05-27', title: "Spring Bank Holiday" },
-    { date: '2024-08-26', title: "Summer Bank Holiday" },
-    { date: '2024-12-25', title: "Christmas Day" },
-    { date: '2024-12-26', title: "Boxing Day" }
-];
+// Bank Holidays Data (Multi-Year)
+const BANK_HOLIDAYS = {
+    2024: [
+        { date: '2024-01-01', title: "New Year's Day" },
+        { date: '2024-03-29', title: "Good Friday" },
+        { date: '2024-04-01', title: "Easter Monday" },
+        { date: '2024-05-06', title: "Early May Bank Holiday" },
+        { date: '2024-05-27', title: "Spring Bank Holiday" },
+        { date: '2024-08-26', title: "Summer Bank Holiday" },
+        { date: '2024-12-25', title: "Christmas Day" },
+        { date: '2024-12-26', title: "Boxing Day" }
+    ],
+    2025: [
+        { date: '2025-01-01', title: "New Year's Day" },
+        { date: '2025-04-18', title: "Good Friday" },
+        { date: '2025-04-21', title: "Easter Monday" },
+        { date: '2025-05-05', title: "Early May Bank Holiday" },
+        { date: '2025-05-26', title: "Spring Bank Holiday" },
+        { date: '2025-08-25', title: "Summer Bank Holiday" },
+        { date: '2025-12-25', title: "Christmas Day" },
+        { date: '2025-12-26', title: "Boxing Day" }
+    ],
+    2026: [
+        // Add 2026 bank holidays
+    ],
+    2027: [
+        // Add 2027 bank holidays
+    ]
+};
 
 // State Management
 let calendar;
-let selectedDates = [];
+let currentYear = CONFIG.INITIAL_YEAR;
+let userData = {
+    totalPTO: 0,
+    plannedPTO: 0,
+    selectedDates: {},
+    preferences: {
+        extendBankHolidays: [],
+        preferredMonths: [],
+        schoolHolidays: []
+    }
+};
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    // Load saved dates first
-    loadSavedDates();
-    
-    // Initialize calendar
-    initializeCalendar();
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Update summary display
-    updateSummary();
+    // Check if first visit
+    if (!localStorage.getItem('ptoData')) {
+        showWelcomeScreen();
+    } else {
+        loadUserData();
+        initializeApp();
+    }
 });
 
+// Welcome & Setup Functions
+function showWelcomeScreen() {
+    document.getElementById('welcomeScreen').classList.remove('hidden');
+    document.getElementById('getStartedBtn').addEventListener('click', () => {
+        document.getElementById('welcomeScreen').classList.add('hidden');
+        document.getElementById('appContainer').classList.remove('hidden');
+        showSetupWizard();
+    });
+}
+
+function showSetupWizard() {
+    showLoading();
+    const setupModal = document.getElementById('setupModal');
+    setupModal.style.display = 'flex';
+    initializeSetupWizard();
+    hideLoading();
+}
+
+// Calendar Initialization
 function initializeCalendar() {
     const calendarEl = document.getElementById('calendar');
     
     calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: CONFIG.CALENDAR_SETTINGS.DEFAULT_VIEW,
-        firstDay: CONFIG.CALENDAR_SETTINGS.FIRST_DAY,
+        initialView: 'dayGridMonth',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,dayGridWeek'
         },
+        firstDay: 1, // Monday start
         selectable: true,
         select: handleDateSelection,
+        eventDidMount: handleEventMount,
+        events: generateEvents(),
         eventClick: handleEventClick,
-        events: getBankHolidayEvents(),
-        weekends: true,
-        height: 'auto',
-        eventDidMount: function(info) {
-            // Add tooltips to events
-            if (info.event.title) {
-                info.el.setAttribute('title', info.event.title);
-            }
+        daysOfWeek: true,
+        weekNumbers: true,
+        businessHours: {
+            dow: [1, 2, 3, 4, 5] // Monday - Friday
         }
     });
 
     calendar.render();
-
-    // Add any saved leave days
-    selectedDates.forEach(date => {
-        calendar.addEvent({
-            title: 'Annual Leave',
-            start: date,
-            backgroundColor: CONFIG.COLORS.ANNUAL_LEAVE,
-            borderColor: CONFIG.COLORS.ANNUAL_LEAVE
-        });
-    });
 }
 
-function setupEventListeners() {
-    // Settings Modal
-    const settingsBtn = document.getElementById('settingsBtn');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeSettings = document.getElementById('closeSettings');
-    const cancelSettings = document.getElementById('cancelSettings');
-    
-    settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
-    closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
-    cancelSettings.addEventListener('click', () => settingsModal.style.display = 'none');
-
-    // Settings Form
-    document.getElementById('settingsForm').addEventListener('submit', handleSettingsSubmit);
-
-    // Export Button
-    document.getElementById('exportBtn').addEventListener('click', exportCalendar);
-
-    // Close modal on outside click
-    window.addEventListener('click', (e) => {
-        if (e.target === settingsModal) {
-            settingsModal.style.display = 'none';
-        }
-    });
-}
-
+// Event Handlers
 function handleDateSelection(selectInfo) {
     const startDate = selectInfo.start;
     const endDate = selectInfo.end;
 
-    // Check for weekends
     if (isWeekend(startDate) || isWeekend(endDate)) {
-        Swal.fire({
-            title: 'Invalid Selection',
-            text: 'Weekends cannot be selected as leave days.',
-            icon: 'error'
-        });
+        showError('Cannot select weekends');
         return;
     }
 
-    // Check for bank holidays
     if (isBankHoliday(startDate) || isBankHoliday(endDate)) {
-        Swal.fire({
-            title: 'Invalid Selection',
-            text: 'Bank holidays cannot be selected as leave days.',
-            icon: 'error'
-        });
+        showError('Cannot select bank holidays');
         return;
     }
 
-    // Calculate working days
-    const workingDays = calculateWorkingDays(startDate, endDate);
+    Swal.fire({
+        title: 'Add PTO Days',
+        text: `Add PTO from ${formatDate(startDate)} to ${formatDate(endDate)}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: CONFIG.COLORS.PTO,
+        confirmButtonText: 'Add PTO'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            addPTODays(startDate, endDate);
+        }
+    });
+}
+
+function handleEventMount(info) {
+    if (info.event.extendedProps.type === 'bankHoliday') {
+        info.el.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
+        info.el.style.borderColor = CONFIG.COLORS.BANK_HOLIDAY;
+    } else if (info.event.extendedProps.type === 'pto') {
+        info.el.style.backgroundColor = CONFIG.COLORS.PTO;
+        info.el.style.borderColor = CONFIG.COLORS.PTO;
+    }
+}
+
+// PTO Management
+function addPTODays(start, end) {
+    const workingDays = calculateWorkingDays(start, end);
     
-    // Check remaining leave
-    if (selectedDates.length + workingDays > CONFIG.DEFAULT_LEAVE) {
-        Swal.fire({
-            title: 'Insufficient Leave',
-            text: `You only have ${CONFIG.DEFAULT_LEAVE - selectedDates.length} days remaining.`,
-            icon: 'warning'
-        });
+    if (userData.plannedPTO + workingDays > userData.totalPTO) {
+        showError(`Not enough PTO days remaining. You have ${userData.totalPTO - userData.plannedPTO} days left.`);
         return;
     }
 
-    // Add leave days
-    let currentDate = new Date(startDate);
-    while (currentDate < endDate) {
+    let currentDate = new Date(start);
+    while (currentDate < end) {
         if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
             const dateStr = formatDate(currentDate);
-            selectedDates.push(dateStr);
+            if (!userData.selectedDates[currentYear]) {
+                userData.selectedDates[currentYear] = [];
+            }
+            userData.selectedDates[currentYear].push(dateStr);
             
             calendar.addEvent({
-                title: 'Annual Leave',
+                title: 'PTO Day',
                 start: dateStr,
-                backgroundColor: CONFIG.COLORS.ANNUAL_LEAVE,
-                borderColor: CONFIG.COLORS.ANNUAL_LEAVE
+                type: 'pto',
+                backgroundColor: CONFIG.COLORS.PTO
             });
         }
         currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    saveDates();
+    userData.plannedPTO += workingDays;
     updateSummary();
-}
-
-function handleEventClick(info) {
-    if (info.event.title === 'Annual Leave') {
-        Swal.fire({
-            title: 'Remove Leave Day?',
-            text: 'Do you want to remove this leave day?',
-            icon: 'question',
-            showCancelButton: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const dateStr = formatDate(info.event.start);
-                selectedDates = selectedDates.filter(date => date !== dateStr);
-                info.event.remove();
-                saveDates();
-                updateSummary();
-            }
-        });
-    }
-}
-
-function handleSettingsSubmit(e) {
-    e.preventDefault();
-    const form = e.target;
-    
-    const newSettings = {
-        annualLeave: parseInt(form.annualLeave.value),
-        weekStart: parseInt(form.weekStart.value),
-        defaultView: form.defaultView.value
-    };
-
-    // Update calendar settings
-    calendar.setOption('firstDay', newSettings.weekStart);
-    calendar.setOption('initialView', newSettings.defaultView);
-    
-    // Save settings
-    localStorage.setItem('calendarSettings', JSON.stringify(newSettings));
-    
-    // Close modal and show confirmation
-    document.getElementById('settingsModal').style.display = 'none';
-    Swal.fire({
-        title: 'Settings Saved',
-        icon: 'success',
-        timer: 1500
-    });
+    saveUserData();
 }
 
 // Helper Functions
@@ -217,7 +189,8 @@ function isWeekend(date) {
 
 function isBankHoliday(date) {
     const dateStr = formatDate(date);
-    return BANK_HOLIDAYS.some(holiday => holiday.date === dateStr);
+    const year = new Date(date).getFullYear();
+    return BANK_HOLIDAYS[year]?.some(holiday => holiday.date === dateStr) || false;
 }
 
 function formatDate(date) {
@@ -238,49 +211,65 @@ function calculateWorkingDays(start, end) {
     return count;
 }
 
-function getBankHolidayEvents() {
-    return BANK_HOLIDAYS.map(holiday => ({
-        title: holiday.title,
-        start: holiday.date,
-        display: 'background',
-        backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
-    }));
-}
-
+// UI Updates
 function updateSummary() {
-    document.getElementById('totalLeaveDays').textContent = CONFIG.DEFAULT_LEAVE;
-    document.getElementById('usedDays').textContent = selectedDates.length;
-    document.getElementById('remainingDays').textContent = CONFIG.DEFAULT_LEAVE - selectedDates.length;
-    document.getElementById('bankHolidays').textContent = BANK_HOLIDAYS.length;
+    document.getElementById('totalPTO').textContent = userData.totalPTO;
+    document.getElementById('plannedPTO').textContent = userData.plannedPTO;
+    document.getElementById('remainingPTO').textContent = 
+        userData.totalPTO - userData.plannedPTO;
+    document.getElementById('bankHolidays').textContent = 
+        BANK_HOLIDAYS[currentYear].length;
 }
 
-// Data Persistence
-function saveDates() {
-    localStorage.setItem('selectedDates', JSON.stringify(selectedDates));
+// Data Management
+function saveUserData() {
+    localStorage.setItem('ptoData', JSON.stringify(userData));
 }
 
-function loadSavedDates() {
-    const saved = localStorage.getItem('selectedDates');
-    selectedDates = saved ? JSON.parse(saved) : [];
+function loadUserData() {
+    const saved = localStorage.getItem('ptoData');
+    if (saved) {
+        userData = JSON.parse(saved);
+    }
+}
+
+// Notifications
+function showError(message) {
+    Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: CONFIG.COLORS.PTO
+    });
+}
+
+function showSuccess(message) {
+    Swal.fire({
+        title: 'Success',
+        text: message,
+        icon: 'success',
+        timer: 1500,
+        confirmButtonColor: CONFIG.COLORS.PTO
+    });
+}
+
+// Loading State
+function showLoading() {
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loadingIndicator').classList.add('hidden');
 }
 
 // Export Functionality
 function exportCalendar() {
     const events = calendar.getEvents()
-        .filter(event => event.title === 'Annual Leave')
+        .filter(event => event.extendedProps.type === 'pto')
         .map(event => ({
             date: formatDate(event.start),
-            type: 'Annual Leave'
+            type: 'PTO Day'
         }));
-
-    if (events.length === 0) {
-        Swal.fire({
-            title: 'No Data',
-            text: 'There are no leave days to export.',
-            icon: 'info'
-        });
-        return;
-    }
 
     const csvContent = "data:text/csv;charset=utf-8,"
         + "Date,Type\n"
@@ -289,15 +278,38 @@ function exportCalendar() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `leave_calendar_${formatDate(new Date())}.csv`);
+    link.setAttribute("download", `pto_calendar_${currentYear}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    Swal.fire({
-        title: 'Export Complete',
-        text: 'Your calendar has been exported successfully.',
-        icon: 'success',
-        timer: 1500
+    showSuccess('Calendar exported successfully');
+}
+
+// Initialize everything
+function initializeApp() {
+    showLoading();
+    initializeCalendar();
+    setupEventListeners();
+    updateSummary();
+    hideLoading();
+}
+
+// Event Listeners Setup
+function setupEventListeners() {
+    document.getElementById('setupPTOBtn').addEventListener('click', showSetupWizard);
+    document.getElementById('exportBtn').addEventListener('click', exportCalendar);
+    document.getElementById('yearSelect').addEventListener('change', handleYearChange);
+    
+    // Settings Modal
+    const settingsBtn = document.getElementById('settingsBtn');
+    const closeSettings = document.getElementById('closeSettings');
+    
+    settingsBtn.addEventListener('click', () => {
+        document.getElementById('setupModal').style.display = 'flex';
+    });
+    
+    closeSettings.addEventListener('click', () => {
+        document.getElementById('setupModal').style.display = 'none';
     });
 }
