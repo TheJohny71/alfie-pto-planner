@@ -1,56 +1,167 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Element references
-    const ptoForm = document.getElementById('ptoForm');
-    const submitFormBtn = document.getElementById('submitFormBtn');
-    const calendarContainer = document.getElementById('calendarContainer');
-    const calendarEl = document.getElementById('calendar');
-    const leaveSummary = document.getElementById('leaveSummary');
-    const leaveSummaryContent = document.getElementById('leaveSummaryContent');
-    const downloadPDFBtn = document.getElementById('downloadPDFBtn');
-    const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alfie PTO Planner - Your Leave Management Companion">
+    <title>Alfie | Your Leave Companion</title>
 
-    // Debug check for calendar element
-    if (!calendarEl) {
-        console.error('Calendar element not found. Please check the HTML structure.');
-        return;
-    }
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAAQEAAAAEAAQCAQAAAQABAAAAAQAAAAAAAQAAAAAAAQAAAAAAAQD/1wAA/9cAAP/XAAD/1w==" type="image/x-icon">
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    
+    <!-- Your custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Load FullCalendar JavaScript bundle -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    
+    <!-- Other dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="app-header">
+            <div class="app-header-content">
+                <img src="alfie-icon.png" alt="Alfie Icon" class="app-icon" width="50" height="50">
+                <h1>Alfie | Your Leave Companion</h1>
+            </div>
+        </div>
+    </header>
 
-    let calendar = null; // Global calendar reference
+    <!-- Main Content -->
+    <main class="container">
+        <div class="planning-section">
+            <!-- PTO Form -->
+            <div id="ptoForm" class="card form-card">
+                <h2>Plan Your Leave</h2>
+                <div class="form-group">
+                    <label for="selectYear">Select Year:</label>
+                    <select id="selectYear" class="form-control">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
 
-    // Initialize calendar on page load
-    function initializeCalendar() {
-        try {
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth'
-                },
-                selectable: true,
-                selectMirror: true,
-                weekends: true,
-                height: 'auto',
-                displayEventTime: false,
-                dayCellDidMount: function(info) {
-                    const day = info.date.getDay();
-                    if (day === 0 || day === 6) {
-                        info.el.style.backgroundColor = '#f8d7da';
-                    }
-                },
-                select: handleDateSelection,
-                eventClick: handleEventClick
-            });
+                <div class="form-group">
+                    <label for="totalLeave">Total Leave Days Available:</label>
+                    <input type="number" id="totalLeave" class="form-control" placeholder="30" min="0" max="365">
+                </div>
 
-            calendar.render();
-            console.log('Calendar initialized successfully');
-        } catch (error) {
-            console.error('Error initializing calendar:', error);
+                <div class="form-group">
+                    <label for="leaveThisYear">Number of Leave Days to Take This Year:</label>
+                    <input type="number" id="leaveThisYear" class="form-control" placeholder="e.g., 15" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="preferredMonths">Preferred Months for Holidays:</label>
+                    <input type="text" id="preferredMonths" class="form-control" 
+                           placeholder="e.g., June, July, August">
+                </div>
+
+                <div class="form-group">
+                    <label for="customHolidays">Custom Holidays (YYYY-MM-DD):</label>
+                    <input type="text" id="customHolidays" class="form-control" 
+                           placeholder="e.g., 2024-12-25, 2024-01-01">
+                </div>
+
+                <button id="submitFormBtn" class="btn btn-primary">Plan My Leave</button>
+            </div>
+
+            <!-- Leave Summary -->
+            <div id="leaveSummary" class="card summary-card" style="display:none;">
+                <h2>Leave Summary</h2>
+                <div id="leaveSummaryContent"></div>
+                <div class="button-group">
+                    <button id="downloadPDFBtn" class="btn btn-secondary">
+                        Download PDF Summary
+                    </button>
+                    <button id="downloadExcelBtn" class="btn btn-secondary">
+                        Download Excel Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar Container -->
+            <div id="calendarContainer" class="card calendar-card">
+                <h2>Your Leave Calendar</h2>
+                <div id="calendar"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend card">
+                <h4>Calendar Legend</h4>
+                <div class="legend-items">
+                    <p>
+                        <span class="legend-item" style="background-color: #28a745;"></span>
+                        PTO Day
+                    </p>
+                    <p>
+                        <span class="legend-item" style="background-color: #ffc107;"></span>
+                        Bank Holiday
+                    </p>
+                    <p>
+                        <span class="legend-item" style="background-color: #f8d7da;"></span>
+                        Weekend
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="app-footer">
+        <p>&copy; 2024 Alfie PTO Planner. All rights reserved.</p>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+        <div class="loading-spinner"></div>
+        <p>Processing your request...</p>
+    </div>
+
+    <!-- Error Message Toast -->
+    <div id="errorToast" class="toast" style="display:none;">
+        <div class="toast-content">
+            <span id="errorMessage"></span>
+            <button class="toast-close">&times;</button>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Show loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
         }
-    }
 
-    // Call initialize after everything is loaded
-    initializeCalendar();
+        // Hide loading overlay
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
 
-    // ... rest of your JavaScript code ...
-});
+        // Show error message
+        function showError(message) {
+            const toast = document.getElementById('errorToast');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
+        }
+
+        // Close error toast
+        document.querySelector('.toast-close').addEventListener('click', function() {
+            document.getElementById('errorToast').style.display = 'none';
+        });
+    </script>
+
+    <!-- Main Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>
