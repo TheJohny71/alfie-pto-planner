@@ -3,142 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional PTO Planning and Management">
     <title>Alfie PTO Planner Pro</title>
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="alfie-icon.png">
-    <!-- Updated Libraries -->
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/index.global.min.js'></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Stylesheets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
     <link href="styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- FullCalendar (Load this first) -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 </head>
 <body>
-    <!-- Loading Indicator -->
-    <div class="loading-indicator" id="loadingIndicator"></div>
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-indicator" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
 
+    <!-- Main App Container -->
     <div class="app-wrapper">
-        <!-- Enhanced Header -->
+        <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <img src="alfie-icon.png" alt="Alfie Logo" class="logo">
-                <h1>Alfie PTO Planner Pro</h1>
+                <img src="alfie-icon.png" 
+                     alt="Alfie Logo" 
+                     class="logo" 
+                     width="40" 
+                     height="40"
+                     loading="eager">
+                <h1>Alfie PTO Planner</h1>
             </div>
             <div class="header-right">
-                <button id="reportBtn" class="btn" title="Generate Reports">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    Reports
-                </button>
-                <button id="exportBtn" class="btn" title="Export Calendar">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Export
-                </button>
-                <button id="settingsBtn" class="btn" title="Settings">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                    Settings
-                </button>
+                <div class="button-group">
+                    <button id="exportBtn" 
+                            class="btn" 
+                            type="button"
+                            aria-label="Export Calendar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export
+                    </button>
+                    <button id="settingsBtn" 
+                            class="btn" 
+                            type="button"
+                            aria-label="Open Settings">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        Settings
+                    </button>
+                </div>
             </div>
         </header>
 
+        <!-- Main Content -->
         <div class="main-container">
-            <!-- Enhanced Sidebar -->
+            <!-- Sidebar -->
             <aside class="sidebar">
-                <div class="leave-summary">
+                <section class="leave-summary">
                     <h2>Leave Summary</h2>
                     <div class="summary-card">
-                        <div class="summary-item">
-                            <span class="label">Annual Allowance</span>
-                            <span id="totalLeaveDays" class="value">25</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="label">Used</span>
-                            <span id="usedDays" class="value">0</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="label">Remaining</span>
-                            <span id="remainingDays" class="value">25</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="label">Bank Holidays</span>
-                            <span id="bankHolidays" class="value">8</span>
-                        </div>
+                        <dl class="summary-list">
+                            <div class="summary-item">
+                                <dt class="label">Total Leave</dt>
+                                <dd id="totalLeaveDays" class="value">25</dd>
+                            </div>
+                            <div class="summary-item">
+                                <dt class="label">Used</dt>
+                                <dd id="usedDays" class="value">0</dd>
+                            </div>
+                            <div class="summary-item">
+                                <dt class="label">Remaining</dt>
+                                <dd id="remainingDays" class="value">25</dd>
+                            </div>
+                            <div class="summary-item">
+                                <dt class="label">Bank Holidays</dt>
+                                <dd id="bankHolidays" class="value">8</dd>
+                            </div>
+                        </dl>
                     </div>
-                </div>
+                </section>
 
-                <div class="leave-types">
+                <section class="leave-types">
                     <h3>Leave Types</h3>
-                    <div class="leave-type-item">
-                        <div class="color-dot" style="background: var(--success-color);"></div>
-                        <span>Annual Leave</span>
-                    </div>
-                    <div class="leave-type-item">
-                        <div class="color-dot" style="background: var(--warning-color);"></div>
-                        <span>Bank Holiday</span>
-                    </div>
-                    <div class="leave-type-item">
-                        <div class="color-dot" style="background: var(--gray-200);"></div>
-                        <span>Weekend</span>
-                    </div>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="quick-stats">
-                    <h3>Quick Stats</h3>
-                    <div class="stats-card">
-                        <div class="stat-item">
-                            <span class="label">Longest Leave</span>
-                            <span id="longestLeave" class="value">0 days</span>
+                    <div class="leave-type-list">
+                        <div class="leave-type-item" role="listitem">
+                            <div class="color-dot annual-dot"></div>
+                            <span>Annual Leave</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="label">Average Length</span>
-                            <span id="averageLeave" class="value">0 days</span>
+                        <div class="leave-type-item" role="listitem">
+                            <div class="color-dot bank-holiday-dot"></div>
+                            <span>Bank Holiday</span>
+                        </div>
+                        <div class="leave-type-item" role="listitem">
+                            <div class="color-dot weekend-dot"></div>
+                            <span>Weekend</span>
                         </div>
                     </div>
-                </div>
+                </section>
             </aside>
 
-            <!-- Calendar Container -->
-            <main class="calendar-container">
-                <div id="calendar"></div>
+            <!-- Calendar -->
+            <main class="calendar-container" role="main">
+                <div id="calendar" aria-label="Leave Calendar"></div>
             </main>
         </div>
 
-        <!-- Enhanced Settings Modal -->
-        <div id="settingsModal" class="modal">
+        <!-- Settings Modal -->
+        <div id="settingsModal" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="settingsTitle" 
+             aria-hidden="true">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Settings</h2>
-                    <button class="close-btn" id="closeSettings">×</button>
-                </div>
-                <form id="settingsForm">
+                <header class="modal-header">
+                    <h2 id="settingsTitle">Settings</h2>
+                    <button type="button" 
+                            id="closeSettings" 
+                            class="close-button" 
+                            aria-label="Close settings">
+                        ×
+                    </button>
+                </header>
+                <form id="settingsForm" class="settings-form">
                     <div class="form-group">
-                        <label for="annualLeave">Annual Leave Allowance</label>
-                        <input type="number" id="annualLeave" min="0" max="50" value="25">
+                        <label for="annualLeave">Annual Leave Days</label>
+                        <input type="number" 
+                               id="annualLeave" 
+                               name="annualLeave"
+                               min="0" 
+                               max="50" 
+                               value="25" 
+                               required>
                     </div>
                     <div class="form-group">
                         <label for="weekStart">Week Starts On</label>
-                        <select id="weekStart">
+                        <select id="weekStart" 
+                                name="weekStart" 
+                                required>
                             <option value="1">Monday</option>
                             <option value="0">Sunday</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="defaultView">Default Calendar View</label>
-                        <select id="defaultView">
+                        <label for="defaultView">Default View</label>
+                        <select id="defaultView" 
+                                name="defaultView" 
+                                required>
                             <option value="dayGridMonth">Month</option>
                             <option value="dayGridWeek">Week</option>
                         </select>
@@ -150,25 +172,17 @@
                 </form>
             </div>
         </div>
-
-        <!-- Reports Modal -->
-        <div id="reportsModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Generate Report</h2>
-                    <button class="close-btn" id="closeReports">×</button>
-                </div>
-                <div class="report-options">
-                    <button class="btn" data-report="summary">Leave Summary</button>
-                    <button class="btn" data-report="calendar">Calendar View</button>
-                    <button class="btn" data-report="detailed">Detailed Report</button>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.js"></script>
-    <script src="script.js"></script>
+    <!-- Scripts (Load these last) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.js" defer></script>
+    <script src="script.js" defer></script>
+
+    <!-- Fallback for older browsers -->
+    <noscript>
+        <div class="noscript-message">
+            Please enable JavaScript to use the PTO Planner.
+        </div>
+    </noscript>
 </body>
 </html>
