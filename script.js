@@ -1,249 +1,313 @@
+```javascript
+// Application Configuration
+const CONFIG = {
+    ANNUAL_LEAVE: 25,
+    COLORS: {
+        LEAVE: '#4CAF50',
+        BANK_HOLIDAY: '#FF9800',
+        WEEKEND: '#E0E0E0'
+    },
+    CALENDAR: {
+        FIRST_DAY: 1, // Monday
+        DEFAULT_VIEW: 'dayGridMonth'
+    }
+};
+
+// Bank Holidays 2024
+const BANK_HOLIDAYS = [
+    { date: '2024-01-01', title: "New Year's Day" },
+    { date: '2024-03-29', title: "Good Friday" },
+    { date: '2024-04-01', title: "Easter Monday" },
+    { date: '2024-05-06', title: "Early May Bank Holiday" },
+    { date: '2024-05-27', title: "Spring Bank Holiday" },
+    { date: '2024-08-26', title: "Summer Bank Holiday" },
+    { date: '2024-12-25', title: "Christmas Day" },
+    { date: '2024-12-26', title: "Boxing Day" }
+];
+
+// State Management
+let calendar;
+let selectedLeaves = [];
+
+// Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    // First, get all necessary DOM elements
+    initializeCalendar();
+    setupEventListeners();
+    loadSavedData();
+});
+
+// Calendar Initialization
+function initializeCalendar() {
     const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) {
-        console.error('Calendar element not found. Check if the element with ID "calendar" exists.');
+    
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: CONFIG.CALENDAR.DEFAULT_VIEW,
+        firstDay: CONFIG.CALENDAR.FIRST_DAY,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek'
+        },
+        selectable: true,
+        select: handleDateSelection,
+        events: getBankHolidayEvents(),
+        eventClick: handleEventClick,
+        height: 'auto',
+        weekends: true,
+        selectConstraint: {
+            start: '00:00',
+            end: '24:00'
+        }
+    });
+
+    calendar.render();
+    updateSummaryDisplay();
+}
+
+// Event Listeners Setup
+function setupEventListeners() {
+    // Settings Modal
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettings = document.getElementById('closeSettings');
+    const settingsForm = document.getElementById('settingsForm');
+
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
+
+    closeSettings.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    settingsForm.addEventListener('submit', handleSettingsSubmit);
+
+    // Export Button
+    document.getElementById('exportBtn').addEventListener('click', exportCalendar);
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+            settingsModal.style.display = 'none';
+        }
+    });
+}
+
+// Date Selection Handler
+function handleDateSelection(info) {
+    const startDate = info.start;
+    const endDate = info.end;
+    
+    if (isWeekend(startDate) || isWeekend(endDate)) {
+        showNotification('Invalid Selection', 'Weekends cannot be selected as leave days.', 'error');
         return;
     }
 
-    const ptoForm = document.getElementById('ptoForm');
-    const submitFormBtn = document.getElementById('submitFormBtn');
-    const calendarContainer = document.getElementById('calendarContainer');
-    const leaveSummary = document.getElementById('leaveSummary');
-    const leaveSummaryContent = document.getElementById('leaveSummaryContent');
-    const downloadPDFBtn = document.getElementById('downloadPDFBtn');
-    const downloadExcelBtn = document.getElementById('downloadExcelBtn');
-    const monthViewBtn = document.getElementById('monthViewBtn');
-    const listViewBtn = document.getElementById('listViewBtn');
-    const todayBtn = document.getElementById('todayBtn');
+    if (isBankHoliday(startDate) || isBankHoliday(endDate)) {
+        showNotification('Invalid Selection', 'Bank holidays cannot be selected as leave days.', 'error');
+        return;
+    }
 
-    // Global calendar reference
-    let calendar = null;
+    const workingDays = calculateWorkingDays(startDate, endDate);
+    
+    if (selectedLeaves.length + workingDays > CONFIG.ANNUAL_LEAVE) {
+        showNotification('Insufficient Leave', 
+            `You only have ${CONFIG.ANNUAL_LEAVE - selectedLeaves.length} days remaining.`, 
+            'warning');
+        return;
+    }
 
-    // UK Bank Holidays
-    const ukBankHolidays = {
-        2024: [
-            { date: '2024-01-01', title: "New Year's Day" },
-            { date: '2024-03-29', title: "Good Friday" },
-            { date: '2024-04-01', title: "Easter Monday" },
-            { date: '2024-05-06', title: "Early May Bank Holiday" },
-            { date: '2024-05-27', title: "Spring Bank Holiday" },
-            { date: '2024-08-26', title: "Summer Bank Holiday" },
-            { date: '2024-12-25', title: "Christmas Day" },
-            { date: '2024-12-26', title: "Boxing Day" }
-        ],
-        2025: [
-            { date: '2025-01-01', title: "New Year's Day" },
-            { date: '2025-04-18', title: "Good Friday" },
-            { date: '2025-04-21', title: "Easter Monday" },
-            { date: '2025-05-05', title: "Early May Bank Holiday" },
-            { date: '2025-05-26', title: "Spring Bank Holiday" },
-            { date: '2025-08-25', title: "Summer Bank Holiday" },
-            { date: '2025-12-25', title: "Christmas Day" },
-            { date: '2025-12-26', title: "Boxing Day" }
-        ]
-    };
+    addLeaveDays(startDate, endDate);
+}
 
-    // Initialize calendar
-    function initializeCalendar() {
-        try {
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,listMonth'
-                },
-                views: {
-                    listMonth: {
-                        buttonText: 'List View'
-                    }
-                },
-                selectable: true,
-                selectMirror: true,
-                weekends: true,
-                height: 'auto',
-                firstDay: 1, // Monday start (UK)
-                displayEventTime: false,
-                select: handleDateSelection,
-                eventClick: handleEventClick,
-                dayCellDidMount: function(info) {
-                    styleDayCell(info);
-                },
-                datesSet: function(info) {
-                    updateCalendarWithHolidays();
-                }
-            });
-
-            calendar.render();
-            console.log('Calendar initialized successfully');
+// Leave Management Functions
+function addLeaveDays(start, end) {
+    let currentDate = new Date(start);
+    const endDate = new Date(end);
+    
+    while (currentDate < endDate) {
+        if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
+            const dateStr = formatDate(currentDate);
+            selectedLeaves.push(dateStr);
             
-            // Initialize calendar with current year's holidays
-            updateCalendarWithHolidays();
-        } catch (error) {
-            console.error('Error initializing calendar:', error);
-            showError('Failed to initialize calendar');
-        }
-    }
-
-    // Style individual day cells
-    function styleDayCell(info) {
-        const date = info.date;
-        const cell = info.el;
-
-        // Mark weekends
-        if (isWeekend(date)) {
-            cell.style.backgroundColor = '#f8d7da';
-            cell.style.cursor = 'not-allowed';
-        }
-
-        // Mark bank holidays
-        if (isBankHoliday(date)) {
-            cell.style.backgroundColor = '#fff3cd';
-            cell.style.cursor = 'not-allowed';
-        }
-    }
-
-    // Handle date selection
-    function handleDateSelection(info) {
-        if (isWeekend(info.start) || isBankHoliday(info.start)) {
-            calendar.unselect();
-            showError('Cannot select weekends or bank holidays');
-            return;
-        }
-
-        const leaveType = prompt('Enter leave type (1: Annual Leave, 2: Special Leave, 3: Training)');
-        if (!leaveType) {
-            calendar.unselect();
-            return;
-        }
-
-        addLeaveEvent(info.start, info.end, getLeaveTypeConfig(leaveType));
-    }
-
-    // Handle event click
-    function handleEventClick(info) {
-        if (info.event.title.includes('Bank Holiday')) {
-            showError('Cannot modify bank holidays');
-            return;
-        }
-
-        if (confirm(`Delete "${info.event.title}"?`)) {
-            info.event.remove();
-            updateLeaveSummary();
-        }
-    }
-
-    // Update calendar with bank holidays
-    function updateCalendarWithHolidays() {
-        const year = document.getElementById('selectYear').value;
-        const holidays = ukBankHolidays[year] || [];
-
-        // Remove existing bank holidays
-        calendar.getEvents().forEach(event => {
-            if (event.title.includes('Bank Holiday')) {
-                event.remove();
-            }
-        });
-
-        // Add bank holidays
-        holidays.forEach(holiday => {
             calendar.addEvent({
-                title: holiday.title,
-                start: holiday.date,
-                allDay: true,
-                backgroundColor: '#ffc107',
-                borderColor: '#ffc107',
-                classNames: ['bank-holiday'],
-                editable: false
+                title: 'Leave Day',
+                start: dateStr,
+                backgroundColor: CONFIG.COLORS.LEAVE,
+                borderColor: CONFIG.COLORS.LEAVE
+            });
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    updateSummaryDisplay();
+    saveData();
+}
+
+function handleEventClick(info) {
+    if (info.event.title === 'Leave Day') {
+        Swal.fire({
+            title: 'Remove Leave Day?',
+            text: 'Do you want to remove this leave day?',
+            icon: 'question',
+            showCancelButton: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removeLeaveDayEvent(info.event);
+            }
+        });
+    }
+}
+
+function removeLeaveDayEvent(event) {
+    const dateStr = formatDate(event.start);
+    selectedLeaves = selectedLeaves.filter(date => date !== dateStr);
+    event.remove();
+    updateSummaryDisplay();
+    saveData();
+}
+
+// Helper Functions
+function isWeekend(date) {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+}
+
+function isBankHoliday(date) {
+    const dateStr = formatDate(date);
+    return BANK_HOLIDAYS.some(holiday => holiday.date === dateStr);
+}
+
+function calculateWorkingDays(start, end) {
+    let count = 0;
+    let current = new Date(start);
+    
+    while (current < end) {
+        if (!isWeekend(current) && !isBankHoliday(current)) {
+            count++;
+        }
+        current.setDate(current.getDate() + 1);
+    }
+    
+    return count;
+}
+
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
+}
+
+function getBankHolidayEvents() {
+    return BANK_HOLIDAYS.map(holiday => ({
+        title: holiday.title,
+        start: holiday.date,
+        backgroundColor: CONFIG.COLORS.BANK_HOLIDAY,
+        borderColor: CONFIG.COLORS.BANK_HOLIDAY,
+        display: 'background'
+    }));
+}
+
+// UI Updates
+function updateSummaryDisplay() {
+    document.getElementById('totalLeaveDays').textContent = CONFIG.ANNUAL_LEAVE;
+    document.getElementById('usedDays').textContent = selectedLeaves.length;
+    document.getElementById('remainingDays').textContent = CONFIG.ANNUAL_LEAVE - selectedLeaves.length;
+    document.getElementById('bankHolidays').textContent = BANK_HOLIDAYS.length;
+}
+
+function showNotification(title, text, icon) {
+    Swal.fire({
+        title,
+        text,
+        icon,
+        confirmButtonColor: CONFIG.COLORS.LEAVE
+    });
+}
+
+// Data Persistence
+function saveData() {
+    localStorage.setItem('selectedLeaves', JSON.stringify(selectedLeaves));
+}
+
+function loadSavedData() {
+    const savedLeaves = localStorage.getItem('selectedLeaves');
+    if (savedLeaves) {
+        selectedLeaves = JSON.parse(savedLeaves);
+        selectedLeaves.forEach(dateStr => {
+            calendar.addEvent({
+                title: 'Leave Day',
+                start: dateStr,
+                backgroundColor: CONFIG.COLORS.LEAVE,
+                borderColor: CONFIG.COLORS.LEAVE
             });
         });
+        updateSummaryDisplay();
     }
+}
 
-    // Utility functions
-    function isWeekend(date) {
-        const day = date.getDay();
-        return day === 0 || day === 6;
-    }
+// Settings Handler
+function handleSettingsSubmit(e) {
+    e.preventDefault();
+    const annualLeave = parseInt(document.getElementById('annualLeave').value);
+    const weekStart = parseInt(document.getElementById('weekStart').value);
+    const defaultView = document.getElementById('defaultView').value;
 
-    function isBankHoliday(date) {
-        const dateString = date.toISOString().split('T')[0];
-        const year = date.getFullYear().toString();
-        const holidays = ukBankHolidays[year] || [];
-        return holidays.some(holiday => holiday.date === dateString);
-    }
+    CONFIG.ANNUAL_LEAVE = annualLeave;
+    CONFIG.CALENDAR.FIRST_DAY = weekStart;
+    CONFIG.CALENDAR.DEFAULT_VIEW = defaultView;
 
-    function getLeaveTypeConfig(type) {
-        const types = {
-            '1': { title: 'Annual Leave', color: '#28a745' },
-            '2': { title: 'Special Leave', color: '#17a2b8' },
-            '3': { title: 'Training', color: '#6f42c1' }
-        };
-        return types[type] || types['1'];
-    }
+    calendar.setOption('firstDay', weekStart);
+    calendar.setOption('initialView', defaultView);
 
-    function addLeaveEvent(start, end, config) {
-        calendar.addEvent({
-            title: config.title,
-            start: start,
-            end: end,
-            allDay: true,
-            backgroundColor: config.color,
-            borderColor: config.color
-        });
-        updateLeaveSummary();
-    }
+    updateSummaryDisplay();
+    document.getElementById('settingsModal').style.display = 'none';
+    showNotification('Settings Updated', 'Your preferences have been saved.', 'success');
+}
 
-    function updateLeaveSummary() {
-        const events = calendar.getEvents();
-        const annualLeave = events.filter(e => e.title === 'Annual Leave').length;
-        
-        if (leaveSummary && leaveSummaryContent) {
-            leaveSummary.style.display = 'block';
-            leaveSummaryContent.innerHTML = `
-                <p>Annual Leave Days Taken: ${annualLeave}</p>
-                <p>Remaining Leave: ${document.getElementById('totalLeave').value - annualLeave}</p>
-            `;
-        }
-    }
+// Export Function
+function exportCalendar() {
+    const events = calendar.getEvents()
+        .filter(event => event.title === 'Leave Day')
+        .map(event => ({
+            date: formatDate(event.start),
+            type: 'Annual Leave'
+        }));
 
-    function showError(message) {
-        alert(message); // Simple error display, can be enhanced with toast notification
-    }
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "Date,Type\n"
+        + events.map(e => `${e.date},${e.type}`).join("\n");
 
-    // Event Listeners
-    if (submitFormBtn) {
-        submitFormBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Process form submission
-            const totalLeave = parseInt(document.getElementById('totalLeave').value);
-            const leaveThisYear = parseInt(document.getElementById('leaveThisYear').value);
-            
-            if (!totalLeave || !leaveThisYear) {
-                showError('Please enter valid numbers for leave days');
-                return;
-            }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "leave_calendar.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+```
 
-            if (leaveThisYear > totalLeave) {
-                showError('Requested leave days cannot exceed total available days');
-                return;
-            }
+This JavaScript code provides:
 
-            updateLeaveSummary();
-        });
-    }
+1. Calendar functionality with:
+   - Leave day selection/removal
+   - Bank holiday display
+   - Weekend handling
+   - Date validation
 
-    // View toggle buttons
-    if (monthViewBtn) {
-        monthViewBtn.addEventListener('click', () => calendar.changeView('dayGridMonth'));
-    }
-    if (listViewBtn) {
-        listViewBtn.addEventListener('click', () => calendar.changeView('listMonth'));
-    }
-    if (todayBtn) {
-        todayBtn.addEventListener('click', () => calendar.today());
-    }
+2. State management:
+   - Tracks selected leave days
+   - Maintains settings
+   - Persists data in localStorage
 
-    // Initialize the calendar
-    initializeCalendar();
-});
+3. User interface features:
+   - Settings modal
+   - Leave summary updates
+   - Notifications
+   - Calendar export
+
+4. Helper functions for:
+   - Date formatting
+   - Working day calculations
+   - Event handling
+
+Would you like me to explain any specific part of the code or make any adjustments?
