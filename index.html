@@ -99,58 +99,45 @@
         </div>
 
         <!-- Setup Wizard Modal -->
-        <div id="setupModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>PTO Setup</h2>
-                    <button type="button" class="close-button" id="closeSetup">&times;</button>
-                </div>
-                <div class="setup-wizard">
-                    <div class="wizard-step" data-step="1">
-                        <h3>Annual Leave Allocation</h3>
-                        <div class="form-group">
-                            <label for="totalPTOInput">Total Annual PTO Days</label>
-                            <input type="number" id="totalPTOInput" min="0" max="50" required>
-                            <small>Standard UK range: 20-28 days</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="plannedPTOInput">Days Planning to Use This Year</label>
-                            <input type="number" id="plannedPTOInput" min="0" required>
-                        </div>
-                    </div>
+     <div class="setup-wizard">
+    <div class="wizard-step" data-step="1">
+        <h3>Annual Leave Allocation</h3>
+        <div class="form-group">
+            <label for="totalPTOInput">Total Annual PTO Days</label>
+            <input type="number" id="totalPTOInput" min="0" max="50" required>
+            <small>Standard UK range: 20-28 days</small>
+        </div>
+        <div class="form-group">
+            <label for="plannedPTOInput">Days Planning to Use This Year</label>
+            <input type="number" id="plannedPTOInput" min="0" required>
+        </div>
+    </div>
 
-                    <div class="wizard-step" data-step="2">
-                        <h3>Bank Holiday Extensions</h3>
-                        <div class="bank-holiday-list">
-                            <!-- Bank holidays will be populated by JavaScript -->
-                        </div>
-                    </div>
+    <div class="wizard-step" data-step="2">
+        <h3>Bank Holiday Extensions</h3>
+        <div class="bank-holiday-list">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
 
-                    <div class="wizard-step" data-step="3">
-                        <h3>Important Dates</h3>
-                        <div class="form-group">
-                            <label>School Holidays</label>
-                            <div class="checkbox-group">
-                                <label><input type="checkbox" name="schoolHolidays" value="halfTerm"> Half Terms</label>
-                                <label><input type="checkbox" name="schoolHolidays" value="summer"> Summer Holiday</label>
-                                <label><input type="checkbox" name="schoolHolidays" value="christmas"> Christmas Break</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Preferred Holiday Months</label>
-                            <div class="month-selector">
-                                <!-- Months will be populated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn" id="prevStep">Previous</button>
-                    <button type="button" class="btn btn-primary" id="nextStep">Next</button>
-                </div>
+    <div class="wizard-step" data-step="3">
+        <h3>Important Dates</h3>
+        <div class="form-group">
+            <label>School Holidays</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="schoolHolidays" value="halfTerm"> Half Terms</label>
+                <label><input type="checkbox" name="schoolHolidays" value="summer"> Summer Holiday</label>
+                <label><input type="checkbox" name="schoolHolidays" value="christmas"> Christmas Break</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Preferred Holiday Months</label>
+            <div class="month-selector">
+                <!-- Will be populated by JavaScript -->
             </div>
         </div>
     </div>
+</div>
 
     <!-- Loading Indicator -->
     <div id="loadingIndicator" class="loading-indicator hidden">
