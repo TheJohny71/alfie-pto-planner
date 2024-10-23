@@ -3,27 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Professional PTO Planning and Management">
     <title>Alfie PTO Planner</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="alfie-icon.png">
     
-    <!-- Preload Critical Resources -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Stylesheets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+        <div class="loader"></div>
+    </div>
+
     <!-- Welcome Screen -->
     <div id="welcomeScreen" class="welcome-screen">
         <div class="welcome-content">
-            <img src="alfie-icon.png" alt="Alfie PTO Planner" class="welcome-logo">
+            <img src="alfie-icon.png" alt="Alfie Logo" class="welcome-logo">
             <h1>Welcome to Alfie PTO Planner</h1>
             <button id="getStartedBtn" class="btn btn-primary">Get Started</button>
         </div>
@@ -41,8 +47,6 @@
                 <select id="yearSelect" class="year-select">
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
                 </select>
                 <button id="setupPTOBtn" class="btn">Update PTO</button>
                 <button id="exportBtn" class="btn">Export</button>
@@ -57,16 +61,16 @@
                     <h2>Leave Summary</h2>
                     <div class="summary-card">
                         <div class="summary-item">
-                            <span class="label">Total PTO</span>
-                            <span id="totalPTO" class="value">0</span>
+                            <span class="label">Total Leave</span>
+                            <span id="totalPTO" class="value">25</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Planned</span>
+                            <span class="label">Used</span>
                             <span id="plannedPTO" class="value">0</span>
                         </div>
                         <div class="summary-item">
                             <span class="label">Remaining</span>
-                            <span id="remainingPTO" class="value">0</span>
+                            <span id="remainingPTO" class="value">25</span>
                         </div>
                         <div class="summary-item">
                             <span class="label">Bank Holidays</span>
@@ -76,77 +80,89 @@
                 </div>
 
                 <div class="leave-types">
-                    <h3>Calendar Key</h3>
+                    <h3>Leave Types</h3>
                     <div class="leave-type-item">
-                        <div class="color-dot" style="background: #059669;"></div>
-                        <span>PTO Days</span>
+                        <div class="color-dot" style="background: var(--pto-green);"></div>
+                        <span>Annual Leave</span>
                     </div>
                     <div class="leave-type-item">
-                        <div class="color-dot" style="background: #f59e0b;"></div>
-                        <span>Bank Holidays</span>
+                        <div class="color-dot" style="background: var(--bank-holiday-orange);"></div>
+                        <span>Bank Holiday</span>
                     </div>
                     <div class="leave-type-item">
-                        <div class="color-dot" style="background: #e5e7eb;"></div>
-                        <span>Weekends</span>
+                        <div class="color-dot" style="background: var(--weekend-grey);"></div>
+                        <span>Weekend</span>
                     </div>
                 </div>
             </aside>
 
-            <!-- Calendar -->
+            <!-- Calendar Container -->
             <main class="calendar-container">
                 <div id="calendar"></div>
             </main>
         </div>
-
-        <!-- Setup Wizard Modal -->
-     <div class="setup-wizard">
-    <div class="wizard-step" data-step="1">
-        <h3>Annual Leave Allocation</h3>
-        <div class="form-group">
-            <label for="totalPTOInput">Total Annual PTO Days</label>
-            <input type="number" id="totalPTOInput" min="0" max="50" required>
-            <small>Standard UK range: 20-28 days</small>
-        </div>
-        <div class="form-group">
-            <label for="plannedPTOInput">Days Planning to Use This Year</label>
-            <input type="number" id="plannedPTOInput" min="0" required>
-        </div>
     </div>
 
-    <div class="wizard-step" data-step="2">
-        <h3>Bank Holiday Extensions</h3>
-        <div class="bank-holiday-list">
-            <!-- Will be populated by JavaScript -->
-        </div>
-    </div>
+    <!-- Setup Modal -->
+    <div id="setupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>PTO Setup</h2>
+                <button type="button" class="close-button" id="closeSetup">&times;</button>
+            </div>
+            
+            <div class="setup-wizard">
+                <!-- Step 1: PTO Allocation -->
+                <div class="wizard-step" data-step="1">
+                    <h3>Annual Leave Allocation</h3>
+                    <div class="form-group">
+                        <label for="totalPTOInput">Total Annual PTO Days</label>
+                        <input type="number" id="totalPTOInput" min="0" max="50" required>
+                        <small>Standard UK range: 20-28 days</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="plannedPTOInput">Days Planning to Use This Year</label>
+                        <input type="number" id="plannedPTOInput" min="0" required>
+                    </div>
+                </div>
 
-    <div class="wizard-step" data-step="3">
-        <h3>Important Dates</h3>
-        <div class="form-group">
-            <label>School Holidays</label>
-            <div class="checkbox-group">
-                <label><input type="checkbox" name="schoolHolidays" value="halfTerm"> Half Terms</label>
-                <label><input type="checkbox" name="schoolHolidays" value="summer"> Summer Holiday</label>
-                <label><input type="checkbox" name="schoolHolidays" value="christmas"> Christmas Break</label>
+                <!-- Step 2: Bank Holidays -->
+                <div class="wizard-step" data-step="2">
+                    <h3>Bank Holiday Extensions</h3>
+                    <div class="bank-holiday-list">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Step 3: Important Dates -->
+                <div class="wizard-step" data-step="3">
+                    <h3>Important Dates</h3>
+                    <div class="form-group">
+                        <label>School Holidays</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="schoolHolidays" value="halfTerm"> Half Terms</label>
+                            <label><input type="checkbox" name="schoolHolidays" value="summer"> Summer Holiday</label>
+                            <label><input type="checkbox" name="schoolHolidays" value="christmas"> Christmas Break</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Holiday Months</label>
+                        <div class="month-selector">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn" id="prevStep">Previous</button>
+                <button type="button" class="btn btn-primary" id="nextStep">Next</button>
             </div>
         </div>
-        <div class="form-group">
-            <label>Preferred Holiday Months</label>
-            <div class="month-selector">
-                <!-- Will be populated by JavaScript -->
-            </div>
-        </div>
-    </div>
-</div>
-
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-indicator hidden">
-        <div class="loader"></div>
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
