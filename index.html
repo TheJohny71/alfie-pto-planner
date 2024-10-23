@@ -3,37 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfie PTO Planner</title>
+    <title>Alfie PTO Planner Pro</title>
     <link rel="icon" type="image/png" href="alfie-icon.png">
-    <!-- Updated Library Links -->
+    <!-- Updated Libraries -->
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/index.global.min.js'></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" id="loadingIndicator"></div>
+
     <div class="app-wrapper">
-        <!-- Header -->
+        <!-- Enhanced Header -->
         <header class="header">
             <div class="header-left">
                 <img src="alfie-icon.png" alt="Alfie Logo" class="logo">
-                <h1>Alfie PTO Planner</h1>
+                <h1>Alfie PTO Planner Pro</h1>
             </div>
             <div class="header-right">
-                <button id="exportBtn" class="btn">Export Calendar</button>
-                <button id="settingsBtn" class="btn">Settings</button>
+                <button id="reportBtn" class="btn" title="Generate Reports">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Reports
+                </button>
+                <button id="exportBtn" class="btn" title="Export Calendar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export
+                </button>
+                <button id="settingsBtn" class="btn" title="Settings">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Settings
+                </button>
             </div>
         </header>
 
         <div class="main-container">
-            <!-- Sidebar -->
+            <!-- Enhanced Sidebar -->
             <aside class="sidebar">
                 <div class="leave-summary">
                     <h2>Leave Summary</h2>
                     <div class="summary-card">
                         <div class="summary-item">
-                            <span class="label">Total Leave</span>
+                            <span class="label">Annual Allowance</span>
                             <span id="totalLeaveDays" class="value">25</span>
                         </div>
                         <div class="summary-item">
@@ -54,16 +82,31 @@
                 <div class="leave-types">
                     <h3>Leave Types</h3>
                     <div class="leave-type-item">
-                        <div class="color-dot leave-dot"></div>
+                        <div class="color-dot" style="background: var(--success-color);"></div>
                         <span>Annual Leave</span>
                     </div>
                     <div class="leave-type-item">
-                        <div class="color-dot holiday-dot"></div>
+                        <div class="color-dot" style="background: var(--warning-color);"></div>
                         <span>Bank Holiday</span>
                     </div>
                     <div class="leave-type-item">
-                        <div class="color-dot weekend-dot"></div>
+                        <div class="color-dot" style="background: var(--gray-200);"></div>
                         <span>Weekend</span>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <h3>Quick Stats</h3>
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <span class="label">Longest Leave</span>
+                            <span id="longestLeave" class="value">0 days</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Average Length</span>
+                            <span id="averageLeave" class="value">0 days</span>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -74,13 +117,16 @@
             </main>
         </div>
 
-        <!-- Settings Modal -->
+        <!-- Enhanced Settings Modal -->
         <div id="settingsModal" class="modal">
             <div class="modal-content">
-                <h2>Settings</h2>
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="close-btn" id="closeSettings">×</button>
+                </div>
                 <form id="settingsForm">
                     <div class="form-group">
-                        <label for="annualLeave">Annual Leave Days</label>
+                        <label for="annualLeave">Annual Leave Allowance</label>
                         <input type="number" id="annualLeave" min="0" max="50" value="25">
                     </div>
                     <div class="form-group">
@@ -91,22 +137,37 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="defaultView">Default View</label>
+                        <label for="defaultView">Default Calendar View</label>
                         <select id="defaultView">
                             <option value="dayGridMonth">Month</option>
                             <option value="dayGridWeek">Week</option>
                         </select>
                     </div>
                     <div class="button-group">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn" id="closeSettings">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn" id="cancelSettings">Cancel</button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <!-- Reports Modal -->
+        <div id="reportsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Generate Report</h2>
+                    <button class="close-btn" id="closeReports">×</button>
+                </div>
+                <div class="report-options">
+                    <button class="btn" data-report="summary">Leave Summary</button>
+                    <button class="btn" data-report="calendar">Calendar View</button>
+                    <button class="btn" data-report="detailed">Detailed Report</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Updated JavaScript libraries -->
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.js"></script>
     <script src="script.js"></script>
 </body>
