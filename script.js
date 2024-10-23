@@ -1,4 +1,4 @@
-// Configuration & Constants
+// Global Constants
 const CONFIG = {
     COLORS: {
         PTO: '#059669',
@@ -9,7 +9,6 @@ const CONFIG = {
     MAX_PTO: 50
 };
 
-// Bank Holidays Data (Multi-Year)
 const BANK_HOLIDAYS = {
     2024: [
         { date: '2024-01-01', title: "New Year's Day" },
@@ -30,18 +29,14 @@ const BANK_HOLIDAYS = {
         { date: '2025-08-25', title: "Summer Bank Holiday" },
         { date: '2025-12-25', title: "Christmas Day" },
         { date: '2025-12-26', title: "Boxing Day" }
-    ],
-    2026: [
-        // Add 2026 bank holidays
-    ],
-    2027: [
-        // Add 2027 bank holidays
     ]
 };
 
 // State Management
 let calendar;
 let currentYear = CONFIG.INITIAL_YEAR;
+let currentStep = 1;
+const totalSteps = 3;
 let userData = {
     totalPTO: 0,
     plannedPTO: 0,
@@ -55,7 +50,6 @@ let userData = {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if first visit
     if (!localStorage.getItem('ptoData')) {
         showWelcomeScreen();
     } else {
@@ -64,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Welcome & Setup Functions
 function showWelcomeScreen() {
     document.getElementById('welcomeScreen').classList.remove('hidden');
     document.getElementById('getStartedBtn').addEventListener('click', () => {
@@ -74,42 +67,74 @@ function showWelcomeScreen() {
     });
 }
 
-function showSetupWizard() {
+function initializeApp() {
     showLoading();
-    const setupModal = document.getElementById('setupModal');
-    setupModal.style.display = 'flex';
-    initializeSetupWizard();
+    initializeCalendar();
+    setupEventListeners();
+    updateSummary();
     hideLoading();
 }
 
-// Calendar Initialization
+function initializeSetupWizard() {
+    currentStep = 1;
+    showWizardStep(currentStep);
+    
+    const wizard = document.getElementById('setupModal');
+    wizard.style.display = 'flex';
+    
+    // Set up event listeners
+    document.getElementById('nextStep').addEventListener('click', handleNextStep);
+    document.getElementById('prevStep').addEventListener('click', handlePrevStep);
+    document.getElementById('closeSetup').addEventListener('click', () => {
+        wizard.style.display = 'none';
+    });
+
+    // Populate forms with existing data if any
+    if (userData.totalPTO) {
+        document.getElementById('totalPTOInput').value = userData.totalPTO;
+        document.getElementById('plannedPTOInput').value = userData.plannedPTO;
+    }
+
+    populateBankHolidays();
+    populateMonthSelector();
+}
+
+function showWizardStep(step) {
+    document.querySelectorAll('.wizard-step').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    document.querySelector(`.wizard-step[data-step="${step}"]`).style.display = 'block';
+    
+    const prevBtn = document.getElementById('prevStep');
+    const nextBtn = document.getElementById('nextStep');
+    
+    prevBtn.style.display = step === 1 ? 'none' : 'block';
+    nextBtn.textContent = step === totalSteps ? 'Finish' : 'Next';
+}
+
 function initializeCalendar() {
     const calendarEl = document.getElementById('calendar');
     
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
+        firstDay: 1, // Monday start
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,dayGridWeek'
         },
-        firstDay: 1, // Monday start
         selectable: true,
         select: handleDateSelection,
         eventDidMount: handleEventMount,
         events: generateEvents(),
         eventClick: handleEventClick,
-        daysOfWeek: true,
-        weekNumbers: true,
-        businessHours: {
-            dow: [1, 2, 3, 4, 5] // Monday - Friday
-        }
+        dayCellDidMount: handleDayCellMount
     });
 
     calendar.render();
 }
 
-// Event Handlers
 function handleDateSelection(selectInfo) {
     const startDate = selectInfo.start;
     const endDate = selectInfo.end;
@@ -126,7 +151,7 @@ function handleDateSelection(selectInfo) {
 
     Swal.fire({
         title: 'Add PTO Days',
-        text: `Add PTO from ${formatDate(startDate)} to ${formatDate(endDate)}?`,
+        text: `Add PTO from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: CONFIG.COLORS.PTO,
@@ -138,17 +163,41 @@ function handleDateSelection(selectInfo) {
     });
 }
 
-function handleEventMount(info) {
-    if (info.event.extendedProps.type === 'bankHoliday') {
-        info.el.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
-        info.el.style.borderColor = CONFIG.COLORS.BANK_HOLIDAY;
-    } else if (info.event.extendedProps.type === 'pto') {
-        info.el.style.backgroundColor = CONFIG.COLORS.PTO;
-        info.el.style.borderColor = CONFIG.COLORS.PTO;
+function generateEvents() {
+    let events = [];
+    
+    // Add bank holidays
+    BANK_HOLIDAYS[currentYear].forEach(holiday => {
+        events.push({
+            title: holiday.title,
+            start: holiday.date,
+            className: 'bank-holiday',
+            display: 'background',
+            backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
+        });
+    });
+
+    // Add PTO days
+    if (userData.selectedDates[currentYear]) {
+        userData.selectedDates[currentYear].forEach(date => {
+            events.push({
+                title: 'PTO Day',
+                start: date,
+                className: 'pto-day',
+                backgroundColor: CONFIG.COLORS.PTO
+            });
+        });
+    }
+
+    return events;
+}
+
+function handleDayCellMount(arg) {
+    if (isWeekend(arg.date)) {
+        arg.el.style.backgroundColor = CONFIG.COLORS.WEEKEND;
     }
 }
 
-// PTO Management
 function addPTODays(start, end) {
     const workingDays = calculateWorkingDays(start, end);
     
@@ -169,7 +218,7 @@ function addPTODays(start, end) {
             calendar.addEvent({
                 title: 'PTO Day',
                 start: dateStr,
-                type: 'pto',
+                className: 'pto-day',
                 backgroundColor: CONFIG.COLORS.PTO
             });
         }
@@ -179,6 +228,7 @@ function addPTODays(start, end) {
     userData.plannedPTO += workingDays;
     updateSummary();
     saveUserData();
+    showSuccess('PTO days added successfully');
 }
 
 // Helper Functions
@@ -197,6 +247,14 @@ function formatDate(date) {
     return new Date(date).toISOString().split('T')[0];
 }
 
+function formatDisplayDate(date) {
+    return new Date(date).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+}
+
 function calculateWorkingDays(start, end) {
     let count = 0;
     let current = new Date(start);
@@ -211,7 +269,6 @@ function calculateWorkingDays(start, end) {
     return count;
 }
 
-// UI Updates
 function updateSummary() {
     document.getElementById('totalPTO').textContent = userData.totalPTO;
     document.getElementById('plannedPTO').textContent = userData.plannedPTO;
@@ -221,19 +278,78 @@ function updateSummary() {
         BANK_HOLIDAYS[currentYear].length;
 }
 
-// Data Management
-function saveUserData() {
-    localStorage.setItem('ptoData', JSON.stringify(userData));
-}
+// Event Handlers
+function handleNextStep() {
+    if (currentStep === 1 && !validateStep1()) {
+        return;
+    }
 
-function loadUserData() {
-    const saved = localStorage.getItem('ptoData');
-    if (saved) {
-        userData = JSON.parse(saved);
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showWizardStep(currentStep);
+    } else {
+        saveWizardData();
     }
 }
 
-// Notifications
+function handlePrevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showWizardStep(currentStep);
+    }
+}
+
+function validateStep1() {
+    const totalPTO = parseInt(document.getElementById('totalPTOInput').value);
+    const plannedPTO = parseInt(document.getElementById('plannedPTOInput').value);
+    
+    if (!totalPTO || totalPTO <= 0 || totalPTO > CONFIG.MAX_PTO) {
+        showError('Please enter a valid number of PTO days (1-50)');
+        return false;
+    }
+    
+    if (!plannedPTO || plannedPTO < 0 || plannedPTO > totalPTO) {
+        showError('Planned PTO cannot exceed total PTO days');
+        return false;
+    }
+    
+    return true;
+}
+
+function handleEventClick(info) {
+    if (info.event.classNames.includes('pto-day')) {
+        Swal.fire({
+            title: 'Remove PTO Day?',
+            text: 'Do you want to remove this PTO day?',
+            icon: 'question',
+            showCancelButton: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removePTODay(info.event);
+            }
+        });
+    }
+}
+
+function removePTODay(event) {
+    const dateStr = formatDate(event.start);
+    userData.selectedDates[currentYear] = userData.selectedDates[currentYear].filter(date => date !== dateStr);
+    userData.plannedPTO--;
+    event.remove();
+    updateSummary();
+    saveUserData();
+    showSuccess('PTO day removed');
+}
+
+// UI Functions
+function showLoading() {
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loadingIndicator').classList.add('hidden');
+}
+
 function showError(message) {
     Swal.fire({
         title: 'Error',
@@ -253,23 +369,43 @@ function showSuccess(message) {
     });
 }
 
-// Loading State
-function showLoading() {
-    document.getElementById('loadingIndicator').classList.remove('hidden');
+// Data Management
+function saveUserData() {
+    localStorage.setItem('ptoData', JSON.stringify(userData));
 }
 
-function hideLoading() {
-    document.getElementById('loadingIndicator').classList.add('hidden');
+function loadUserData() {
+    const saved = localStorage.getItem('ptoData');
+    if (saved) {
+        userData = JSON.parse(saved);
+    }
 }
 
-// Export Functionality
+// Setup Event Listeners
+function setupEventListeners() {
+    document.getElementById('setupPTOBtn').addEventListener('click', showSetupWizard);
+    document.getElementById('exportBtn').addEventListener('click', exportCalendar);
+    document.getElementById('yearSelect').addEventListener('change', handleYearChange);
+}
+
+function handleYearChange(e) {
+    currentYear = parseInt(e.target.value);
+    calendar.refetchEvents();
+    updateSummary();
+}
+
 function exportCalendar() {
     const events = calendar.getEvents()
-        .filter(event => event.extendedProps.type === 'pto')
+        .filter(event => event.classNames.includes('pto-day'))
         .map(event => ({
             date: formatDate(event.start),
             type: 'PTO Day'
         }));
+
+    if (events.length === 0) {
+        showError('No PTO days to export');
+        return;
+    }
 
     const csvContent = "data:text/csv;charset=utf-8,"
         + "Date,Type\n"
@@ -286,30 +422,6 @@ function exportCalendar() {
     showSuccess('Calendar exported successfully');
 }
 
-// Initialize everything
-function initializeApp() {
-    showLoading();
-    initializeCalendar();
-    setupEventListeners();
-    updateSummary();
-    hideLoading();
-}
-
-// Event Listeners Setup
-function setupEventListeners() {
-    document.getElementById('setupPTOBtn').addEventListener('click', showSetupWizard);
-    document.getElementById('exportBtn').addEventListener('click', exportCalendar);
-    document.getElementById('yearSelect').addEventListener('change', handleYearChange);
-    
-    // Settings Modal
-    const settingsBtn = document.getElementById('settingsBtn');
-    const closeSettings = document.getElementById('closeSettings');
-    
-    settingsBtn.addEventListener('click', () => {
-        document.getElementById('setupModal').style.display = 'flex';
-    });
-    
-    closeSettings.addEventListener('click', () => {
-        document.getElementById('setupModal').style.display = 'none';
-    });
+function showSetupWizard() {
+    initializeSetupWizard();
 }
