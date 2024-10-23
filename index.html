@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Alfie PTO Planner - UK Leave Management System">
     <title>Alfie | UK Leave Management System</title>
 
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAAQEAAAAEAAQCAQAAAQABAAAAAQAAAAAAAQAAAAAAAQAAAAAAAQD/1wAA/9cAAP/XAAD/1w==" type="image/x-icon">
-    
     <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
-    
-    <!-- Your custom CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
     
     <!-- FullCalendar Scripts -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.js'></script>
     
-    <!-- Other dependencies -->
+    <!-- PDF Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-    <!-- Header Section -->
     <header>
         <div class="app-header">
             <div class="app-header-content">
@@ -35,126 +33,95 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container">
-        <div class="dashboard-grid">
-            <!-- Leave Planning Section -->
-            <section class="planning-section card">
-                <div id="ptoForm" class="form-card">
-                    <h2>Plan Your Leave</h2>
-                    
-                    <div class="form-group">
-                        <label for="selectYear">Leave Year:</label>
-                        <select id="selectYear" class="form-control">
-                            <option value="2024">2024/25</option>
-                            <option value="2025">2025/26</option>
-                            <option value="2026">2026/27</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="totalLeave">Annual Leave Entitlement:</label>
-                        <input type="number" id="totalLeave" class="form-control" 
-                               placeholder="e.g., 25" min="0" max="50">
-                        <small class="form-text">Standard UK allowance is typically 20-28 days</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="leaveThisYear">Planned Leave Days:</label>
-                        <input type="number" id="leaveThisYear" class="form-control" 
-                               placeholder="e.g., 15" min="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="preferredMonths">Preferred Holiday Months:</label>
-                        <input type="text" id="preferredMonths" class="form-control" 
-                               placeholder="e.g., June, July, August">
-                        <small class="form-text">Separate months with commas</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="customHolidays">Additional Bank Holidays:</label>
-                        <input type="text" id="customHolidays" class="form-control" 
-                               placeholder="YYYY-MM-DD, YYYY-MM-DD">
-                        <small class="form-text">Standard UK bank holidays are automatically included</small>
-                    </div>
-
-                    <button id="submitFormBtn" class="btn btn-primary">Plan My Leave</button>
+        <!-- Form Section -->
+        <section class="planning-section card">
+            <div id="ptoForm" class="form-card">
+                <h2>Plan Your Leave</h2>
+                
+                <div class="form-group">
+                    <label for="selectYear">Leave Year:</label>
+                    <select id="selectYear" class="form-control">
+                        <option value="2024">2024/25</option>
+                        <option value="2025">2025/26</option>
+                    </select>
                 </div>
-            </section>
 
-            <!-- Calendar Section -->
-            <section class="calendar-section card">
-                <div id="calendarContainer">
-                    <div class="calendar-header">
-                        <h2>Leave Calendar</h2>
-                        <div class="calendar-actions">
-                            <button id="todayBtn" class="btn btn-outline">Today</button>
-                            <div class="view-toggles">
-                                <button id="monthViewBtn" class="btn btn-outline active">Month</button>
-                                <button id="listViewBtn" class="btn btn-outline">List</button>
-                            </div>
+                <div class="form-group">
+                    <label for="totalLeave">Annual Leave Entitlement:</label>
+                    <input type="number" id="totalLeave" class="form-control" 
+                           placeholder="e.g., 25" min="0" max="50">
+                    <small class="form-text">Standard UK allowance is typically 20-28 days</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="leaveThisYear">Planned Leave Days:</label>
+                    <input type="number" id="leaveThisYear" class="form-control" 
+                           placeholder="e.g., 15" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="preferredMonths">Preferred Holiday Months:</label>
+                    <input type="text" id="preferredMonths" class="form-control" 
+                           placeholder="e.g., June, July, August">
+                    <small class="form-text">Separate months with commas</small>
+                </div>
+
+                <button id="submitFormBtn" class="btn btn-primary">Plan My Leave</button>
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section class="calendar-section card">
+            <div id="calendarContainer">
+                <div class="calendar-header">
+                    <h2>Leave Calendar</h2>
+                    <div class="calendar-actions">
+                        <button id="todayBtn" class="btn btn-outline">Today</button>
+                        <div class="view-toggles">
+                            <button id="monthViewBtn" class="btn btn-outline active">Month</button>
+                            <button id="listViewBtn" class="btn btn-outline">List</button>
                         </div>
                     </div>
-                    <div id="calendar"></div>
                 </div>
-            </section>
+                <div id="calendar"></div>
+            </div>
+        </section>
 
-            <!-- Leave Summary Section -->
-            <section id="leaveSummary" class="summary-section card" style="display:none;">
-                <h2>Leave Summary</h2>
-                <div class="summary-content">
-                    <div id="leaveSummaryContent"></div>
-                    <div id="workingDaysInfo" class="working-days-info"></div>
-                </div>
-                <div class="summary-actions">
-                    <button id="downloadPDFBtn" class="btn btn-secondary">
-                        <span class="icon">📑</span> Download PDF
-                    </button>
-                    <button id="downloadExcelBtn" class="btn btn-secondary">
-                        <span class="icon">📊</span> Download Excel
-                    </button>
-                </div>
-            </section>
+        <!-- Leave Summary Section -->
+        <section id="leaveSummary" class="summary-section card" style="display:none;">
+            <h2>Leave Summary</h2>
+            <div id="leaveSummaryContent"></div>
+            <div class="button-group">
+                <button id="downloadPDFBtn" class="btn btn-secondary">
+                    <span class="icon">📑</span> Download PDF
+                </button>
+                <button id="downloadExcelBtn" class="btn btn-secondary">
+                    <span class="icon">📊</span> Download Excel
+                </button>
+            </div>
+        </section>
 
-            <!-- Legend Section -->
-            <section class="legend-section card">
-                <h3>Calendar Legend</h3>
-                <div class="legend-grid">
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #28a745;"></span>
-                        <span>Annual Leave</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #ffc107;"></span>
-                        <span>Bank Holiday</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #17a2b8;"></span>
-                        <span>Special Leave</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #dc3545;"></span>
-                        <span>Sick Leave</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #6f42c1;"></span>
-                        <span>Training Day</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #fd7e14;"></span>
-                        <span>Work From Home</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color" style="background-color: #f8d7da;"></span>
-                        <span>Weekend</span>
-                    </div>
+        <!-- Legend Section -->
+        <section class="legend-section card">
+            <h3>Calendar Legend</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #28a745;"></span>
+                    <span>Annual Leave</span>
                 </div>
-            </section>
-        </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #ffc107;"></span>
+                    <span>Bank Holiday</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #f8d7da;"></span>
+                    <span>Weekend</span>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Footer Section -->
     <footer class="app-footer">
         <div class="footer-content">
             <p class="copyright">&copy; 2024 Alfie PTO Planner. All rights reserved.</p>
@@ -166,56 +133,13 @@
         </div>
     </footer>
 
-    <!-- Modal Templates -->
-    <!-- Help Modal -->
-    <div id="helpModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>How to Use the Leave Planner</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <h4>Quick Guide:</h4>
-                <ol>
-                    <li>Select your leave year</li>
-                    <li>Enter your annual leave entitlement</li>
-                    <li>Click on calendar dates to book leave</li>
-                    <li>Use different leave types as needed</li>
-                    <li>Download your leave summary</li>
-                </ol>
-                <p><strong>Note:</strong> UK Bank Holidays are automatically marked and don't count towards your annual leave.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Leave Type Selection Modal -->
-    <div id="leaveTypeModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Select Leave Type</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="leaveTypeOptions" class="leave-type-grid"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay" style="display:none;">
         <div class="loading-spinner"></div>
         <p>Processing your request...</p>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="notificationToast" class="toast" style="display:none;">
-        <div class="toast-content">
-            <span id="notificationMessage"></span>
-            <button class="toast-close">&times;</button>
-        </div>
-    </div>
-
-    <!-- Scripts -->
+    <!-- Custom Script -->
     <script src="script.js"></script>
 </body>
 </html>
