@@ -166,7 +166,7 @@ body {
 /* Setup Wizard */
 .wizard-step {
     display: none;
-    padding: 1rem 0;
+    padding: 1.5rem 0;
 }
 
 .wizard-step.active {
@@ -214,7 +214,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -222,12 +222,24 @@ body {
     border-bottom: none;
 }
 
+.holiday-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .extension-type {
     width: 120px;
-    padding: 0.25rem;
-    margin-left: 1rem;
+    padding: 0.5rem;
     border: 1px solid var(--border-light);
     border-radius: 4px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 /* Month Selector */
@@ -238,10 +250,11 @@ body {
     margin-top: 0.5rem;
 }
 
-.month-checkbox {
+.month-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    cursor: pointer;
 }
 
 /* Modal Styles */
@@ -309,6 +322,15 @@ body {
 
 .btn-primary:hover {
     background: var(--primary-dark);
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-light);
 }
 
 /* Loading State */
