@@ -1,262 +1,93 @@
-/* Reset and Base Styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: #f0f2f5;
-    color: #1a1a1a;
-    line-height: 1.6;
-    min-height: 100vh;
-}
-
-/* Layout */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* Header Styles */
-.app-header {
-    background: white;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+/* Leave Type Dialog */
+.leave-type-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    z-index: 1000;
 }
 
-.app-icon {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-}
-
-h1 {
-    font-size: 1.75rem;
-    color: #1a73e8;
-    font-weight: 600;
-}
-
-/* Form Styles */
-#ptoForm {
+.dialog-content {
     background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-    max-width: 800px;
-    margin: 0 auto 2rem;
-}
-
-#ptoForm h2 {
-    color: #1a73e8;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
-
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #5f6368;
-    font-weight: 500;
-}
-
-input, select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #dadce0;
+    padding: 20px;
     border-radius: 8px;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
+    min-width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-input:focus, select:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
-}
-
-/* Button Styles */
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
+.leave-type-option {
+    padding: 10px;
+    margin: 5px 0;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-}
-
-.btn-primary {
-    background-color: #1a73e8;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #1557b0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.btn-secondary {
-    background-color: #5f6368;
-    color: white;
-    margin-right: 1rem;
-}
-
-.btn-secondary:hover {
-    background-color: #494c50;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Calendar Styles */
-#calendarContainer {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-}
-
-#calendar {
-    margin-top: 1rem;
-}
-
-.fc {
-    max-width: 100%;
-    background: white;
-}
-
-.fc .fc-toolbar-title {
-    font-size: 1.25rem;
-    color: #1a1a1a;
-}
-
-.fc .fc-button-primary {
-    background-color: #1a73e8;
-    border-color: #1a73e8;
-}
-
-.fc .fc-button-primary:hover {
-    background-color: #1557b0;
-    border-color: #1557b0;
-}
-
-.fc .fc-daygrid-day {
-    min-height: 100px;
-}
-
-.fc .fc-daygrid-day-number {
-    font-size: 1rem;
-    color: #5f6368;
-}
-
-/* Leave Summary Styles */
-#leaveSummary {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-    max-width: 800px;
-    margin: 2rem auto;
-}
-
-#leaveSummary h2 {
-    color: #1a73e8;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
-
-#leaveSummaryContent {
-    margin-bottom: 1.5rem;
-}
-
-#leaveSummaryContent p {
-    margin-bottom: 0.75rem;
-    font-size: 1.1rem;
-    color: #5f6368;
-}
-
-/* Legend Styles */
-.legend {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    max-width: 800px;
-    margin: 2rem auto;
-}
-
-.legend h4 {
-    color: #1a73e8;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.legend p {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    color: #5f6368;
+    border-radius: 4px;
+    transition: background-color 0.2s;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        padding: 10px;
-    }
-    
-    #ptoForm, #calendarContainer, #leaveSummary {
-        padding: 1rem;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-    }
-    
-    .fc .fc-toolbar {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
+.leave-type-option:hover {
+    background-color: #f8f9fa;
 }
 
-/* Loading States */
-.loading {
-    opacity: 0.7;
-    pointer-events: none;
-    position: relative;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 24px;
-    height: 24px;
-    margin: -12px;
-    border: 2px solid #1a73e8;
-    border-top-color: transparent;
+.leave-type-indicator {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    margin-right: 10px;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+.dialog-close {
+    margin-top: 15px;
+    padding: 8px 15px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.dialog-close:hover {
+    background: #5a6268;
+}
+
+/* Calendar Enhancements */
+.fc-day-header {
+    background: #f8f9fa;
+    padding: 10px 0 !important;
+}
+
+.fc-day-number {
+    font-weight: bold;
+    padding: 8px !important;
+}
+
+.bank-holiday {
+    background-color: #fff3cd !important;
+    border-color: #ffeeba !important;
+}
+
+.pto-day {
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+}
+
+.working-day {
+    background-color: #ffffff !important;
+}
+
+/* Tooltip Styles */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
 }
