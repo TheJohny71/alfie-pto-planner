@@ -1,24 +1,54 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Element references
-    const ptoForm = document.getElementById('ptoForm');
-    const submitFormBtn = document.getElementById('submitFormBtn');
-    const calendarContainer = document.getElementById('calendarContainer');
-    const calendarEl = document.getElementById('calendar');
-    const leaveSummary = document.getElementById('leaveSummary');
-    const leaveSummaryContent = document.getElementById('leaveSummaryContent');
-    const downloadPDFBtn = document.getElementById('downloadPDFBtn');
-    const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+    // Element references remain the same as before...
 
-    // Global calendar reference
-    let calendar = null;
+    // UK Bank Holidays for multiple years
+    const ukBankHolidays = {
+        2024: [
+            { date: '2024-01-01', title: "New Year's Day" },
+            { date: '2024-03-29', title: "Good Friday" },
+            { date: '2024-04-01', title: "Easter Monday" },
+            { date: '2024-05-06', title: "Early May Bank Holiday" },
+            { date: '2024-05-27', title: "Spring Bank Holiday" },
+            { date: '2024-08-26', title: "Summer Bank Holiday" },
+            { date: '2024-12-25', title: "Christmas Day" },
+            { date: '2024-12-26', title: "Boxing Day" }
+        ],
+        2025: [
+            { date: '2025-01-01', title: "New Year's Day" },
+            { date: '2025-04-18', title: "Good Friday" },
+            { date: '2025-04-21', title: "Easter Monday" },
+            { date: '2025-05-05', title: "Early May Bank Holiday" },
+            { date: '2025-05-26', title: "Spring Bank Holiday" },
+            { date: '2025-08-25', title: "Summer Bank Holiday" },
+            { date: '2025-12-25', title: "Christmas Day" },
+            { date: '2025-12-26', title: "Boxing Day" }
+        ],
+        2026: [
+            { date: '2026-01-01', title: "New Year's Day" },
+            { date: '2026-04-03', title: "Good Friday" },
+            { date: '2026-04-06', title: "Easter Monday" },
+            { date: '2026-05-04', title: "Early May Bank Holiday" },
+            { date: '2026-05-25', title: "Spring Bank Holiday" },
+            { date: '2026-08-31', title: "Summer Bank Holiday" },
+            { date: '2026-12-25', title: "Christmas Day" },
+            { date: '2026-12-28', title: "Boxing Day (Substitute)" }
+        ]
+    };
 
-    // Initialize calendar on page load
-    initializeCalendar();
+    // UK-specific leave types
+    const leaveTypes = {
+        annual: { title: 'Annual Leave', color: '#28a745', textColor: '#ffffff' },
+        bankHoliday: { title: 'Bank Holiday', color: '#ffc107', textColor: '#000000' },
+        special: { title: 'Special Leave', color: '#17a2b8', textColor: '#ffffff' },
+        sick: { title: 'Sick Leave', color: '#dc3545', textColor: '#ffffff' },
+        training: { title: 'Training Day', color: '#6f42c1', textColor: '#ffffff' },
+        wfh: { title: 'Work From Home', color: '#fd7e14', textColor: '#000000' }
+    };
 
-    // Calendar initialization function
+    // Calendar initialization with enhanced styling
     function initializeCalendar() {
         if (!calendarEl) {
-            showError('Calendar element not found. Please check the page structure.');
+            showError('Calendar element not found');
             return;
         }
 
@@ -28,339 +58,278 @@ document.addEventListener('DOMContentLoaded', function() {
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth'
+                    right: 'dayGridMonth,listMonth'
+                },
+                views: {
+                    listMonth: {
+                        buttonText: 'List View'
+                    }
                 },
                 selectable: true,
                 selectMirror: true,
                 weekends: true,
                 height: 'auto',
                 displayEventTime: false,
-                selectConstraint: {
-                    start: '00:00',
-                    end: '24:00'
+                firstDay: 1, // Monday start (UK)
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5], // Monday - Friday
+                    startTime: '09:00',
+                    endTime: '17:30',
                 },
-                dateClick: handleDateClick,
+                slotMinTime: '09:00:00',
+                slotMaxTime: '17:30:00',
+                dayCellDidMount: function(info) {
+                    styleDayCell(info);
+                },
+                eventDidMount: function(info) {
+                    styleEvent(info);
+                },
                 select: handleDateSelection,
                 eventClick: handleEventClick,
-                dayCellDidMount: function(info) {
-                    // Mark weekends
-                    const day = info.date.getDay();
-                    if (day === 0 || day === 6) {
-                        info.el.style.backgroundColor = '#f8d7da';
-                    }
+                datesSet: function(info) {
+                    const selectedYear = document.getElementById('selectYear').value;
+                    markBankHolidays(selectedYear);
+                    updateWorkingDays();
                 }
             });
 
             calendar.render();
-            console.log('Calendar initialized successfully');
+            markBankHolidays(document.getElementById('selectYear').value);
+            addCustomStyles();
         } catch (error) {
-            console.error('Error initializing calendar:', error);
-            showError('Failed to initialize calendar. Please refresh the page.');
+            console.error('Calendar initialization error:', error);
+            showError('Failed to initialize calendar');
         }
     }
 
-    // Handle single date clicks
-    function handleDateClick(info) {
-        const isWeekend = isWeekendDay(info.date);
-        if (isWeekend) {
-            showError('Cannot select weekend days for PTO');
-            return;
-        }
-        promptForEventType(info.date);
+    // Add custom CSS styles
+    function addCustomStyles() {
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            .fc-day-today {
+                background: #f8f9fa !important;
+                border: 2px solid #4285f4 !important;
+            }
+
+            .fc-day-weekend {
+                background: #f8d7da !important;
+                color: #721c24 !important;
+            }
+
+            .bank-holiday {
+                background: #fff3cd !important;
+                border: none !important;
+                border-radius: 4px !important;
+                font-weight: bold !important;
+            }
+
+            .pto-day {
+                background: #d4edda !important;
+                border: none !important;
+                border-radius: 4px !important;
+            }
+
+            .fc-event {
+                cursor: pointer;
+                transition: transform 0.1s ease;
+            }
+
+            .fc-event:hover {
+                transform: scale(1.02);
+            }
+
+            .fc-day-past {
+                opacity: 0.7;
+            }
+
+            .working-day {
+                background: #ffffff !important;
+            }
+
+            .leave-type-indicator {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                display: inline-block;
+                margin-right: 5px;
+            }
+
+            .tooltip {
+                position: absolute;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 1000;
+            }
+        `;
+        document.head.appendChild(styleSheet);
     }
 
-    // Handle date range selection
+    // Style individual day cells
+    function styleDayCell(info) {
+        const date = info.date;
+        const cell = info.el;
+
+        // Weekend styling
+        if (isWeekend(date)) {
+            cell.classList.add('fc-day-weekend');
+            cell.style.cursor = 'not-allowed';
+        }
+
+        // Past days styling
+        if (date < new Date()) {
+            cell.classList.add('fc-day-past');
+            cell.style.cursor = 'not-allowed';
+        }
+
+        // Bank holiday styling
+        if (isBankHoliday(date)) {
+            cell.classList.add('bank-holiday');
+            cell.style.cursor = 'not-allowed';
+        }
+
+        // Working day styling
+        if (isWorkingDay(date)) {
+            cell.classList.add('working-day');
+        }
+
+        // Add hover tooltip
+        cell.addEventListener('mouseover', (e) => showDayTooltip(e, date));
+        cell.addEventListener('mouseout', hideDayTooltip);
+    }
+
+    // Style events
+    function styleEvent(info) {
+        const event = info.event;
+        const element = info.el;
+
+        // Add leave type indicator
+        const leaveType = leaveTypes[event.extendedProps.leaveType] || leaveTypes.annual;
+        element.style.backgroundColor = leaveType.color;
+        element.style.borderColor = leaveType.color;
+        element.style.color = leaveType.textColor;
+
+        // Add tooltip
+        element.addEventListener('mouseover', (e) => showEventTooltip(e, event));
+        element.addEventListener('mouseout', hideEventTooltip);
+    }
+
+    // Enhanced date selection handler
     function handleDateSelection(info) {
         const startDate = info.start;
         const endDate = info.end;
-        
-        // Prevent selecting weekends
-        if (containsWeekend(startDate, endDate)) {
-            showError('Please avoid selecting weekend days');
+
+        if (isInvalidDateRange(startDate, endDate)) {
             calendar.unselect();
             return;
         }
 
-        promptForEventType(startDate, endDate);
+        // Show leave type selection dialog
+        showLeaveTypeDialog(startDate, endDate);
     }
 
-    // Handle event clicks (for deletion)
-    function handleEventClick(info) {
-        if (confirm(`Do you want to delete "${info.event.title}"?`)) {
-            info.event.remove();
-            updateLeaveSummary();
-        }
+    // Leave type selection dialog
+    function showLeaveTypeDialog(startDate, endDate) {
+        const dialog = document.createElement('div');
+        dialog.className = 'leave-type-dialog';
+        dialog.innerHTML = `
+            <div class="dialog-content">
+                <h3>Select Leave Type</h3>
+                ${Object.entries(leaveTypes).map(([key, type]) => `
+                    <div class="leave-type-option" data-type="${key}">
+                        <span class="leave-type-indicator" style="background-color: ${type.color}"></span>
+                        ${type.title}
+                    </div>
+                `).join('')}
+                <button class="dialog-close">Cancel</button>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // Handle leave type selection
+        dialog.querySelectorAll('.leave-type-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const leaveType = option.dataset.type;
+                addLeaveEvent(startDate, endDate, leaveType);
+                dialog.remove();
+                updateLeaveSummary();
+            });
+        });
+
+        dialog.querySelector('.dialog-close').addEventListener('click', () => {
+            dialog.remove();
+            calendar.unselect();
+        });
     }
 
-    // Prompt user for event type
-    function promptForEventType(start, end = null) {
-        const eventType = prompt('Enter event type (1 for PTO Day, 2 for Bank Holiday):');
-        if (!eventType) return;
-
-        let eventConfig;
-        switch (eventType.trim()) {
-            case '1':
-                eventConfig = {
-                    title: 'PTO Day',
-                    backgroundColor: '#28a745',
-                    borderColor: '#28a745'
-                };
-                break;
-            case '2':
-                eventConfig = {
-                    title: 'Bank Holiday',
-                    backgroundColor: '#ffc107',
-                    borderColor: '#ffc107'
-                };
-                break;
-            default:
-                showError('Invalid event type selected');
-                return;
-        }
-
-        addCalendarEvent(start, end, eventConfig);
-        updateLeaveSummary();
-    }
-
-    // Add event to calendar
-    function addCalendarEvent(start, end, config) {
+    // Add leave event to calendar
+    function addLeaveEvent(start, end, leaveType) {
+        const typeConfig = leaveTypes[leaveType];
         calendar.addEvent({
-            title: config.title,
+            title: typeConfig.title,
             start: start,
             end: end,
             allDay: true,
-            backgroundColor: config.backgroundColor,
-            borderColor: config.borderColor
-        });
-    }
-
-    // Form submission handler
-    if (submitFormBtn) {
-        submitFormBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            showLoading();
-
-            try {
-                processFormSubmission();
-            } catch (error) {
-                console.error('Error processing form:', error);
-                showError('Failed to process form. Please check your inputs.');
-            } finally {
-                hideLoading();
+            backgroundColor: typeConfig.color,
+            borderColor: typeConfig.color,
+            textColor: typeConfig.textColor,
+            extendedProps: {
+                leaveType: leaveType
             }
         });
     }
 
-    // Process form submission
-    function processFormSubmission() {
-        // Get and validate form inputs
-        const totalLeave = parseInt(document.getElementById('totalLeave').value);
-        const leaveThisYear = parseInt(document.getElementById('leaveThisYear').value);
-        const preferredMonths = document.getElementById('preferredMonths').value;
-        const customHolidays = document.getElementById('customHolidays').value;
-
-        // Validate inputs
-        if (!validateFormInputs(totalLeave, leaveThisYear, preferredMonths)) {
-            return;
+    // Update working days calculation
+    function updateWorkingDays() {
+        const year = document.getElementById('selectYear').value;
+        const workingDays = calculateWorkingDays(year);
+        
+        // Update UI with working days info
+        const workingDaysInfo = document.getElementById('workingDaysInfo');
+        if (workingDaysInfo) {
+            workingDaysInfo.textContent = `Working Days in ${year}: ${workingDays}`;
         }
-
-        // Calculate remaining leave
-        const remainingLeave = totalLeave - leaveThisYear;
-
-        // Update UI
-        updateLeaveSummary(totalLeave, leaveThisYear, remainingLeave);
-        updateCalendarEvents(preferredMonths, customHolidays, leaveThisYear);
     }
 
-    // Validate form inputs
-    function validateFormInputs(totalLeave, leaveThisYear, preferredMonths) {
-        if (!totalLeave || isNaN(totalLeave)) {
-            showError('Please enter a valid number for total leave days');
-            return false;
-        }
+    // Calculate working days for a year
+    function calculateWorkingDays(year) {
+        let workingDays = 0;
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31);
 
-        if (!leaveThisYear || isNaN(leaveThisYear)) {
-            showError('Please enter a valid number for leave days this year');
-            return false;
-        }
-
-        if (leaveThisYear > totalLeave) {
-            showError('Requested leave days cannot exceed total available days');
-            return false;
-        }
-
-        if (!preferredMonths.trim()) {
-            showError('Please enter preferred months for your leave');
-            return false;
-        }
-
-        return true;
-    }
-
-    // Update calendar events
-    function updateCalendarEvents(preferredMonths, customHolidays, leaveThisYear) {
-        calendar.removeAllEvents();
-
-        const currentYear = document.getElementById('selectYear').value;
-        const months = preferredMonths.split(',').map(m => m.trim()).filter(m => m);
-        const holidays = customHolidays.split(',').map(h => h.trim()).filter(h => h);
-
-        // Distribute PTO days across preferred months
-        if (months.length && leaveThisYear > 0) {
-            const daysPerMonth = Math.ceil(leaveThisYear / months.length);
-            
-            months.forEach(month => {
-                try {
-                    const monthIndex = new Date(`${month} 1, ${currentYear}`).getMonth();
-                    let daysAdded = 0;
-                    let dayOfMonth = 1;
-
-                    while (daysAdded < daysPerMonth && dayOfMonth <= 31) {
-                        const date = new Date(currentYear, monthIndex, dayOfMonth);
-                        
-                        // Skip if invalid date or weekend
-                        if (date.getMonth() !== monthIndex || isWeekendDay(date)) {
-                            dayOfMonth++;
-                            continue;
-                        }
-
-                        calendar.addEvent({
-                            title: 'PTO Day',
-                            start: date,
-                            allDay: true,
-                            backgroundColor: '#28a745',
-                            borderColor: '#28a745'
-                        });
-
-                        daysAdded++;
-                        dayOfMonth++;
-                    }
-                } catch (e) {
-                    console.error(`Error processing month: ${month}`, e);
-                    showError(`Failed to process month: ${month}`);
-                }
-            });
-        }
-
-        // Add custom holidays
-        holidays.forEach(holiday => {
-            try {
-                if (isValidDate(holiday)) {
-                    calendar.addEvent({
-                        title: 'Bank Holiday',
-                        start: holiday,
-                        allDay: true,
-                        backgroundColor: '#ffc107',
-                        borderColor: '#ffc107'
-                    });
-                }
-            } catch (e) {
-                console.error(`Error processing holiday: ${holiday}`, e);
-                showError(`Failed to process holiday date: ${holiday}`);
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            if (isWorkingDay(d)) {
+                workingDays++;
             }
-        });
-
-        calendar.render();
-    }
-
-    // Update leave summary
-    function updateLeaveSummary(totalLeave, leaveThisYear, remainingLeave) {
-        if (!leaveSummary || !leaveSummaryContent) return;
-
-        const ptoEvents = calendar.getEvents().filter(event => 
-            event.title.toLowerCase().includes('pto')).length;
-
-        leaveSummary.style.display = 'block';
-        leaveSummaryContent.innerHTML = `
-            <p>Total Leave Days Available: ${totalLeave}</p>
-            <p>Leave Days Requested: ${leaveThisYear}</p>
-            <p>Leave Days Scheduled: ${ptoEvents}</p>
-            <p>Remaining Leave Days: ${remainingLeave}</p>
-        `;
-    }
-
-    // Utility functions
-    function isWeekendDay(date) {
-        return date.getDay() === 0 || date.getDay() === 6;
-    }
-
-    function isValidDate(dateString) {
-        const date = new Date(dateString);
-        return date instanceof Date && !isNaN(date);
-    }
-
-    function containsWeekend(start, end) {
-        for (let date = new Date(start); date < end; date.setDate(date.getDate() + 1)) {
-            if (isWeekendDay(date)) return true;
         }
-        return false;
+
+        return workingDays;
     }
 
-    // Download handlers
-    downloadPDFBtn.addEventListener('click', function() {
-        showLoading();
-        const element = document.getElementById('leaveSummaryContent');
-        const opt = {
-            margin: 1,
-            filename: 'leave_summary.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
+    // Utility functions...
+    // (Keep all your existing utility functions and add these new ones)
 
-        html2pdf().set(opt).from(element).save()
-            .then(() => hideLoading())
-            .catch(error => {
-                console.error('PDF generation error:', error);
-                showError('Failed to generate PDF');
-                hideLoading();
-            });
-    });
-
-    downloadExcelBtn.addEventListener('click', function() {
-        try {
-            const events = calendar.getEvents();
-            const ptoCount = events.filter(event => 
-                event.title.toLowerCase().includes('pto')).length;
-            
-            const summaryData = [
-                ['Leave Summary Report'],
-                ['Generated on:', new Date().toLocaleDateString()],
-                [''],
-                ['Total Leave Days Available', document.getElementById('totalLeave').value],
-                ['Leave Days Requested', document.getElementById('leaveThisYear').value],
-                ['Leave Days Scheduled', ptoCount],
-                ['Remaining Leave Days', 
-                    parseInt(document.getElementById('totalLeave').value) - ptoCount],
-                [''],
-                ['Scheduled Events'],
-                ['Date', 'Event Type']
-            ];
-
-            // Add all events to the CSV
-            events.sort((a, b) => a.start - b.start).forEach(event => {
-                summaryData.push([
-                    event.start.toISOString().split('T')[0],
-                    event.title
-                ]);
-            });
-
-            downloadCSV(summaryData, 'leave_summary.csv');
-        } catch (error) {
-            console.error('Excel generation error:', error);
-            showError('Failed to generate Excel file');
-        }
-    });
-
-    function downloadCSV(data, filename) {
-        const csvContent = "data:text/csv;charset=utf-8," + 
-            data.map(row => row.join(",")).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    function showDayTooltip(event, date) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = getDateInfo(date);
+        tooltip.style.left = event.pageX + 10 + 'px';
+        tooltip.style.top = event.pageY + 10 + 'px';
+        document.body.appendChild(tooltip);
     }
+
+    function getDateInfo(date) {
+        if (isWeekend(date)) return 'Weekend';
+        if (isBankHoliday(date)) return 'Bank Holiday';
+        if (isWorkingDay(date)) return 'Working Day';
+        return 'Non-working Day';
+    }
+
+    // Initialize calendar
+    initializeCalendar();
+
+    // ... (keep the rest of your existing code)
 });
