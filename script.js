@@ -69,17 +69,26 @@ function initializeApp() {
     hideLoading();
 }
 
+// Add this at the beginning of your showWelcomeScreen function
 function showWelcomeScreen() {
+    console.log('showWelcomeScreen called'); // Debug line
     const welcomeScreen = document.getElementById('welcomeScreen');
     const appContainer = document.getElementById('appContainer');
+    const getStartedBtn = document.getElementById('getStartedBtn');
     
+    console.log('Elements found:', { // Debug line
+        welcomeScreen: !!welcomeScreen,
+        appContainer: !!appContainer,
+        getStartedBtn: !!getStartedBtn
+    });
+
     if (welcomeScreen && appContainer) {
         welcomeScreen.classList.remove('hidden');
         appContainer.classList.add('hidden');
         
-        const getStartedBtn = document.getElementById('getStartedBtn');
         if (getStartedBtn) {
             getStartedBtn.addEventListener('click', () => {
+                console.log('Get Started clicked'); // Debug line
                 welcomeScreen.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 initializeSetupWizard();
