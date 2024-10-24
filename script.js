@@ -1,4 +1,5 @@
 // Global Constants
+let hasSetup = false;
 const CONFIG = {
     COLORS: {
         PTO: '#059669',
@@ -50,28 +51,25 @@ let userData = {
 };
 
 // Initialize Application
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
-    
-    // Clear localStorage for testing (remove this in production)
-    localStorage.clear(); // Add this line temporarily for testing
+localStorage.clear();
     
     const welcomeScreen = document.getElementById('welcomeScreen');
     const appContainer = document.getElementById('appContainer');
     const getStartedBtn = document.getElementById('getStartedBtn');
 
-    if (welcomeScreen && appContainer) {
-        welcomeScreen.classList.remove('hidden');
-        appContainer.classList.add('hidden');
+    if (welcomeScreen && appContainer && getStartedBtn) {
+        // Show welcome screen first
+        welcomeScreen.style.display = 'flex';
+        appContainer.style.display = 'none';
 
-        if (getStartedBtn) {
-            getStartedBtn.addEventListener('click', function() {
-                console.log('Get Started clicked');
-                welcomeScreen.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                initializeSetupWizard(); // Always show setup wizard first
-            });
-        }
+        getStartedBtn.addEventListener('click', function() {
+            console.log('Get Started clicked');
+            welcomeScreen.style.display = 'none';
+            appContainer.style.display = 'flex';
+            initializeSetupWizard();
+        });
+    } else {
+        console.error('Required elements not found:', { welcomeScreen, appContainer, getStartedBtn });
     }
 });
 
@@ -117,38 +115,37 @@ function initializeCalendar() {
     calendar.render();
 }
 
+// Replace your initializeSetupWizard function
 function initializeSetupWizard() {
-    console.log('Initializing setup wizard'); // Debug
-    try {
-        const setupModal = document.getElementById('setupModal');
-        if (!setupModal) {
-            console.error('Setup modal not found');
-            return;
-        }
+    console.log('Initializing setup wizard');
+    const setupModal = document.getElementById('setupModal');
+    
+    if (!setupModal) {
+        console.error('Setup modal not found');
+        return;
+    }
 
-        currentStep = 1;
-        setupModal.style.display = 'flex';
+    currentStep = 1;
+    setupModal.style.display = 'flex';
 
-        // Initialize form values
-        const totalPTOInput = document.getElementById('totalPTOInput');
-        const plannedPTOInput = document.getElementById('plannedPTOInput');
-        
-        if (totalPTOInput) totalPTOInput.value = userData.totalPTO || CONFIG.DEFAULT_PTO;
-        if (plannedPTOInput) plannedPTOInput.value = userData.plannedPTO || 0;
+    // Show first step
+    showWizardStep(1);
+    
+    // Initialize content
+    populateBankHolidays();
+    populateMonthSelector();
 
-        // Show first step
-        showWizardStep(currentStep);
-        
-        // Initialize content
-        populateBankHolidays();
-        populateMonthSelector();
+    // Set up event listeners if not already set
+    if (!hasSetup) {
+        const nextBtn = document.getElementById('nextStep');
+        const prevBtn = document.getElementById('prevStep');
+        const closeBtn = document.getElementById('closeSetup');
 
-        // Setup event listeners
-        setupWizardEventListeners(setupModal);
+        if (nextBtn) nextBtn.addEventListener('click', handleNextStep);
+        if (prevBtn) prevBtn.addEventListener('click', handlePrevStep);
+        if (closeBtn) closeBtn.addEventListener('click', () => setupModal.style.display = 'none');
 
-    } catch (error) {
-        console.error('Error initializing setup wizard:', error);
-        showError('Failed to initialize setup wizard. Please refresh the page.');
+        hasSetup = true;
     }
 }
 function setupWizardEventListeners(modal) {
