@@ -28,6 +28,7 @@ body {
     color: var(--text-primary);
     background-color: var(--background-light);
     line-height: 1.5;
+    min-height: 100vh;
 }
 
 /* Welcome Screen */
@@ -47,12 +48,27 @@ body {
 .welcome-content {
     text-align: center;
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
 }
 
 .welcome-logo {
     width: 120px;
     height: 120px;
-    margin-bottom: 2rem;
+}
+
+.welcome-content h1 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+#getStartedBtn {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    min-width: 200px;
 }
 
 /* Main Layout */
@@ -82,6 +98,11 @@ body {
     height: 40px;
 }
 
+.header h1 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
 .header-right {
     display: flex;
     gap: 1rem;
@@ -94,6 +115,7 @@ body {
     border: 1px solid var(--border-light);
     border-radius: 4px;
     font-size: 0.875rem;
+    cursor: pointer;
 }
 
 /* Main Container */
@@ -208,11 +230,6 @@ body {
     padding: 8px;
 }
 
-.bank-holiday-label {
-    font-size: 0.8em;
-    color: var(--text-secondary);
-}
-
 /* Modal Styles */
 .modal {
     display: none;
@@ -299,6 +316,7 @@ body {
 
 .month-item input[type="checkbox"] {
     margin: 0;
+    cursor: pointer;
 }
 
 .checkbox-group {
@@ -331,7 +349,7 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn:hover {
@@ -430,6 +448,15 @@ body {
 
     .month-selector {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .welcome-content h1 {
+        font-size: 1.5rem;
+    }
+
+    #getStartedBtn {
+        min-width: 160px;
+        padding: 0.875rem 1.5rem;
     }
 }
 
