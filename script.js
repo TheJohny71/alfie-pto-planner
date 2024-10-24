@@ -52,15 +52,14 @@ let userData = {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded'); // Debug line
-    const savedData = loadUserData();
+    console.log('DOM Content Loaded');
     
-    // Always show welcome screen first
+    // Clear localStorage for testing (remove this in production)
+    localStorage.clear(); // Add this line temporarily for testing
+    
     const welcomeScreen = document.getElementById('welcomeScreen');
     const appContainer = document.getElementById('appContainer');
     const getStartedBtn = document.getElementById('getStartedBtn');
-
-    console.log('Initial elements:', { welcomeScreen, appContainer, getStartedBtn }); // Debug
 
     if (welcomeScreen && appContainer) {
         welcomeScreen.classList.remove('hidden');
@@ -68,15 +67,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (getStartedBtn) {
             getStartedBtn.addEventListener('click', function() {
-                console.log('Get Started clicked'); // Debug
+                console.log('Get Started clicked');
                 welcomeScreen.classList.add('hidden');
                 appContainer.classList.remove('hidden');
-                if (!savedData) {
-                    initializeSetupWizard();
-                } else {
-                    userData = savedData;
-                    initializeApp();
-                }
+                initializeSetupWizard(); // Always show setup wizard first
             });
         }
     }
@@ -460,18 +454,23 @@ function generateEvents() {
     
     // Add bank holidays
     BANK_HOLIDAYS[currentYear].forEach(holiday => {
+        // Background event for coloring
         events.push({
             title: holiday.title,
             start: holiday.date,
-            allDay: true,
-            className: 'bank-holiday',
+            backgroundColor: CONFIG.COLORS.BANK_HOLIDAY,
+            borderColor: CONFIG.COLORS.BANK_HOLIDAY,
+            classNames: ['bank-holiday'],
             display: 'background'
         });
+        
+        // Text event for the holiday name
         events.push({
             title: holiday.title,
             start: holiday.date,
-            allDay: true,
-            className: 'bank-holiday-label'
+            classNames: ['bank-holiday-label'],
+            display: 'block',
+            textColor: 'black'
         });
     });
 
@@ -481,8 +480,9 @@ function generateEvents() {
             events.push({
                 title: 'PTO Day',
                 start: date,
-                allDay: true,
-                className: 'pto-day'
+                backgroundColor: CONFIG.COLORS.PTO,
+                borderColor: CONFIG.COLORS.PTO,
+                classNames: ['pto-day']
             });
         });
     }
