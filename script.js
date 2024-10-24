@@ -11,17 +11,16 @@ const CONFIG = {
 };
 
 // Bank Holidays Data
-const BANK_HOLIDAYS = {
-    2024: [
-        { date: '2024-01-01', title: "New Year's Day" },
-        { date: '2024-03-29', title: "Good Friday" },
-        { date: '2024-04-01', title: "Easter Monday" },
-        { date: '2024-05-06', title: "Early May Bank Holiday" },
-        { date: '2024-05-27', title: "Spring Bank Holiday" },
-        { date: '2024-08-26', title: "Summer Bank Holiday" },
-        { date: '2024-12-25', title: "Christmas Day" },
-        { date: '2024-12-26', title: "Boxing Day" }
-    ],
+const BANK_HOLIDAYS = [
+    { date: '2024-01-01', title: "New Year's Day" },
+    { date: '2024-03-29', title: "Good Friday" },
+    { date: '2024-04-01', title: "Easter Monday" },
+    { date: '2024-05-06', title: "Early May Bank Holiday" },
+    { date: '2024-05-27', title: "Spring Bank Holiday" },
+    { date: '2024-08-26', title: "Summer Bank Holiday" },
+    { date: '2024-12-25', title: "Christmas Day" },
+    { date: '2024-12-26', title: "Boxing Day" }
+];
     2025: [
         { date: '2025-01-01', title: "New Year's Day" },
         { date: '2025-04-18', title: "Good Friday" },
@@ -198,12 +197,12 @@ function populateBankHolidays() {
     const container = document.querySelector('.bank-holiday-list');
     if (!container) return;
 
-    const holidaysList = BANK_HOLIDAYS[currentYear].map(holiday => `
+    const holidaysList = BANK_HOLIDAYS.map(holiday => `
         <div class="holiday-item">
-            <div class="holiday-check">
+            <label class="holiday-check">
                 <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
-                <label for="holiday-${holiday.date}">${holiday.title} (${formatDisplayDate(holiday.date)})</label>
-            </div>
+                <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
+            </label>
             <select class="extension-type" data-date="${holiday.date}">
                 <option value="before">Day Before</option>
                 <option value="after">Day After</option>
@@ -213,6 +212,30 @@ function populateBankHolidays() {
     `).join('');
 
     container.innerHTML = holidaysList;
+}
+
+function populateMonthSelector() {
+    const container = document.querySelector('.month-selector');
+    if (!container) return;
+
+    const months = [
+        ['January', 'February', 'March', 'April'],
+        ['May', 'June', 'July', 'August'],
+        ['September', 'October', 'November', 'December']
+    ];
+
+    const monthsHtml = months.map(row => `
+        <div class="month-row">
+            ${row.map(month => `
+                <label class="month-item">
+                    <input type="checkbox" name="preferredMonth" value="${month}">
+                    <span>${month}</span>
+                </label>
+            `).join('')}
+        </div>
+    `).join('');
+
+    container.innerHTML = monthsHtml;
 }
 
 function populateMonthSelector() {
