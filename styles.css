@@ -213,21 +213,22 @@ body {
     padding: 2px 4px;
 }
 
+/* Add or update these classes */
 .fc-event.bank-holiday {
     background-color: var(--bank-holiday-orange) !important;
     border-color: var(--bank-holiday-orange) !important;
-    color: black !important;
+}
+
+.fc-event.bank-holiday-label {
+    background: none !important;
+    border: none !important;
+    font-size: 0.8em;
     padding: 2px 4px;
+    margin-top: 15px;
 }
 
-.fc .fc-day-sat,
-.fc .fc-day-sun {
-    background-color: var(--weekend-grey) !important;
-}
-
-.fc .fc-daygrid-day-number {
-    font-weight: 500;
-    padding: 8px;
+.fc-daygrid-day.fc-day-today {
+    background-color: rgba(37, 99, 235, 0.1) !important;
 }
 
 /* Modal Styles */
