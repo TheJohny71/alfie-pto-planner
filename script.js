@@ -1,6 +1,5 @@
 // Global Constants
 let hasSetup = false;
-// Replace this section at the top of your script.js
 const CONFIG = {
     COLORS: {
         PTO: '#059669',
@@ -12,17 +11,18 @@ const CONFIG = {
     DEFAULT_PTO: 0
 };
 
-// Bank Holidays Data (keep as a separate constant)
-const BANK_HOLIDAYS = [
-    { date: '2024-01-01', title: "New Year's Day" },
-    { date: '2024-03-29', title: "Good Friday" },
-    { date: '2024-04-01', title: "Easter Monday" },
-    { date: '2024-05-06', title: "Early May Bank Holiday" },
-    { date: '2024-05-27', title: "Spring Bank Holiday" },
-    { date: '2024-08-26', title: "Summer Bank Holiday" },
-    { date: '2024-12-25', title: "Christmas Day" },
-    { date: '2024-12-26', title: "Boxing Day" }
-];
+// Bank Holidays Data
+const BANK_HOLIDAYS = {
+    2024: [
+        { date: '2024-01-01', title: "New Year's Day" },
+        { date: '2024-03-29', title: "Good Friday" },
+        { date: '2024-04-01', title: "Easter Monday" },
+        { date: '2024-05-06', title: "Early May Bank Holiday" },
+        { date: '2024-05-27', title: "Spring Bank Holiday" },
+        { date: '2024-08-26', title: "Summer Bank Holiday" },
+        { date: '2024-12-25', title: "Christmas Day" },
+        { date: '2024-12-26', title: "Boxing Day" }
+    ],
     2025: [
         { date: '2025-01-01', title: "New Year's Day" },
         { date: '2025-04-18', title: "Good Friday" },
@@ -52,30 +52,39 @@ let userData = {
 };
 
 // Initialize Application
-localStorage.clear();
-    
-    const welcomeScreen = document.getElementById('welcomeScreen');
-    const appContainer = document.getElementById('appContainer');
-    const getStartedBtn = document.getElementById('getStartedBtn');
+document.addEventListener('DOMContentLoaded', function() {
+    showLoading();
+    try {
+        const savedData = loadUserData();
+        if (savedData) {
+            userData = savedData;
+            initializeApp();
+        } else {
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const appContainer = document.getElementById('appContainer');
+            const getStartedBtn = document.getElementById('getStartedBtn');
 
-    if (welcomeScreen && appContainer && getStartedBtn) {
-        // Show welcome screen first
-        welcomeScreen.style.display = 'flex';
-        appContainer.style.display = 'none';
+            if (welcomeScreen && appContainer && getStartedBtn) {
+                welcomeScreen.classList.remove('hidden');
+                appContainer.classList.add('hidden');
 
-        getStartedBtn.addEventListener('click', function() {
-            console.log('Get Started clicked');
-            welcomeScreen.style.display = 'none';
-            appContainer.style.display = 'flex';
-            initializeSetupWizard();
-        });
-    } else {
-        console.error('Required elements not found:', { welcomeScreen, appContainer, getStartedBtn });
+                getStartedBtn.addEventListener('click', function() {
+                    welcomeScreen.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    initializeSetupWizard();
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Failed to initialize application');
+    } finally {
+        hideLoading();
     }
 });
 
 function initializeApp() {
-    console.log('Initializing app'); // Debug
+    console.log('Initializing app');
     showLoading();
     initializeCalendar();
     setupEventListeners();
@@ -84,39 +93,47 @@ function initializeApp() {
 }
 
 function initializeCalendar() {
-    console.log('Initializing calendar'); // Debug
+    console.log('Initializing calendar');
     const calendarEl = document.getElementById('calendar');
     
     if (!calendarEl) {
-        console.error('Calendar element not found');
+        showError('Calendar element not found');
         return;
     }
 
-    calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        firstDay: 1, // Monday start
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,dayGridWeek'
-        },
-        selectable: true,
-        select: handleDateSelection,
-        eventDidMount: handleEventMount,
-        events: generateEvents(),
-        eventClick: handleEventClick,
-        dayCellDidMount: handleDayCellMount,
-        displayEventTime: false,
-        eventDisplay: 'block',
-        dayMaxEvents: true,
-        weekends: true,
-        slotEventOverlap: false
-    });
+    try {
+        if (typeof FullCalendar === 'undefined') {
+            throw new Error('FullCalendar library not loaded');
+        }
 
-    calendar.render();
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            firstDay: 1,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            selectable: true,
+            select: handleDateSelection,
+            eventDidMount: handleEventMount,
+            events: generateEvents(),
+            eventClick: handleEventClick,
+            dayCellDidMount: handleDayCellMount,
+            displayEventTime: false,
+            eventDisplay: 'block',
+            dayMaxEvents: true,
+            weekends: true,
+            slotEventOverlap: false
+        });
+
+        calendar.render();
+    } catch (error) {
+        console.error('Calendar initialization error:', error);
+        showError('Failed to initialize calendar');
+    }
 }
 
-// Replace your initializeSetupWizard function
 function initializeSetupWizard() {
     console.log('Initializing setup wizard');
     const setupModal = document.getElementById('setupModal');
@@ -129,26 +146,16 @@ function initializeSetupWizard() {
     currentStep = 1;
     setupModal.style.display = 'flex';
 
-    // Show first step
     showWizardStep(1);
-    
-    // Initialize content
     populateBankHolidays();
     populateMonthSelector();
 
-    // Set up event listeners if not already set
     if (!hasSetup) {
-        const nextBtn = document.getElementById('nextStep');
-        const prevBtn = document.getElementById('prevStep');
-        const closeBtn = document.getElementById('closeSetup');
-
-        if (nextBtn) nextBtn.addEventListener('click', handleNextStep);
-        if (prevBtn) prevBtn.addEventListener('click', handlePrevStep);
-        if (closeBtn) closeBtn.addEventListener('click', () => setupModal.style.display = 'none');
-
+        setupWizardEventListeners(setupModal);
         hasSetup = true;
     }
 }
+
 function setupWizardEventListeners(modal) {
     const closeBtn = document.getElementById('closeSetup');
     const nextBtn = document.getElementById('nextStep');
@@ -156,7 +163,6 @@ function setupWizardEventListeners(modal) {
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
-            console.log('Close button clicked'); // Debug
             modal.style.display = 'none';
         });
     }
@@ -171,7 +177,6 @@ function setupWizardEventListeners(modal) {
 }
 
 function showWizardStep(step) {
-    console.log('Showing wizard step:', step); // Debug
     const steps = document.querySelectorAll('.wizard-step');
     steps.forEach(s => s.style.display = 'none');
 
@@ -195,7 +200,7 @@ function populateBankHolidays() {
     const container = document.querySelector('.bank-holiday-list');
     if (!container) return;
 
-    const holidaysList = BANK_HOLIDAYS.map(holiday => `
+    const holidaysList = BANK_HOLIDAYS[currentYear].map(holiday => `
         <div class="holiday-item">
             <label class="holiday-check">
                 <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
@@ -236,25 +241,7 @@ function populateMonthSelector() {
     container.innerHTML = monthsHtml;
 }
 
-function populateMonthSelector() {
-    const container = document.querySelector('.month-selector');
-    if (!container) return;
-
-    const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-
-    container.innerHTML = months.map((month, index) => `
-        <label class="month-item">
-            <input type="checkbox" name="preferredMonth" value="${index + 1}">
-            <span>${month}</span>
-        </label>
-    `).join('');
-}
-
 function setupEventListeners() {
-    console.log('Setting up event listeners'); // Debug
     const setupPTOBtn = document.getElementById('setupPTOBtn');
     const exportBtn = document.getElementById('exportBtn');
     const yearSelect = document.getElementById('yearSelect');
@@ -265,7 +252,6 @@ function setupEventListeners() {
 }
 
 function handleDateSelection(selectInfo) {
-    console.log('Date selection:', selectInfo); // Debug
     if (!userData.totalPTO) {
         showError('Please complete PTO setup first');
         return;
@@ -345,7 +331,6 @@ function handleDayCellMount(arg) {
 }
 
 function handleNextStep() {
-    console.log('Next step clicked, current step:', currentStep); // Debug
     if (currentStep === 1 && !validateStep1()) {
         return;
     }
@@ -370,7 +355,7 @@ function validateStep1() {
     const plannedPTOInput = document.getElementById('plannedPTOInput');
     
     if (!totalPTOInput || !plannedPTOInput) {
-        console.error('PTO input elements not found'); // Debug
+        showError('Required input fields not found');
         return false;
     }
 
@@ -391,7 +376,6 @@ function validateStep1() {
 }
 
 function saveWizardData() {
-    console.log('Saving wizard data'); // Debug
     const totalPTOInput = document.getElementById('totalPTOInput');
     const plannedPTOInput = document.getElementById('plannedPTOInput');
 
@@ -399,7 +383,6 @@ function saveWizardData() {
         userData.totalPTO = parseInt(totalPTOInput.value);
         userData.plannedPTO = parseInt(plannedPTOInput.value);
 
-        // Save preferences
         userData.preferences.schoolHolidays = Array.from(
             document.querySelectorAll('input[name="schoolHolidays"]:checked')
         ).map(input => input.value);
@@ -461,7 +444,7 @@ function removePTODay(event) {
     if (userData.selectedDates[currentYear]) {
         userData.selectedDates[currentYear] = userData.selectedDates[currentYear]
             .filter(date => date !== dateStr);
-        userData.plannedPTO--;
+userData.plannedPTO--;
     }
     
     event.remove();
@@ -474,29 +457,31 @@ function generateEvents() {
     let events = [];
     
     // Add bank holidays
-    BANK_HOLIDAYS[currentYear].forEach(holiday => {
-        // Background event for coloring
-        events.push({
-            title: holiday.title,
-            start: holiday.date,
-            backgroundColor: CONFIG.COLORS.BANK_HOLIDAY,
-            borderColor: CONFIG.COLORS.BANK_HOLIDAY,
-            classNames: ['bank-holiday'],
-            display: 'background'
+    if (BANK_HOLIDAYS[currentYear]) {
+        BANK_HOLIDAYS[currentYear].forEach(holiday => {
+            // Background event for coloring
+            events.push({
+                title: holiday.title,
+                start: holiday.date,
+                backgroundColor: CONFIG.COLORS.BANK_HOLIDAY,
+                borderColor: CONFIG.COLORS.BANK_HOLIDAY,
+                classNames: ['bank-holiday'],
+                display: 'background'
+            });
+            
+            // Text event for the holiday name
+            events.push({
+                title: holiday.title,
+                start: holiday.date,
+                classNames: ['bank-holiday-label'],
+                display: 'block',
+                textColor: 'black'
+            });
         });
-        
-        // Text event for the holiday name
-        events.push({
-            title: holiday.title,
-            start: holiday.date,
-            classNames: ['bank-holiday-label'],
-            display: 'block',
-            textColor: 'black'
-        });
-    });
+    }
 
     // Add PTO days
-    if (userData.selectedDates[currentYear]) {
+    if (userData.selectedDates && userData.selectedDates[currentYear]) {
         userData.selectedDates[currentYear].forEach(date => {
             events.push({
                 title: 'PTO Day',
@@ -519,7 +504,7 @@ function isWeekend(date) {
 
 function isBankHoliday(date) {
     const dateStr = formatDate(date);
-    return BANK_HOLIDAYS[currentYear]?.some(holiday => holiday.date === dateStr);
+    return BANK_HOLIDAYS[currentYear]?.some(holiday => holiday.date === dateStr) || false;
 }
 
 function formatDate(date) {
@@ -549,10 +534,19 @@ function calculateWorkingDays(start, end) {
 }
 
 function updateSummary() {
-    document.getElementById('totalPTO').textContent = userData.totalPTO;
-    document.getElementById('plannedPTO').textContent = userData.plannedPTO;
-    document.getElementById('remainingPTO').textContent = userData.totalPTO - userData.plannedPTO;
-    document.getElementById('bankHolidays').textContent = BANK_HOLIDAYS[currentYear].length;
+    const elements = {
+        totalPTO: document.getElementById('totalPTO'),
+        plannedPTO: document.getElementById('plannedPTO'),
+        remainingPTO: document.getElementById('remainingPTO'),
+        bankHolidays: document.getElementById('bankHolidays')
+    };
+
+    if (elements.totalPTO) elements.totalPTO.textContent = userData.totalPTO;
+    if (elements.plannedPTO) elements.plannedPTO.textContent = userData.plannedPTO;
+    if (elements.remainingPTO) elements.remainingPTO.textContent = userData.totalPTO - userData.plannedPTO;
+    if (elements.bankHolidays && BANK_HOLIDAYS[currentYear]) {
+        elements.bankHolidays.textContent = BANK_HOLIDAYS[currentYear].length;
+    }
 }
 
 function showLoading() {
@@ -566,7 +560,7 @@ function hideLoading() {
 }
 
 function showError(message) {
-    console.error(message); // Debug
+    console.error(message);
     Swal.fire({
         title: 'Error',
         text: message,
@@ -626,4 +620,4 @@ function exportCalendar() {
     document.body.removeChild(link);
 
     showSuccess('Calendar exported successfully');
-}
+}        
