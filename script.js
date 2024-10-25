@@ -62,7 +62,7 @@ let userData = {
 };
 
 
-// Helper Functions - Must be defined before they're used
+// Core Helper Functions - Must be defined before any other functions
 function formatDisplayDate(date) {
     return new Date(date).toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -139,7 +139,7 @@ function showSuccess(message) {
 }
 
 
-// Data Management Helper Functions
+// Data Helper Functions
 function saveUserData() {
     localStorage.setItem('ptoData', JSON.stringify(userData));
 }
@@ -445,7 +445,7 @@ function generateEvents() {
 }
 
 
-// Event Handlers
+// Calendar Event Handlers
 function handleDateSelection(selectInfo) {
     if (!userData.totalPTO) {
         showError('Please complete PTO setup first');
@@ -529,6 +529,7 @@ function handleDayCellMount(arg) {
 }
 
 
+// Wizard Step Handlers
 function handleNextStep() {
     log('Next step clicked, current step:', currentStep);
     if (currentStep === 1 && !validateStep1()) {
@@ -551,160 +552,9 @@ function handlePrevStep() {
     }
 }
 
-// Validation and Data Management Functions
-function validateStep1() {
-    const totalPTOInput = document.getElementById('totalPTOInput');
-    const plannedPTOInput = document.getElementById('plannedPTOInput');
-    
-    if (!totalPTOInput || !plannedPTOInput) {
-        showError('Required input fields not found');
-        return false;
-    }
-
-    const totalPTO = parseInt(totalPTOInput.value);
-    const plannedPTO = parseInt(plannedPTOInput.value);
-    
-    if (!totalPTO || totalPTO <= 0 || totalPTO > CONFIG.MAX_PTO) {
-        showError('Please enter a valid number of PTO days (1-50)');
-        return false;
-    }
-    
-    if (!plannedPTO || plannedPTO < 0 || plannedPTO > totalPTO) {
-        showError('Planned PTO cannot exceed total PTO days');
-        return false;
-    }
-    
-    return true;
-}
-
-
-function saveWizardData() {
-    log('Saving wizard data');
-    const totalPTOInput = document.getElementById('totalPTOInput');
-    const plannedPTOInput = document.getElementById('plannedPTOInput');
-
-    if (totalPTOInput && plannedPTOInput) {
-        userData.totalPTO = parseInt(totalPTOInput.value);
-        userData.plannedPTO = parseInt(plannedPTOInput.value);
-
-        userData.preferences.schoolHolidays = Array.from(
-            document.querySelectorAll('input[name="schoolHolidays"]:checked')
-        ).map(input => input.value);
-
-        userData.preferences.preferredMonths = Array.from(
-            document.querySelectorAll('input[name="preferredMonth"]:checked')
-        ).map(input => parseInt(input.value));
-
-        userData.preferences.extendBankHolidays = Array.from(
-            document.querySelectorAll('.holiday-item input[type="checkbox"]:checked')
-        ).map(input => ({
-            date: input.dataset.date,
-            extensionType: input.closest('.holiday-item').querySelector('.extension-type').value
-        }));
-
-        saveUserData();
-        
-        const setupModal = document.getElementById('setupModal');
-        if (setupModal) setupModal.style.display = 'none';
-        
-        if (!calendar) {
-            initializeApp();
-        } else {
-            calendar.refetchEvents();
-            updateSummary();
-        }
-
-        showSuccess('PTO setup completed successfully');
-    }
-}
-
-
-function addPTODays(start, end) {
-    let currentDate = new Date(start);
-    const endDate = new Date(end);
-    
-    while (currentDate < endDate) {
-        if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
-            const dateStr = formatDate(currentDate);
-            if (!userData.selectedDates[currentYear]) {
-                userData.selectedDates[currentYear] = [];
-            }
-            
-            if (!userData.selectedDates[currentYear].includes(dateStr)) {
-                userData.selectedDates[currentYear].push(dateStr);
-                userData.plannedPTO++;
-            }
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    calendar.refetchEvents();
-    updateSummary();
-    saveUserData();
-    showSuccess('PTO days added successfully');
-}
-
-
-function removePTODay(event) {
-    const dateStr = formatDate(event.start);
-    if (userData.selectedDates[currentYear]) {
-        userData.selectedDates[currentYear] = userData.selectedDates[currentYear]
-            .filter(date => date !== dateStr);
-        userData.plannedPTO--;
-    }
-    
-    event.remove();
-    updateSummary();
-    saveUserData();
-    showSuccess('PTO day removed');
-}
-
-
-// Event Listeners Setup
-function setupEventListeners() {
-    log('Setting up event listeners');
-    const setupPTOBtn = document.getElementById('setupPTOBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const yearSelect = document.getElementById('yearSelect');
-
-    if (setupPTOBtn) setupPTOBtn.addEventListener('click', initializeSetupWizard);
-    if (exportBtn) exportBtn.addEventListener('click', exportCalendar);
-    if (yearSelect) yearSelect.addEventListener('change', handleYearChange);
-}
-
 
 function handleYearChange(e) {
     currentYear = parseInt(e.target.value);
     calendar.refetchEvents();
     updateSummary();
-}
-
-
-// Export Functionality
-function exportCalendar() {
-    const events = calendar.getEvents()
-        .filter(event => event.classNames.includes('pto-day'))
-        .map(event => ({
-            date: formatDate(event.start),
-            type: 'PTO Day'
-        }));
-
-    if (events.length === 0) {
-        showError('No PTO days to export');
-        return;
-    }
-
-    const csvContent = "data:text/csv;charset=utf-8,"
-        + "Date,Type\n"
-        + events.map(e => `${e.date},${e.type}`).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `pto_calendar_${currentYear}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showSuccess('Calendar exported successfully');
 }
