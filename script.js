@@ -105,7 +105,6 @@ function calculateWorkingDays(start, end) {
 
 
 // UI Helper Functions
-// UI Helper Functions
 function showLoading() {
     const loader = document.getElementById('loadingIndicator');
     if (loader) loader.classList.remove('hidden');
