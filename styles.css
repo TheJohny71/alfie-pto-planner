@@ -748,6 +748,7 @@ body {
 }
 
 /* Modal Footer */
+/* Update Modal Footer Styles */
 .modal-footer {
     display: flex;
     justify-content: space-between;
@@ -755,75 +756,68 @@ body {
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border-light);
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    background: var(--background-white);
+    padding: 1rem 0;
 }
 
-/* Form Validation Styles */
-.form-group.error input {
-    border-color: var(--error-red);
+.modal-footer .btn {
+    min-width: 100px;
+    justify-content: center;
 }
 
-.form-group.error .error-message {
-    color: var(--error-red);
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
+/* Add spacing above the footer when scrolling */
+.wizard-step {
+    padding-bottom: 4rem; /* Add space for the sticky footer */
 }
 
-/* Tooltip Styles */
-[data-tooltip] {
-    position: relative;
+/* Update Modal Content to handle scrolling better */
+.modal-content {
+    background: var(--background-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
 }
 
-[data-tooltip]:before {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.5rem;
-    background: var(--text-primary);
-    color: white;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
+/* Update Bank Holiday List Styles */
+.bank-holiday-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(90vh - 250px); /* Adjust based on header and footer height */
+    overflow-y: auto;
+    padding-right: 1rem;
+    margin-bottom: 1rem;
 }
 
-[data-tooltip]:hover:before {
-    opacity: 1;
-    visibility: visible;
+.holiday-item {
+    padding: 1rem;
+    background: var(--background-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
 }
 
-/* Transition Classes */
-.fade-enter {
-    opacity: 0;
-}
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .modal-footer {
+        flex-direction: row; /* Keep buttons side by side */
+        padding: 1rem;
+    }
 
-.fade-enter-active {
-    opacity: 1;
-    transition: opacity 200ms ease-in;
+    .modal-footer .btn {
+        flex: 1; /* Make buttons take equal width */
+        min-width: 0;
+    }
 }
-
-.fade-exit {
-    opacity: 1;
-}
-
-.fade-exit-active {
-    opacity: 0;
-    transition: opacity 200ms ease-out;
-}
-
-/* Loading States */
-.loading {
-    position: relative;
-    pointer-events: none;
-}
-
-.loading:after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(2px);
-}   
