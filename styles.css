@@ -46,6 +46,15 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.welcome-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
 }
 
 .welcome-content {
@@ -63,6 +72,9 @@ body {
     width: 150px;
     height: 150px;
     object-fit: contain;
+}
+
+.animate-spin {
     animation: float 6s ease-in-out infinite;
 }
 
@@ -119,6 +131,15 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.app-wrapper.hidden {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
 }
 
 .header {
@@ -128,6 +149,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+    z-index: 10;
 }
 
 .header-left {
@@ -159,6 +182,13 @@ body {
     border-radius: var(--radius-md);
     font-size: 0.875rem;
     cursor: pointer;
+    background-color: var(--background-white);
+}
+
+.year-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 /* Main Container */
@@ -248,83 +278,46 @@ body {
     background-color: rgba(245, 158, 11, 0.1) !important;
 }
 
-/* Setup Wizard Styles */
-.wizard-step {
-    padding: 1rem 0;
-}
-
-.bank-holiday-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 1rem;
-}
-
-.holiday-item {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: var(--background-light);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
-}
-
-.holiday-check {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.holiday-check input[type="checkbox"] {
-    width: 1.2rem;
-    height: 1.2rem;
-    border-radius: var(--radius-sm);
-    border: 2px solid var(--border-light);
-    cursor: pointer;
-}
-
-.extension-type {
-    padding: 0.375rem 0.75rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+/* Calendar Customization */
+.fc {
+    height: 100%;
     background: var(--background-white);
-    font-size: 0.875rem;
-    cursor: pointer;
 }
 
-/* Month Selector */
-.month-selector {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-    margin-top: 0.5rem;
+.fc .fc-toolbar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
-.month-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: var(--background-light);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+.fc .fc-button {
+    background: var(--background-white);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
 }
 
-.month-item:hover {
-    background: var(--border-light);
+.fc .fc-button:hover {
+    background-color: var(--background-light);
 }
 
-.month-item input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
 }
 
-/* Modal Styles */
+.fc .fc-day-today {
+    background-color: rgba(37, 99, 235, 0.05) !important;
+}
+
+.fc-event {
+    transition: transform 0.2s ease;
+}
+
+.fc-event:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Setup Modal */
 .modal {
     display: none;
     position: fixed;
@@ -357,15 +350,6 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-light);
-}
-
 .close-button {
     background: none;
     border: none;
@@ -377,6 +361,15 @@ body {
 
 .close-button:hover {
     color: var(--text-primary);
+}
+
+/* Wizard Steps */
+.wizard-step {
+    display: none;
+}
+
+.wizard-step[data-step="1"] {
+    display: block;
 }
 
 /* Button Styles */
@@ -446,48 +439,11 @@ body {
     outline: none;
 }
 
-.form-group.error input {
-    border-color: var(--error-red);
-}
-
-.form-group.error .error-message {
-    color: var(--error-red);
-    font-size: 0.875rem;
+.form-group small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
     margin-top: 0.25rem;
-}
-
-/* Calendar Customization */
-.fc {
-    height: 100%;
-}
-
-.fc .fc-toolbar-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.fc .fc-button {
-    background: var(--background-white);
-    border: 1px solid var(--border-light);
-    color: var(--text-primary);
-}
-
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-    background: var(--primary-blue);
-    border-color: var(--primary-blue);
-}
-
-.fc .fc-day-today {
-    background-color: rgba(37, 99, 235, 0.05) !important;
-}
-
-.fc-event {
-    transition: transform 0.2s ease;
-}
-
-.fc-event:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
 }
 
 /* Loading Indicator */
@@ -505,6 +461,10 @@ body {
     backdrop-filter: blur(4px);
 }
 
+.loading-indicator.hidden {
+    display: none;
+}
+
 .loader {
     width: 48px;
     height: 48px;
@@ -512,6 +472,53 @@ body {
     border-top-color: var(--primary-blue);
     border-radius: 50%;
     animation: spin 1s linear infinite;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/* Bank Holiday List */
+.bank-holiday-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 1rem;
+}
+
+.holiday-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--background-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+/* Month Selector */
+.month-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.month-row {
+    display: contents;
 }
 
 /* Animations */
@@ -546,13 +553,11 @@ body {
     100% { transform: scale(1); }
 }
 
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
+    .main-container {
+
+ @media (max-width: 1024px) {
     .main-container {
         padding: 1rem;
     }
@@ -563,6 +568,11 @@ body {
 
     .welcome-text h1 {
         font-size: 2rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-width: 500px;
     }
 }
 
@@ -598,6 +608,20 @@ body {
     .modal-content {
         width: 95%;
         margin: 1rem;
+        max-height: 85vh;
+    }
+
+    .bank-holiday-list {
+        max-height: 300px;
+    }
+
+    .holiday-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .month-selector {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -613,13 +637,37 @@ body {
     #getStartedBtn {
         width: 100%;
     }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .header-right {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .year-select {
+        width: 100%;
+        text-align: center;
+    }
+
+    .modal-content {
+        padding: 1rem;
+    }
+
+    .month-selector {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Print Styles */
 @media print {
     .sidebar,
     .header-right,
-    .modal {
+    .modal,
+    .welcome-screen {
         display: none !important;
     }
 
@@ -630,4 +678,152 @@ body {
     .main-container {
         padding: 0;
     }
+
+    .fc-button-group,
+    .fc-today-button {
+        display: none !important;
+    }
 }
+
+/* SweetAlert2 Custom Styles */
+.swal2-popup {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: var(--radius-lg) !important;
+}
+
+.swal2-title {
+    color: var(--text-primary) !important;
+}
+
+.swal2-html-container {
+    color: var(--text-secondary) !important;
+}
+
+.swal2-confirm {
+    background-color: var(--primary-blue) !important;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Focus Styles */
+:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+/* Calendar Additional Styles */
+.fc-day-today {
+    background: rgba(37, 99, 235, 0.05) !important;
+}
+
+.fc-day-disabled {
+    background: var(--background-light) !important;
+}
+
+.fc-day-other {
+    background: var(--background-light) !important;
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+/* Form Validation Styles */
+.form-group.error input {
+    border-color: var(--error-red);
+}
+
+.form-group.error .error-message {
+    color: var(--error-red);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem;
+    background: var(--text-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+[data-tooltip]:hover:before {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Transition Classes */
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 200ms ease-in;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(2px);
+}   
