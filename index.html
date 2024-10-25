@@ -21,7 +21,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.css" rel="stylesheet">
     
     <!-- Custom CSS with version number -->
-    <link href="styles.css?v=5" rel="stylesheet">
+    <link href="styles.css?v=7" rel="stylesheet">
 </head>
 <body>
     <!-- Loading Indicator -->
@@ -29,19 +29,39 @@
         <div class="loader"></div>
     </div>
 
-    <!-- Update your welcome screen section -->
-<div id="welcomeScreen" class="welcome-screen">
-    <div class="welcome-content">
-        <img src="alfie-icon.png" alt="Alfie Logo" class="welcome-logo">
-        <h1>Welcome to Alfie PTO Planner</h1>
-        <button 
-            id="getStartedBtn" 
-            class="btn btn-primary" 
-            onclick="console.log('Button clicked inline')">
-            Get Started
-        </button>
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-content">
+            <div class="logo-container">
+                <img src="alfie-icon.png" alt="Alfie Logo" class="welcome-logo animate-bounce">
+            </div>
+            <div class="welcome-text">
+                <h1>Welcome to Alfie PTO Planner</h1>
+                <p>Your Smart Leave Management Solution</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">📅</span>
+                    <p>Smart Calendar</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🏖️</span>
+                    <p>Leave Tracking</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🎯</span>
+                    <p>Bank Holidays</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <p>Easy Planning</p>
+                </div>
+            </div>
+            <button id="getStartedBtn" class="btn btn-primary pulse-effect">
+                Get Started
+            </button>
+        </div>
     </div>
-</div>
 
     <!-- Main Application -->
     <div id="appContainer" class="app-wrapper hidden">
@@ -112,75 +132,65 @@
     </div>
 
     <!-- Setup Modal -->
-    <!-- Replace your current setupModal div with this -->
-<div id="setupModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>PTO Setup</h2>
-            <button type="button" class="close-button" id="closeSetup">&times;</button>
-        </div>
-        
-        <div class="setup-wizard">
-            <!-- Step 1 -->
-            <div class="wizard-step" data-step="1" style="display: block;">
-                <h3>Annual Leave Allocation</h3>
-                <div class="form-group">
-                    <label for="totalPTOInput">Total Annual PTO Days</label>
-                    <input type="number" id="totalPTOInput" min="0" max="50" value="25" required>
-                    <small>Standard UK range: 20-28 days</small>
-                </div>
-                <div class="form-group">
-                    <label for="plannedPTOInput">Days Planning to Use This Year</label>
-                    <input type="number" id="plannedPTOInput" min="0" value="0" required>
-                </div>
+    <div id="setupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>PTO Setup</h2>
+                <button type="button" class="close-button" id="closeSetup">&times;</button>
             </div>
-
-            <!-- Step 2 -->
-            <div class="wizard-step" data-step="2" style="display: none;">
-                <h3>Bank Holiday Extensions</h3>
-                <div class="bank-holiday-list">
-                    <!-- Will be populated by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="wizard-step" data-step="3" style="display: none;">
-                <h3>Important Dates</h3>
-                <div class="form-group">
-                    <label>School Holidays</label>
-                    <div class="checkbox-group">
-                        <label>
-                            <input type="checkbox" name="schoolHolidays" value="halfTerm">
-                            Half Terms
-                        </label>
-                        <label>
-                            <input type="checkbox" name="schoolHolidays" value="summer">
-                            Summer Holiday
-                        </label>
-                        <label>
-                            <input type="checkbox" name="schoolHolidays" value="christmas">
-                            Christmas Break
-                        </label>
+            
+            <div class="setup-wizard">
+                <!-- Step 1: PTO Allocation -->
+                <div class="wizard-step" data-step="1">
+                    <h3>Annual Leave Allocation</h3>
+                    <div class="form-group">
+                        <label for="totalPTOInput">Total Annual PTO Days</label>
+                        <input type="number" id="totalPTOInput" min="0" max="50" required>
+                        <small>Standard UK range: 20-28 days</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="plannedPTOInput">Days Planning to Use This Year</label>
+                        <input type="number" id="plannedPTOInput" min="0" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Preferred Holiday Months</label>
-                    <div class="month-selector">
+
+                <!-- Step 2: Bank Holidays -->
+                <div class="wizard-step" data-step="2">
+                    <h3>Bank Holiday Extensions</h3>
+                    <div class="bank-holiday-list">
                         <!-- Will be populated by JavaScript -->
                     </div>
                 </div>
+
+                <!-- Step 3: Important Dates -->
+                <div class="wizard-step" data-step="3">
+                    <h3>Important Dates</h3>
+                    <div class="form-group">
+                        <label>School Holidays</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="schoolHolidays" value="halfTerm"> Half Terms</label>
+                            <label><input type="checkbox" name="schoolHolidays" value="summer"> Summer Holiday</label>
+                            <label><input type="checkbox" name="schoolHolidays" value="christmas"> Christmas Break</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Holiday Months</label>
+                        <div class="month-selector">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn" id="prevStep">Previous</button>
+                <button type="button" class="btn btn-primary" id="nextStep">Next</button>
             </div>
         </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn" id="prevStep">Previous</button>
-            <button type="button" class="btn btn-primary" id="nextStep">Next</button>
-        </div>
     </div>
-</div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.js"></script>
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>
