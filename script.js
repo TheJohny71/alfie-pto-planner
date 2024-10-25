@@ -105,6 +105,7 @@ function calculateWorkingDays(start, end) {
 
 
 // UI Helper Functions
+// UI Helper Functions
 function showLoading() {
     const loader = document.getElementById('loadingIndicator');
     if (loader) loader.classList.remove('hidden');
@@ -136,6 +137,149 @@ function showSuccess(message) {
         timer: 1500,
         confirmButtonColor: CONFIG.COLORS.PTO
     });
+}
+
+
+// Data Helper Functions
+function saveUserData() {
+    localStorage.setItem('ptoData', JSON.stringify(userData));
+}
+
+
+function loadUserData() {
+    const saved = localStorage.getItem('ptoData');
+    return saved ? JSON.parse(saved) : null;
+}
+
+
+function updateSummary() {
+    const elements = {
+        totalPTO: document.getElementById('totalPTO'),
+        plannedPTO: document.getElementById('plannedPTO'),
+        remainingPTO: document.getElementById('remainingPTO'),
+        bankHolidays: document.getElementById('bankHolidays')
+    };
+
+    if (elements.totalPTO) elements.totalPTO.textContent = userData.totalPTO;
+    if (elements.plannedPTO) elements.plannedPTO.textContent = userData.plannedPTO;
+    if (elements.remainingPTO) elements.remainingPTO.textContent = userData.totalPTO - userData.plannedPTO;
+    if (elements.bankHolidays && BANK_HOLIDAYS[currentYear]) {
+        elements.bankHolidays.textContent = BANK_HOLIDAYS[currentYear].length;
+    }
+}
+
+
+// Event Handlers
+function handleNextStep() {
+    log('Next step clicked, current step:', currentStep);
+    if (currentStep === 1 && !validateStep1()) {
+        return;
+    }
+
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showWizardStep(currentStep);
+    } else {
+        saveWizardData();
+    }
+}
+
+
+function handlePrevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showWizardStep(currentStep);
+    }
+}
+
+
+function handleYearChange(e) {
+    currentYear = parseInt(e.target.value);
+    calendar.refetchEvents();
+    updateSummary();
+}
+
+
+function handleDateSelection(selectInfo) {
+    if (!userData.totalPTO) {
+        showError('Please complete PTO setup first');
+        return;
+    }
+
+    const startDate = selectInfo.start;
+    const endDate = selectInfo.end;
+
+    if (isWeekend(startDate) || isWeekend(endDate)) {
+        showError('Cannot select weekends');
+        return;
+    }
+
+    if (isBankHoliday(startDate) || isBankHoliday(endDate)) {
+        showError('Cannot select bank holidays');
+        return;
+    }
+
+    const workingDays = calculateWorkingDays(startDate, endDate);
+    
+    if (userData.plannedPTO + workingDays > userData.totalPTO) {
+        showError(`Not enough PTO days remaining. You have ${userData.totalPTO - userData.plannedPTO} days left.`);
+        return;
+    }
+
+    Swal.fire({
+        title: 'Add PTO Days',
+        text: `Add PTO from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: CONFIG.COLORS.PTO,
+        confirmButtonText: 'Add PTO'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            addPTODays(startDate, endDate);
+        }
+    });
+}
+
+
+function handleEventClick(info) {
+    if (info.event.classNames.includes('pto-day')) {
+        Swal.fire({
+            title: 'Remove PTO Day?',
+            text: 'Do you want to remove this PTO day?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: CONFIG.COLORS.PTO
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removePTODay(info.event);
+            }
+        });
+    }
+}
+
+
+function handleEventMount(info) {
+    const eventEl = info.el;
+    const event = info.event;
+
+    if (event.classNames.includes('bank-holiday')) {
+        eventEl.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
+        eventEl.style.color = 'black';
+    } else if (event.classNames.includes('pto-day')) {
+        eventEl.style.backgroundColor = CONFIG.COLORS.PTO;
+        eventEl.style.color = 'white';
+    }
+
+    if (event.title) {
+        eventEl.setAttribute('title', event.title);
+    }
+}
+
+
+function handleDayCellMount(arg) {
+    if (isWeekend(arg.date)) {
+        arg.el.style.backgroundColor = CONFIG.COLORS.WEEKEND;
+    }
 }
 
 
