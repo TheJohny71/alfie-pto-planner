@@ -106,6 +106,211 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function initializeSetupWizard() {
+    log('Initializing setup wizard');
+    const setupModal = document.getElementById('setupModal');
+    
+    if (!setupModal) {
+        console.error('Setup modal not found');
+        Swal.fire({
+            title: 'Error',
+            text: 'Setup wizard could not be initialized',
+            icon: 'error'
+        });
+        return;
+    }
+
+    currentStep = 1;
+    setupModal.style.display = 'flex';
+    
+    // Show first step
+    showWizardStep(1);
+    
+    // Initialize content
+    populateBankHolidays();
+    populateMonthSelector();
+
+    if (!hasSetup) {
+        setupWizardEventListeners(setupModal);
+        hasSetup = true;
+    }
+
+    log('Setup wizard initialized successfully');
+}
+
+function setupWizardEventListeners(modal) {
+    const closeBtn = document.getElementById('closeSetup');
+    const nextBtn = document.getElementById('nextStep');
+    const prevBtn = document.getElementById('prevStep');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            log('Close button clicked');
+            modal.style.display = 'none';
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', handleNextStep);
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', handlePrevStep);
+    }
+}
+
+function showWizardStep(step) {
+    log('Showing wizard step:', step);
+    const steps = document.querySelectorAll('.wizard-step');
+    steps.forEach(s => s.style.display = 'none');
+
+    const currentStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
+    if (currentStepEl) {
+        currentStepEl.style.display = 'block';
+    }
+
+    const prevBtn = document.getElementById('prevStep');
+    const nextBtn = document.getElementById('nextStep');
+
+    if (prevBtn) {
+        prevBtn.style.display = step === 1 ? 'none' : 'block';
+    }
+    if (nextBtn) {
+        nextBtn.textContent = step === totalSteps ? 'Finish' : 'Next';
+    }
+}
+
+function populateBankHolidays() {
+    const container = document.querySelector('.bank-holiday-list');
+    if (!container) return;
+
+    const holidaysList = BANK_HOLIDAYS[currentYear].map(holiday => `
+        <div class="holiday-item">
+            <label class="holiday-check">
+                <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
+                <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
+            </label>
+            <select class="extension-type" data-date="${holiday.date}">
+                <option value="before">Day Before</option>
+                <option value="after">Day After</option>
+                <option value="both">Both Days</option>
+            </select>
+        </div>
+    `).join('');
+
+    container.innerHTML = holidaysList;
+}
+
+function populateMonthSelector() {
+    const container = document.querySelector('.month-selector');
+    if (!container) return;
+
+    const months = [
+        ['January', 'February', 'March', 'April'],
+        ['May', 'June', 'July', 'August'],
+        ['September', 'October', 'November', 'December']
+    ];
+
+    const monthsHtml = months.map(row => `
+        <div class="month-row">
+            ${row.map(month => `
+                <label class="month-item">
+                    <input type="checkbox" name="preferredMonth" value="${month}">
+                    <span>${month}</span>
+                </label>
+            `).join('')}
+        </div>
+    `).join('');
+
+    container.innerHTML = monthsHtml;
+}
+
+function handleNextStep() {
+    log('Next step clicked, current step:', currentStep);
+    if (currentStep === 1 && !validateStep1()) {
+        return;
+    }
+
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showWizardStep(currentStep);
+    } else {
+        saveWizardData();
+    }
+}
+
+function handlePrevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showWizardStep(currentStep);
+    }
+}
+
+function validateStep1() {
+    const totalPTOInput = document.getElementById('totalPTOInput');
+    const plannedPTOInput = document.getElementById('plannedPTOInput');
+    
+    if (!totalPTOInput || !plannedPTOInput) {
+        showError('Required input fields not found');
+        return false;
+    }
+
+    const totalPTO = parseInt(totalPTOInput.value);
+    const plannedPTO = parseInt(plannedPTOInput.value);
+    
+    if (!totalPTO || totalPTO <= 0 || totalPTO > CONFIG.MAX_PTO) {
+        showError('Please enter a valid number of PTO days (1-50)');
+        return false;
+    }
+    
+    if (!plannedPTO || plannedPTO < 0 || plannedPTO > totalPTO) {
+        showError('Planned PTO cannot exceed total PTO days');
+        return false;
+    }
+    
+    return true;
+}
+
+function saveWizardData() {
+    log('Saving wizard data');
+    const totalPTOInput = document.getElementById('totalPTOInput');
+    const plannedPTOInput = document.getElementById('plannedPTOInput');
+
+    if (totalPTOInput && plannedPTOInput) {
+        userData.totalPTO = parseInt(totalPTOInput.value);
+        userData.plannedPTO = parseInt(plannedPTOInput.value);
+
+        userData.preferences.schoolHolidays = Array.from(
+            document.querySelectorAll('input[name="schoolHolidays"]:checked')
+        ).map(input => input.value);
+
+        userData.preferences.preferredMonths = Array.from(
+            document.querySelectorAll('input[name="preferredMonth"]:checked')
+        ).map(input => parseInt(input.value));
+
+        userData.preferences.extendBankHolidays = Array.from(
+            document.querySelectorAll('.holiday-item input[type="checkbox"]:checked')
+        ).map(input => ({
+            date: input.dataset.date,
+            extensionType: input.closest('.holiday-item').querySelector('.extension-type').value
+        }));
+
+        saveUserData();
+        
+        const setupModal = document.getElementById('setupModal');
+        if (setupModal) setupModal.style.display = 'none';
+        
+        if (!calendar) {
+            initializeApp();
+        } else {
+            calendar.refetchEvents();
+            updateSummary();
+        }
+
+        showSuccess('PTO setup completed successfully');
+    }
+}
+
 function initializeApp() {
     log('Initializing app');
     showLoading();
