@@ -1,5 +1,6 @@
 // Global Constants
 let hasSetup = false;
+// Replace this section at the top of your script.js
 const CONFIG = {
     COLORS: {
         PTO: '#059669',
@@ -11,7 +12,7 @@ const CONFIG = {
     DEFAULT_PTO: 25
 };
 
-// Bank Holidays Data
+// Bank Holidays Data (keep as a separate constant)
 const BANK_HOLIDAYS = [
     { date: '2024-01-01', title: "New Year's Day" },
     { date: '2024-03-29', title: "Good Friday" },
