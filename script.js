@@ -1,3 +1,9 @@
+// Debug flag
+const DEBUG = true;
+function log(...args) {
+    if (DEBUG) console.log(...args);
+}
+
 // Global Constants
 let hasSetup = false;
 const CONFIG = {
@@ -52,48 +58,73 @@ let userData = {
 };
 
 // Initialize Application
+console.log('Script loading...');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    
+    // Clear any old data
+    localStorage.clear();
+    
+    // Get elements
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const appContainer = document.getElementById('appContainer');
+    const getStartedBtn = document.getElementById('getStartedBtn');
+    
+    console.log('Elements found:', {
+        welcomeScreen: !!welcomeScreen,
+        appContainer: !!appContainer,
+        getStartedBtn: !!getStartedBtn
+    });
+
+    if (!welcomeScreen || !appContainer || !getStartedBtn) {
+        console.error('Required elements not found');
+        return;
+    }
+
+    // Ensure welcome screen is visible and app container is hidden initially
+    welcomeScreen.classList.remove('hidden');
+    appContainer.classList.add('hidden');
+
+    // Add click handler
+    getStartedBtn.addEventListener('click', function() {
+        console.log('Get Started button clicked');
+        
+        try {
+            welcomeScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            setTimeout(() => {
+                initializeSetupWizard();
+            }, 100);
+            console.log('Setup wizard initialized');
+        } catch (error) {
+            console.error('Error in Get Started click handler:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'There was a problem starting the application. Please refresh the page and try again.',
+                icon: 'error'
+            });
+        }
+    });
+});
+
+function initializeApp() {
+    log('Initializing app');
     showLoading();
     try {
-        const savedData = loadUserData();
-        if (savedData) {
-            userData = savedData;
-            initializeApp();
-        } else {
-            const welcomeScreen = document.getElementById('welcomeScreen');
-            const appContainer = document.getElementById('appContainer');
-            const getStartedBtn = document.getElementById('getStartedBtn');
-
-            if (welcomeScreen && appContainer && getStartedBtn) {
-                welcomeScreen.classList.remove('hidden');
-                appContainer.classList.add('hidden');
-
-                getStartedBtn.addEventListener('click', function() {
-                    welcomeScreen.classList.add('hidden');
-                    appContainer.classList.remove('hidden');
-                    initializeSetupWizard();
-                });
-            }
-        }
+        initializeCalendar();
+        setupEventListeners();
+        updateSummary();
     } catch (error) {
-        console.error('Initialization error:', error);
+        console.error('Error initializing app:', error);
         showError('Failed to initialize application');
     } finally {
         hideLoading();
     }
-});
-
-function initializeApp() {
-    console.log('Initializing app');
-    showLoading();
-    initializeCalendar();
-    setupEventListeners();
-    updateSummary();
-    hideLoading();
 }
 
 function initializeCalendar() {
-    console.log('Initializing calendar');
+    log('Initializing calendar');
     const calendarEl = document.getElementById('calendar');
     
     if (!calendarEl) {
@@ -135,17 +166,22 @@ function initializeCalendar() {
 }
 
 function initializeSetupWizard() {
-    console.log('Initializing setup wizard');
+    log('Initializing setup wizard');
     const setupModal = document.getElementById('setupModal');
     
     if (!setupModal) {
         console.error('Setup modal not found');
+        Swal.fire({
+            title: 'Error',
+            text: 'Setup wizard could not be initialized',
+            icon: 'error'
+        });
         return;
     }
 
     currentStep = 1;
     setupModal.style.display = 'flex';
-
+    
     showWizardStep(1);
     populateBankHolidays();
     populateMonthSelector();
@@ -154,6 +190,8 @@ function initializeSetupWizard() {
         setupWizardEventListeners(setupModal);
         hasSetup = true;
     }
+
+    log('Setup wizard initialized successfully');
 }
 
 function setupWizardEventListeners(modal) {
@@ -163,6 +201,7 @@ function setupWizardEventListeners(modal) {
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
+            log('Close button clicked');
             modal.style.display = 'none';
         });
     }
@@ -177,6 +216,7 @@ function setupWizardEventListeners(modal) {
 }
 
 function showWizardStep(step) {
+    log('Showing wizard step:', step);
     const steps = document.querySelectorAll('.wizard-step');
     steps.forEach(s => s.style.display = 'none');
 
@@ -242,6 +282,7 @@ function populateMonthSelector() {
 }
 
 function setupEventListeners() {
+    log('Setting up event listeners');
     const setupPTOBtn = document.getElementById('setupPTOBtn');
     const exportBtn = document.getElementById('exportBtn');
     const yearSelect = document.getElementById('yearSelect');
@@ -331,6 +372,7 @@ function handleDayCellMount(arg) {
 }
 
 function handleNextStep() {
+    log('Next step clicked, current step:', currentStep);
     if (currentStep === 1 && !validateStep1()) {
         return;
     }
@@ -376,6 +418,7 @@ function validateStep1() {
 }
 
 function saveWizardData() {
+    log('Saving wizard data');
     const totalPTOInput = document.getElementById('totalPTOInput');
     const plannedPTOInput = document.getElementById('plannedPTOInput');
 
@@ -417,8 +460,7 @@ function saveWizardData() {
 function addPTODays(start, end) {
     let currentDate = new Date(start);
     const endDate = new Date(end);
-    
-    while (currentDate < endDate) {
+ while (currentDate < endDate) {
         if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
             const dateStr = formatDate(currentDate);
             if (!userData.selectedDates[currentYear]) {
@@ -444,7 +486,7 @@ function removePTODay(event) {
     if (userData.selectedDates[currentYear]) {
         userData.selectedDates[currentYear] = userData.selectedDates[currentYear]
             .filter(date => date !== dateStr);
-userData.plannedPTO--;
+        userData.plannedPTO--;
     }
     
     event.remove();
@@ -620,4 +662,4 @@ function exportCalendar() {
     document.body.removeChild(link);
 
     showSuccess('Calendar exported successfully');
-}        
+}  
