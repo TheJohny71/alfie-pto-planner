@@ -9,7 +9,7 @@ const CONFIG = {
     },
     INITIAL_YEAR: 2024,
     MAX_PTO: 50,
-    DEFAULT_PTO: 25
+    DEFAULT_PTO: 0
 };
 
 // Bank Holidays Data (keep as a separate constant)
