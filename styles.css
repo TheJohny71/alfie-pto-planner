@@ -368,9 +368,8 @@ body {
     display: none;
 }
 
-.wizard-step[data-step="1"] {
-    display: block;
-}
+.wizard-step[data-step="3"] {
+    padding: 1.5rem 0;
 
 /* Button Styles */
 .btn {
