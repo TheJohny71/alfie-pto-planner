@@ -90,7 +90,6 @@ let userData = {
     }
 };
 
-
 // Core Helper Functions
 function formatDisplayDate(date) {
     return new Date(date).toLocaleDateString('en-GB', {
@@ -167,36 +166,334 @@ function showSuccess(message) {
     });
 }
 
+// Calendar Functions
+function initializeCalendar() {
+    log('Initializing calendar');
+    const calendarEl = document.getElementById('calendar');
+    
+    if (!calendarEl) {
+        showError('Calendar element not found');
+        return;
+    }
 
-// Data Management Functions
-function saveUserData() {
-    localStorage.setItem('ptoData', JSON.stringify(userData));
-}
+    try {
+        if (typeof FullCalendar === 'undefined') {
+            throw new Error('FullCalendar library not loaded');
+        }
 
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            firstDay: 1,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            selectable: true,
+            select: handleDateSelection,
+            eventDidMount: handleEventMount,
+            events: generateEvents(),
+            eventClick: handleEventClick,
+            dayCellDidMount: handleDayCellMount,
+            displayEventTime: false,
+            eventDisplay: 'block',
+            dayMaxEvents: true,
+            weekends: true,
+            slotEventOverlap: false
+        });
 
-function loadUserData() {
-    const saved = localStorage.getItem('ptoData');
-    return saved ? JSON.parse(saved) : null;
-}
-
-
-function updateSummary() {
-    const elements = {
-        totalPTO: document.getElementById('totalPTO'),
-        plannedPTO: document.getElementById('plannedPTO'),
-        remainingPTO: document.getElementById('remainingPTO'),
-        bankHolidays: document.getElementById('bankHolidays')
-    };
-
-    if (elements.totalPTO) elements.totalPTO.textContent = userData.totalPTO;
-    if (elements.plannedPTO) elements.plannedPTO.textContent = userData.plannedPTO;
-    if (elements.remainingPTO) elements.remainingPTO.textContent = userData.totalPTO - userData.plannedPTO;
-    if (elements.bankHolidays && BANK_HOLIDAYS[currentYear]) {
-        elements.bankHolidays.textContent = BANK_HOLIDAYS[currentYear].length;
+        calendar.render();
+        markBankHolidays();
+    } catch (error) {
+        console.error('Calendar initialization error:', error);
+        showError('Failed to initialize calendar');
     }
 }
 
-// Validation Functions
+
+function generateEvents() {
+    let events = [];
+    console.log('Generating events for year:', currentYear);
+    
+    // Add bank holidays with improved visibility
+    if (BANK_HOLIDAYS[currentYear]) {
+        BANK_HOLIDAYS[currentYear].forEach(holiday => {
+            console.log('Adding holiday:', holiday);
+            // Background event for coloring
+            events.push({
+                title: holiday.title,
+                start: holiday.date,
+                backgroundColor: CONFIG.COLORS.BANK_HOLIDAY,
+                borderColor: CONFIG.COLORS.BANK_HOLIDAY,
+                classNames: ['bank-holiday'],
+                display: 'background',
+                allDay: true
+            });
+            
+            // Text event for the holiday name
+            events.push({
+                title: holiday.title,
+                start: holiday.date,
+                classNames: ['bank-holiday-label'],
+                display: 'block',
+                textColor: 'black',
+                allDay: true
+            });
+        });
+    }
+
+    // Add PTO days
+    if (userData.selectedDates && userData.selectedDates[currentYear]) {
+        userData.selectedDates[currentYear].forEach(date => {
+            events.push({
+                title: 'PTO Day',
+                start: date,
+                backgroundColor: CONFIG.COLORS.PTO,
+                borderColor: CONFIG.COLORS.PTO,
+                classNames: ['pto-day']
+            });
+        });
+    }
+
+    return events;
+}
+
+
+function markBankHolidays() {
+    if (!BANK_HOLIDAYS[currentYear]) return;
+    
+    BANK_HOLIDAYS[currentYear].forEach(holiday => {
+        const date = holiday.date;
+        const el = calendar.el.querySelector(`[data-date="${date}"]`);
+        if (el) {
+            el.classList.add('fc-day-bank-holiday');
+            el.setAttribute('title', holiday.title);
+        }
+    });
+}
+
+
+function handleEventMount(info) {
+    const eventEl = info.el;
+    const event = info.event;
+
+    if (event.classNames.includes('bank-holiday')) {
+        eventEl.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
+        eventEl.style.color = 'black';
+        eventEl.style.fontWeight = '500';
+        eventEl.setAttribute('title', event.title);
+    } else if (event.classNames.includes('pto-day')) {
+        eventEl.style.backgroundColor = CONFIG.COLORS.PTO;
+        eventEl.style.color = 'white';
+    }
+}
+
+
+function handleDayCellMount(arg) {
+    if (isWeekend(arg.date)) {
+        arg.el.style.backgroundColor = CONFIG.COLORS.WEEKEND;
+    }
+}
+
+// Event Handlers
+function handleDateSelection(selectInfo) {
+    if (!userData.totalPTO) {
+        showError('Please complete PTO setup first');
+        return;
+    }
+
+    const startDate = selectInfo.start;
+    const endDate = selectInfo.end;
+
+    if (isWeekend(startDate) || isWeekend(endDate)) {
+        showError('Cannot select weekends');
+        return;
+    }
+
+    if (isBankHoliday(startDate) || isBankHoliday(endDate)) {
+        showError('Cannot select bank holidays');
+        return;
+    }
+
+    const workingDays = calculateWorkingDays(startDate, endDate);
+    
+    if (userData.plannedPTO + workingDays > userData.totalPTO) {
+        showError(`Not enough PTO days remaining. You have ${userData.totalPTO - userData.plannedPTO} days left.`);
+        return;
+    }
+
+    Swal.fire({
+        title: 'Add PTO Days',
+        text: `Add PTO from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: CONFIG.COLORS.PTO,
+        confirmButtonText: 'Add PTO'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            addPTODays(startDate, endDate);
+        }
+    });
+}
+
+
+function handleEventClick(info) {
+    if (info.event.classNames.includes('pto-day')) {
+        Swal.fire({
+            title: 'Remove PTO Day?',
+            text: 'Do you want to remove this PTO day?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: CONFIG.COLORS.PTO
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removePTODay(info.event);
+            }
+        });
+    }
+}
+
+
+function handleYearChange(e) {
+    currentYear = parseInt(e.target.value);
+    console.log('Year changed to:', currentYear);
+    if (calendar) {
+        calendar.removeAllEvents();
+        calendar.refetchEvents();
+        updateSummary();
+        setTimeout(() => {
+            markBankHolidays();
+        }, 100);
+    }
+}
+
+
+function handleNextStep() {
+    log('Next step clicked, current step:', currentStep);
+    if (currentStep === 1 && !validateStep1()) {
+        return;
+    }
+
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showWizardStep(currentStep);
+    } else {
+        saveWizardData();
+    }
+}
+
+
+function handlePrevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showWizardStep(currentStep);
+    }
+} 
+
+// Application Logic
+function initializeSetupWizard() {
+    log('Initializing setup wizard');
+    const setupModal = document.getElementById('setupModal');
+    
+    if (!setupModal) {
+        console.error('Setup modal not found');
+        Swal.fire({
+            title: 'Error',
+            text: 'Setup wizard could not be initialized',
+            icon: 'error'
+        });
+        return;
+    }
+
+    currentStep = 1;
+    setupModal.style.display = 'flex';
+    
+    showWizardStep(1);
+    populateBankHolidays();
+    populateMonthSelector();
+
+    if (!hasSetup) {
+        setupWizardEventListeners(setupModal);
+        hasSetup = true;
+    }
+
+    log('Setup wizard initialized successfully');
+}
+
+
+function initializeApp() {
+    log('Initializing app');
+    showLoading();
+    try {
+        initializeCalendar();
+        setupEventListeners();
+        updateSummary();
+    } catch (error) {
+        console.error('Error initializing app:', error);
+        showError('Failed to initialize application');
+    } finally {
+        hideLoading();
+    }
+}
+
+
+function setupWizardEventListeners(modal) {
+    const closeBtn = document.getElementById('closeSetup');
+    const nextBtn = document.getElementById('nextStep');
+    const prevBtn = document.getElementById('prevStep');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            log('Close button clicked');
+            modal.style.display = 'none';
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', handleNextStep);
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', handlePrevStep);
+
+    }
+}
+
+
+function setupEventListeners() {
+    log('Setting up event listeners');
+    const setupPTOBtn = document.getElementById('setupPTOBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const yearSelect = document.getElementById('yearSelect');
+
+    if (setupPTOBtn) setupPTOBtn.addEventListener('click', initializeSetupWizard);
+    if (exportBtn) exportBtn.addEventListener('click', exportCalendar);
+    if (yearSelect) yearSelect.addEventListener('change', handleYearChange);
+}
+
+
+function showWizardStep(step) {
+    log('Showing wizard step:', step);
+    const steps = document.querySelectorAll('.wizard-step');
+    steps.forEach(s => s.style.display = 'none');
+
+    const currentStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
+    if (currentStepEl) {
+        currentStepEl.style.display = 'block';
+    }
+
+    const prevBtn = document.getElementById('prevStep');
+    const nextBtn = document.getElementById('nextStep');
+
+    if (prevBtn) {
+        prevBtn.style.display = step === 1 ? 'none' : 'block';
+    }
+    if (nextBtn) {
+        nextBtn.textContent = step === totalSteps ? 'Finish' : 'Next';
+    }
+}
+
+
 function validateStep1() {
     const totalPTOInput = document.getElementById('totalPTOInput');
     const plannedPTOInput = document.getElementById('plannedPTOInput');
@@ -220,52 +517,6 @@ function validateStep1() {
     }
     
     return true;
-}
-
-
-// Setup Wizard Functions
-function handleNextStep() {
-    log('Next step clicked, current step:', currentStep);
-    if (currentStep === 1 && !validateStep1()) {
-        return;
-    }
-
-    if (currentStep < totalSteps) {
-        currentStep++;
-        showWizardStep(currentStep);
-    } else {
-        saveWizardData();
-    }
-}
-
-
-function handlePrevStep() {
-    if (currentStep > 1) {
-        currentStep--;
-        showWizardStep(currentStep);
-    }
-}
-
-
-function showWizardStep(step) {
-    log('Showing wizard step:', step);
-    const steps = document.querySelectorAll('.wizard-step');
-    steps.forEach(s => s.style.display = 'none');
-
-    const currentStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
-    if (currentStepEl) {
-        currentStepEl.style.display = 'block';
-    }
-
-    const prevBtn = document.getElementById('prevStep');
-    const nextBtn = document.getElementById('nextStep');
-
-    if (prevBtn) {
-        prevBtn.style.display = step === 1 ? 'none' : 'block';
-    }
-    if (nextBtn) {
-        nextBtn.textContent = step === totalSteps ? 'Finish' : 'Next';
-    }
 }
 
 
@@ -356,207 +607,6 @@ function saveWizardData() {
     }
 }
 
-
-function setupWizardEventListeners(modal) {
-    const closeBtn = document.getElementById('closeSetup');
-    const nextBtn = document.getElementById('nextStep');
-    const prevBtn = document.getElementById('prevStep');
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            log('Close button clicked');
-            modal.style.display = 'none';
-        });
-    }
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', handleNextStep);
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', handlePrevStep);
-    }
-}
-
-// Calendar Functions
-function initializeCalendar() {
-    log('Initializing calendar');
-    const calendarEl = document.getElementById('calendar');
-    
-    if (!calendarEl) {
-        showError('Calendar element not found');
-        return;
-    }
-
-    try {
-        if (typeof FullCalendar === 'undefined') {
-            throw new Error('FullCalendar library not loaded');
-        }
-
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            firstDay: 1,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,dayGridWeek'
-            },
-            selectable: true,
-            select: handleDateSelection,
-            eventDidMount: handleEventMount,
-            events: generateEvents(),
-            eventClick: handleEventClick,
-            dayCellDidMount: handleDayCellMount,
-            displayEventTime: false,
-            eventDisplay: 'block',
-            dayMaxEvents: true,
-            weekends: true,
-            slotEventOverlap: false
-        });
-
-        calendar.render();
-    } catch (error) {
-        console.error('Calendar initialization error:', error);
-        showError('Failed to initialize calendar');
-    }
-}
-
-
-function generateEvents() {
-    let events = [];
-    
-    // Add bank holidays
-    if (BANK_HOLIDAYS[currentYear]) {
-        BANK_HOLIDAYS[currentYear].forEach(holiday => {
-            // Background event for coloring
-            events.push({
-                title: holiday.title,
-                start: holiday.date,
-                backgroundColor: CONFIG.COLORS.BANK_HOLIDAY,
-                borderColor: CONFIG.COLORS.BANK_HOLIDAY,
-                classNames: ['bank-holiday'],
-                display: 'background'
-            });
-            
-            // Text event for the holiday name
-            events.push({
-                title: holiday.title,
-                start: holiday.date,
-                classNames: ['bank-holiday-label'],
-                display: 'block',
-                textColor: 'black'
-            });
-        });
-    }
-
-    // Add PTO days
-    if (userData.selectedDates && userData.selectedDates[currentYear]) {
-        userData.selectedDates[currentYear].forEach(date => {
-            events.push({
-                title: 'PTO Day',
-                start: date,
-                backgroundColor: CONFIG.COLORS.PTO,
-                borderColor: CONFIG.COLORS.PTO,
-                classNames: ['pto-day']
-            });
-        });
-    }
-
-    return events;
-}
-
-
-// Event Handlers
-function handleDateSelection(selectInfo) {
-    if (!userData.totalPTO) {
-        showError('Please complete PTO setup first');
-        return;
-    }
-
-    const startDate = selectInfo.start;
-    const endDate = selectInfo.end;
-
-    if (isWeekend(startDate) || isWeekend(endDate)) {
-        showError('Cannot select weekends');
-        return;
-    }
-
-    if (isBankHoliday(startDate) || isBankHoliday(endDate)) {
-        showError('Cannot select bank holidays');
-        return;
-    }
-
-    const workingDays = calculateWorkingDays(startDate, endDate);
-    
-    if (userData.plannedPTO + workingDays > userData.totalPTO) {
-        showError(`Not enough PTO days remaining. You have ${userData.totalPTO - userData.plannedPTO} days left.`);
-        return;
-    }
-
-    Swal.fire({
-        title: 'Add PTO Days',
-        text: `Add PTO from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: CONFIG.COLORS.PTO,
-        confirmButtonText: 'Add PTO'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            addPTODays(startDate, endDate);
-        }
-    });
-}
-
-
-function handleEventClick(info) {
-    if (info.event.classNames.includes('pto-day')) {
-        Swal.fire({
-            title: 'Remove PTO Day?',
-            text: 'Do you want to remove this PTO day?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: CONFIG.COLORS.PTO
-        }).then((result) => {
-            if (result.isConfirmed) {
-                removePTODay(info.event);
-            }
-        });
-    }
-}
-
-
-function handleEventMount(info) {
-    const eventEl = info.el;
-    const event = info.event;
-
-    if (event.classNames.includes('bank-holiday')) {
-        eventEl.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
-        eventEl.style.color = 'black';
-    } else if (event.classNames.includes('pto-day')) {
-        eventEl.style.backgroundColor = CONFIG.COLORS.PTO;
-        eventEl.style.color = 'white';
-    }
-
-    if (event.title) {
-        eventEl.setAttribute('title', event.title);
-    }
-}
-
-
-function handleDayCellMount(arg) {
-    if (isWeekend(arg.date)) {
-        arg.el.style.backgroundColor = CONFIG.COLORS.WEEKEND;
-    }
-}
-
-
-function handleYearChange(e) {
-    currentYear = parseInt(e.target.value);
-    calendar.refetchEvents();
-    updateSummary();
-}
-
-
 // PTO Management Functions
 function addPTODays(start, end) {
     let currentDate = new Date(start);
@@ -598,7 +648,55 @@ function removePTODay(event) {
     showSuccess('PTO day removed');
 }
 
-// Initialize Application
+
+function updateSummary() {
+    const elements = {
+        totalPTO: document.getElementById('totalPTO'),
+        plannedPTO: document.getElementById('plannedPTO'),
+        remainingPTO: document.getElementById('remainingPTO'),
+        bankHolidays: document.getElementById('bankHolidays')
+    };
+
+    if (elements.totalPTO) elements.totalPTO.textContent = userData.totalPTO;
+    if (elements.plannedPTO) elements.plannedPTO.textContent = userData.plannedPTO;
+    if (elements.remainingPTO) elements.remainingPTO.textContent = userData.totalPTO - userData.plannedPTO;
+    if (elements.bankHolidays && BANK_HOLIDAYS[currentYear]) {
+        elements.bankHolidays.textContent = BANK_HOLIDAYS[currentYear].length;
+    }
+}
+
+
+// Export Functionality
+function exportCalendar() {
+    const events = calendar.getEvents()
+        .filter(event => event.classNames.includes('pto-day'))
+        .map(event => ({
+            date: formatDate(event.start),
+            type: 'PTO Day'
+        }));
+
+    if (events.length === 0) {
+        showError('No PTO days to export');
+        return;
+    }
+
+    const csvContent = "data:text/csv;charset=utf-8,"
+        + "Date,Type\n"
+        + events.map(e => `${e.date},${e.type}`).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `pto_calendar_${currentYear}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showSuccess('Calendar exported successfully');
+}
+
+
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded');
     
@@ -646,92 +744,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-
-function initializeApp() {
-    log('Initializing app');
-    showLoading();
-    try {
-        initializeCalendar();
-        setupEventListeners();
-        updateSummary();
-    } catch (error) {
-        console.error('Error initializing app:', error);
-        showError('Failed to initialize application');
-    } finally {
-        hideLoading();
-    }
-}
-
-
-function initializeSetupWizard() {
-    log('Initializing setup wizard');
-    const setupModal = document.getElementById('setupModal');
-    
-    if (!setupModal) {
-        console.error('Setup modal not found');
-        Swal.fire({
-            title: 'Error',
-            text: 'Setup wizard could not be initialized',
-            icon: 'error'
-        });
-        return;
-    }
-
-    currentStep = 1;
-    setupModal.style.display = 'flex';
-    
-    showWizardStep(1);
-    populateBankHolidays();
-    populateMonthSelector();
-
-    if (!hasSetup) {
-        setupWizardEventListeners(setupModal);
-        hasSetup = true;
-    }
-
-    log('Setup wizard initialized successfully');
-}
-
-
-// Setup Event Listeners
-function setupEventListeners() {
-    log('Setting up event listeners');
-    const setupPTOBtn = document.getElementById('setupPTOBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const yearSelect = document.getElementById('yearSelect');
-
-    if (setupPTOBtn) setupPTOBtn.addEventListener('click', initializeSetupWizard);
-    if (exportBtn) exportBtn.addEventListener('click', exportCalendar);
-    if (yearSelect) yearSelect.addEventListener('change', handleYearChange);
-}
-
-
-// Export Functionality
-function exportCalendar() {
-    const events = calendar.getEvents()
-        .filter(event => event.classNames.includes('pto-day'))
-        .map(event => ({
-            date: formatDate(event.start),
-            type: 'PTO Day'
-        }));
-
-    if (events.length === 0) {
-        showError('No PTO days to export');
-        return;
-    }
-
-    const csvContent = "data:text/csv;charset=utf-8,"
-        + "Date,Type\n"
-        + events.map(e => `${e.date},${e.type}`).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `pto_calendar_${currentYear}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showSuccess('Calendar exported successfully');
-}
