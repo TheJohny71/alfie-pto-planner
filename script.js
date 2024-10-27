@@ -99,6 +99,34 @@ function formatDisplayDate(date) {
     });
 }
 
+// Data Management Functions
+function saveUserData() {
+    localStorage.setItem('ptoData', JSON.stringify(userData));
+    console.log('User data saved:', userData);
+}
+
+
+function loadUserData() {
+    const saved = localStorage.getItem('ptoData');
+    return saved ? JSON.parse(saved) : null;
+}
+
+
+function updateSummary() {
+    const elements = {
+        totalPTO: document.getElementById('totalPTO'),
+        plannedPTO: document.getElementById('plannedPTO'),
+        remainingPTO: document.getElementById('remainingPTO'),
+        bankHolidays: document.getElementById('bankHolidays')
+    };
+
+    if (elements.totalPTO) elements.totalPTO.textContent = userData.totalPTO;
+    if (elements.plannedPTO) elements.plannedPTO.textContent = userData.plannedPTO;
+    if (elements.remainingPTO) elements.remainingPTO.textContent = userData.totalPTO - userData.plannedPTO;
+    if (elements.bankHolidays && BANK_HOLIDAYS[currentYear]) {
+        elements.bankHolidays.textContent = BANK_HOLIDAYS[currentYear].length;
+    }
+} 
 
 function formatDate(date) {
     return new Date(date).toISOString().split('T')[0];
