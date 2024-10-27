@@ -39,6 +39,36 @@ const BANK_HOLIDAYS = {
         { date: '2025-08-25', title: "Summer Bank Holiday" },
         { date: '2025-12-25', title: "Christmas Day" },
         { date: '2025-12-26', title: "Boxing Day" }
+    ],
+    2026: [
+        { date: '2026-01-01', title: "New Year's Day" },
+        { date: '2026-04-03', title: "Good Friday" },
+        { date: '2026-04-06', title: "Easter Monday" },
+        { date: '2026-05-04', title: "Early May Bank Holiday" },
+        { date: '2026-05-25', title: "Spring Bank Holiday" },
+        { date: '2026-08-31', title: "Summer Bank Holiday" },
+        { date: '2026-12-25', title: "Christmas Day" },
+        { date: '2026-12-28', title: "Boxing Day (Substitute Day)" }
+    ],
+    2027: [
+        { date: '2027-01-01', title: "New Year's Day" },
+        { date: '2027-03-26', title: "Good Friday" },
+        { date: '2027-03-29', title: "Easter Monday" },
+        { date: '2027-05-03', title: "Early May Bank Holiday" },
+        { date: '2027-05-31', title: "Spring Bank Holiday" },
+        { date: '2027-08-30', title: "Summer Bank Holiday" },
+        { date: '2027-12-27', title: "Christmas Day (Substitute Day)" },
+        { date: '2027-12-28', title: "Boxing Day (Substitute Day)" }
+    ],
+    2028: [
+        { date: '2028-01-03', title: "New Year's Day (Substitute Day)" },
+        { date: '2028-04-14', title: "Good Friday" },
+        { date: '2028-04-17', title: "Easter Monday" },
+        { date: '2028-05-01', title: "Early May Bank Holiday" },
+        { date: '2028-05-29', title: "Spring Bank Holiday" },
+        { date: '2028-08-28', title: "Summer Bank Holiday" },
+        { date: '2028-12-25', title: "Christmas Day" },
+        { date: '2028-12-26', title: "Boxing Day" }
     ]
 };
 
