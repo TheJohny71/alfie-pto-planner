@@ -290,18 +290,38 @@ body {
     border-color: var(--bank-holiday-orange) !important;
     color: var(--text-primary) !important;
     font-weight: 500;
+    padding: 2px 4px;
+    margin: 1px 0;
 }
 
-.fc-event.bank-holiday-label {
+.bank-holiday-event {
+    background-color: rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 2px 4px;
+    margin: 1px 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.fc-day-bank-holiday {
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.fc-daygrid-event-harness {
+    margin-top: 2px !important;
+}
+
+.bank-holiday-label {
+    z-index: 5 !important;
+    position: relative !important;
+    opacity: 1 !important;
     background: transparent !important;
     border: none !important;
-    color: var(--text-primary) !important;
-    font-size: 0.8rem;
-    padding: 2px 4px !important;
 }
 
-.fc-daygrid-day.fc-day-bank-holiday {
-    background-color: rgba(245, 158, 11, 0.1) !important;
+.fc .fc-daygrid-day.fc-day-bank-holiday .fc-daygrid-day-top {
+    font-weight: 500;
 }
 
 /* Calendar Customization */
