@@ -723,6 +723,163 @@ function exportCalendar() {
     showSuccess('Calendar exported successfully');
 }
 
+// Additional initialization function for when returning to app
+function reinitializeApp() {
+    const savedData = loadUserData();
+    if (savedData) {
+        userData = savedData;
+        initializeApp();
+    } else {
+        welcomeScreen.classList.remove('hidden');
+        appContainer.classList.add('hidden');
+    }
+}
+
+
+// Function to ensure proper cleanup when closing modals
+function cleanupModal() {
+    currentStep = 1;
+    showWizardStep(1);
+    const setupModal = document.getElementById('setupModal');
+    if (setupModal) {
+        setupModal.style.display = 'none';
+    }
+}
+
+
+// Additional event handlers for modal navigation
+function handleModalClose() {
+    const setupModal = document.getElementById('setupModal');
+    if (setupModal) {
+        setupModal.style.display = 'none';
+        if (!calendar) {
+            welcomeScreen.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+        }
+    }
+}
+
+
+// Enhanced validation for dates
+function validateDates(start, end) {
+    if (!start || !end) {
+        return false;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return false;
+    }
+
+    if (startDate > endDate) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// Improved event generation with error handling
+function safeGenerateEvents() {
+    try {
+        return generateEvents();
+    } catch (error) {
+        console.error('Error generating events:', error);
+        showError('Failed to generate calendar events');
+        return [];
+    }
+}
+
+
+// Update the setupEventListeners function to include these new handlers
+function setupExtendedEventListeners() {
+    const closeButtons = document.querySelectorAll('.close-button, .modal-close');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', handleModalClose);
+    });
+
+    // Add escape key handler for modals
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            handleModalClose();
+        }
+    });
+
+    // Update summary when window regains focus
+    window.addEventListener('focus', function() {
+        if (calendar) {
+            updateSummary();
+        }
+    });
+}
+
+
+// Initialize everything when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Starting full initialization');
+    
+    // Clear any old data
+    localStorage.clear();
+    
+    // Get elements
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const appContainer = document.getElementById('appContainer');
+    const getStartedBtn = document.getElementById('getStartedBtn');
+    
+    console.log('Elements found:', {
+        welcomeScreen: !!welcomeScreen,
+        appContainer: !!appContainer,
+        getStartedBtn: !!getStartedBtn
+    });
+
+    if (!welcomeScreen || !appContainer || !getStartedBtn) {
+        console.error('Required elements not found');
+        return;
+    }
+
+    // Set up initial state
+    welcomeScreen.classList.remove('hidden');
+    appContainer.classList.add('hidden');
+
+    // Set up all event listeners
+    setupExtendedEventListeners();
+
+    // Add click handler for get started
+    getStartedBtn.addEventListener('click', function() {
+        console.log('Get Started button clicked');
+        
+        try {
+            welcomeScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            setTimeout(() => {
+                initializeSetupWizard();
+            }, 100);
+            console.log('Setup wizard initialized');
+        } catch (error) {
+            console.error('Error in Get Started click handler:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'There was a problem starting the application. Please refresh the page and try again.',
+                icon: 'error'
+            });
+        }
+    });
+
+    // Check for existing data
+    const savedData = loadUserData();
+    if (savedData) {
+        console.log('Found existing user data, reinitializing app');
+        userData = savedData;
+        welcomeScreen.classList.add('hidden');
+        appContainer.classList.remove('hidden');
+        initializeApp();
+    }
+
+    console.log('Initialization complete');
+});
+
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
