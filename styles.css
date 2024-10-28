@@ -906,3 +906,21 @@ body {
     opacity: 1;
     visibility: visible;
 }
+
+.pto-day {
+    background-color: var(--pto-green) !important;
+    border-color: var(--pto-green) !important;
+    color: white !important;
+    padding: 2px 4px !important;
+    margin: 1px 0 !important;
+    font-weight: 500 !important;
+}
+
+.fc .fc-daygrid-event {
+    z-index: 6;
+    margin-top: 1px;
+}
+
+.fc .fc-daygrid-day-events {
+    min-height: 1.5em;
+}
