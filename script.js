@@ -301,13 +301,9 @@ function initializeCalendar() {
     }
 
     try {
-        if (typeof FullCalendar === 'undefined') {
-            throw new Error('FullCalendar library not loaded');
-        }
-
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            firstDay: 1, // Monday start
+            firstDay: 1,
             initialDate: `${currentYear}-01-01`,
             headerToolbar: {
                 left: 'prev,next today',
@@ -315,7 +311,14 @@ function initializeCalendar() {
                 right: 'dayGridMonth'
             },
             selectable: true,
-            select: handleDateSelection,
+            selectConstraint: {
+                start: `${currentYear}-01-01`,
+                end: `${currentYear}-12-31`
+            },
+            select: function(selectInfo) {
+                debugLog('Date selection:', selectInfo);
+                handleDateSelection(selectInfo);
+            },
             eventDidMount: handleEventMount,
             events: generateEvents,
             eventClick: handleEventClick,
@@ -324,25 +327,14 @@ function initializeCalendar() {
             eventDisplay: 'block',
             height: 'auto',
             dayMaxEvents: true,
-            datesSet: function(dateInfo) {
-                // Update current year when calendar view changes
-                const newYear = dateInfo.start.getFullYear();
-                if (newYear !== currentYear) {
-                    currentYear = newYear;
-                    debugLog('Year changed in calendar view', currentYear);
-                    calendar.refetchEvents();
-                }
-            }
+            eventColor: CONFIG.COLORS.PTO,
+            selectOverlap: false
         });
 
-        debugLog('Calendar configuration set');
         calendar.render();
-        debugLog('Calendar rendered');
-        
         setTimeout(() => {
             markBankHolidays();
-            debugLog('Bank holidays marked');
-        }, CONFIG.ANIMATION_DELAY);
+        }, 100);
 
     } catch (error) {
         console.error('Calendar initialization error:', error);
@@ -352,15 +344,13 @@ function initializeCalendar() {
 
 
 function generateEvents(fetchInfo, successCallback, failureCallback) {
-    debugLog('Generating events for', currentYear);
+    debugLog('Generating events for year:', currentYear);
     let events = [];
 
     try {
         // Add bank holidays
         if (BANK_HOLIDAYS[currentYear]) {
-            debugLog('Adding bank holidays', BANK_HOLIDAYS[currentYear]);
             BANK_HOLIDAYS[currentYear].forEach(holiday => {
-                // Background event
                 events.push({
                     title: holiday.title,
                     start: holiday.date,
@@ -370,7 +360,6 @@ function generateEvents(fetchInfo, successCallback, failureCallback) {
                     backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
                 });
 
-                // Text event
                 events.push({
                     title: holiday.title,
                     start: holiday.date,
@@ -383,15 +372,17 @@ function generateEvents(fetchInfo, successCallback, failureCallback) {
 
         // Add PTO days
         if (userData.selectedDates && userData.selectedDates[currentYear]) {
-            debugLog('Adding PTO days', userData.selectedDates[currentYear]);
+            debugLog('Adding PTO days:', userData.selectedDates[currentYear]);
             userData.selectedDates[currentYear].forEach(date => {
                 events.push({
                     title: 'PTO Day',
                     start: date,
+                    end: date,
                     allDay: true,
                     className: 'pto-day',
                     backgroundColor: CONFIG.COLORS.PTO,
-                    borderColor: CONFIG.COLORS.PTO
+                    borderColor: CONFIG.COLORS.PTO,
+                    editable: false
                 });
             });
         }
@@ -608,16 +599,20 @@ function addPTODays(start, end) {
     const endDate = new Date(end);
     let addedDays = 0;
     
+    // Initialize the year's array if it doesn't exist
+    if (!userData.selectedDates[currentYear]) {
+        userData.selectedDates[currentYear] = [];
+    }
+    
     while (currentDate < endDate) {
         if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
             const dateStr = formatDate(currentDate);
-            if (!userData.selectedDates[currentYear]) {
-                userData.selectedDates[currentYear] = [];
-            }
+            debugLog('Processing date:', dateStr);
             
             if (!userData.selectedDates[currentYear].includes(dateStr)) {
                 userData.selectedDates[currentYear].push(dateStr);
                 addedDays++;
+                debugLog('Added PTO day:', dateStr);
             }
         }
         currentDate.setDate(currentDate.getDate() + 1);
@@ -625,12 +620,18 @@ function addPTODays(start, end) {
     
     if (addedDays > 0) {
         userData.plannedPTO += addedDays;
-        refreshCalendar();
+        debugLog('Total PTO days added:', addedDays);
+        
+        // Force calendar refresh
+        calendar.removeAllEvents();
+        calendar.addEventSource(generateEvents());
+        
+        // Update UI and save
+        updateSummary();
         saveUserData();
         showSuccess(`Added ${addedDays} PTO day${addedDays > 1 ? 's' : ''}`);
     }
 }
-
 
 function removePTODay(event) {
     debugLog('Removing PTO day', event);
