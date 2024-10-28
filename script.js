@@ -512,15 +512,33 @@ function handleDayCellMount(arg) {
 
 
 function refreshCalendar() {
-    debugLog('Refreshing calendar');
+    console.group('Calendar Refresh');
+    console.log('Current calendar state:', calendar);
+    console.log('Current userData:', userData);
+    
     if (calendar) {
+        // Remove all existing events
         calendar.removeAllEvents();
-        calendar.refetchEvents();
+        
+        // Generate and add new events
+        const events = generateEvents();
+        console.log('New events to add:', events);
+        
+        // Add events to calendar
+        calendar.addEventSource(events);
+        
+        // Force re-render
+        calendar.render();
+        
+        // Update markings
         setTimeout(() => {
             markBankHolidays();
-        }, CONFIG.ANIMATION_DELAY);
+        }, 100);
+        
         updateSummary();
     }
+    
+    console.groupEnd();
 }
 
 // Event Handlers
@@ -613,9 +631,12 @@ function handleYearChange(e) {
 
 
 function addPTODays(start, end) {
-    debugLog('Starting addPTODays', { start: formatDate(start), end: formatDate(end) });
+    console.group('Adding PTO Days');
+    console.log('Start Date:', start);
+    console.log('End Date:', end);
+    console.log('Current Year:', currentYear);
+    console.log('Current userData:', userData);
     
-    // Ensure both dates are Date objects
     let currentDate = new Date(start);
     const endDate = new Date(end);
     let addedDays = 0;
@@ -623,54 +644,94 @@ function addPTODays(start, end) {
     // Initialize year's array if needed
     if (!userData.selectedDates[currentYear]) {
         userData.selectedDates[currentYear] = [];
-        debugLog('Initialized selectedDates for year', currentYear);
+        console.log('Initialized selectedDates array for year:', currentYear);
     }
     
     // Add each eligible day
     while (currentDate < endDate) {
         const dateStr = formatDate(currentDate);
-        debugLog('Processing date:', dateStr);
+        console.log('Processing date:', dateStr);
         
         if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
             if (!userData.selectedDates[currentYear].includes(dateStr)) {
                 userData.selectedDates[currentYear].push(dateStr);
                 addedDays++;
-                debugLog('Added PTO day:', dateStr);
+                console.log('Added PTO day:', dateStr);
             }
         } else {
-            debugLog('Skipping date (weekend or holiday):', dateStr);
+            console.log('Skipping date (weekend or holiday):', dateStr);
         }
         currentDate.setDate(currentDate.getDate() + 1);
     }
     
     if (addedDays > 0) {
-        debugLog('Updating userData with new PTO days', {
-            addedDays,
-            newTotal: userData.plannedPTO + addedDays
-        });
-        
         userData.plannedPTO += addedDays;
         
-        // Force calendar refresh
-        debugLog('Refreshing calendar display');
+        // Force calendar refresh with explicit debugging
         if (calendar) {
+            console.log('Refreshing calendar with new PTO days');
             calendar.removeAllEvents();
-            calendar.refetchEvents();
+            const events = generateEvents();
+            console.log('Generated events:', events);
+            calendar.addEventSource(events);
+            calendar.render();
         }
         
-        // Update UI and save
         updateSummary();
         saveUserData();
-        
-        debugLog('PTO days successfully added', {
-            totalAdded: addedDays,
-            currentPTODays: userData.selectedDates[currentYear]
-        });
-        
         showSuccess(`Added ${addedDays} PTO day${addedDays > 1 ? 's' : ''}`);
-    } else {
-        debugLog('No PTO days were added');
     }
+    
+    console.log('Final userData state:', userData);
+    console.groupEnd();
+}
+
+function generateEvents(fetchInfo, successCallback, failureCallback) {
+    console.group('Generating Calendar Events');
+    console.log('Current Year:', currentYear);
+    console.log('userData.selectedDates:', userData.selectedDates);
+    
+    let events = [];
+
+    // Add PTO days first
+    if (userData.selectedDates && userData.selectedDates[currentYear]) {
+        userData.selectedDates[currentYear].forEach(date => {
+            events.push({
+                title: 'PTO Day',
+                start: date,
+                allDay: true,
+                className: 'pto-day',
+                backgroundColor: CONFIG.COLORS.PTO,
+                borderColor: CONFIG.COLORS.PTO,
+                display: 'block',
+                editable: false
+            });
+            console.log('Added PTO event for date:', date);
+        });
+    }
+
+    // Add bank holidays
+    if (BANK_HOLIDAYS[currentYear]) {
+        BANK_HOLIDAYS[currentYear].forEach(holiday => {
+            events.push({
+                title: holiday.title,
+                start: holiday.date,
+                allDay: true,
+                className: 'bank-holiday-bg',
+                display: 'background',
+                backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
+            });
+            console.log('Added bank holiday event:', holiday.date);
+        });
+    }
+
+    console.log('Total events generated:', events.length);
+    console.groupEnd();
+    
+    if (successCallback) {
+        successCallback(events);
+    }
+    return events;
 }
 
 
