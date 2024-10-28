@@ -1069,22 +1069,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 showError('Failed to start application setup');
             }
         });
-
-        // Set up year selector
-        const yearSelect = document.getElementById('yearSelect');
-        if (yearSelect) {
-            const years = [2024, 2025, 2026, 2027, 2028];
-            yearSelect.innerHTML = years.map(year => 
-                `<option value="${year}">${year}</option>`
-            ).join('');
-        }
-
-        debugLog('Initial application setup complete');
     } catch (error) {
         console.error('Critical initialization error:', error);
-        showError('Failed to showError('Failed to initialize application. Please refresh the page.');
+        showError('Failed to initialize application. Please refresh the page.');
     }
-});
+}); // End of DOMContentLoaded event listener
 
 
 // Export Functionality
