@@ -980,9 +980,32 @@ function saveWizardData() {
 
     if (totalPTOInput && plannedPTOInput) {
         try {
+            // Save the PTO numbers
             userData.totalPTO = parseInt(totalPTOInput.value);
             userData.plannedPTO = parseInt(plannedPTOInput.value);
 
+            // Initialize the selected dates array for current year if it doesn't exist
+            if (!userData.selectedDates[currentYear]) {
+                userData.selectedDates[currentYear] = [];
+            }
+
+            // Get today's date and add planned PTO days starting from next week
+            let startDate = new Date();
+            startDate.setDate(startDate.getDate() + 7); // Start from next week
+            let daysToAdd = userData.plannedPTO;
+            
+            while (daysToAdd > 0) {
+                if (!isWeekend(startDate) && !isBankHoliday(startDate)) {
+                    const dateStr = formatDate(startDate);
+                    if (!userData.selectedDates[currentYear].includes(dateStr)) {
+                        userData.selectedDates[currentYear].push(dateStr);
+                        daysToAdd--;
+                    }
+                }
+                startDate.setDate(startDate.getDate() + 1);
+            }
+
+            // Save preferences
             userData.preferences.schoolHolidays = Array.from(
                 document.querySelectorAll('input[name="schoolHolidays"]:checked')
             ).map(input => input.value);
@@ -1001,9 +1024,7 @@ function saveWizardData() {
             saveUserData();
             
             const setupModal = document.getElementById('setupModal');
-            if (setupModal) {
-                setupModal.style.display = 'none';
-            }
+            if (setupModal) setupModal.style.display = 'none';
             
             if (!calendar) {
                 initializeApp();
