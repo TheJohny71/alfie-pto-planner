@@ -979,6 +979,9 @@ document.addEventListener('DOMContentLoaded', function() {
     debugLog('DOM Content Loaded - Starting initialization');
     
     try {
+        // Clear any existing data - Add this line
+        localStorage.clear();
+        
         // Add calendar styles first
         addCalendarStyles();
         
@@ -997,9 +1000,19 @@ document.addEventListener('DOMContentLoaded', function() {
             throw new Error('Required UI elements not found');
         }
 
-        // Setup initial state
+        // Always start with welcome screen
         welcomeScreen.classList.remove('hidden');
         appContainer.classList.add('hidden');
+        userData = {  // Reset user data
+            totalPTO: CONFIG.DEFAULT_PTO,
+            plannedPTO: 0,
+            selectedDates: {},
+            preferences: {
+                extendBankHolidays: [],
+                preferredMonths: [],
+                schoolHolidays: []
+            }
+        };
 
         // Set up get started button
         getStartedBtn.addEventListener('click', function() {
@@ -1015,18 +1028,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 showError('Failed to start application setup');
             }
         });
-
-        // Check for existing data
-        const savedData = loadUserData();
-        if (savedData) {
-            debugLog('Found existing user data, reinitializing app');
-            userData = savedData;
-            welcomeScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            initializeApp();
-        } else {
-            debugLog('No existing user data found, showing welcome screen');
-        }
 
         // Set up year selector
         const yearSelect = document.getElementById('yearSelect');
