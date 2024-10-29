@@ -1,3 +1,9 @@
+/*
+* Alfie PTO Planner Pro - Enhanced Styles
+* Version: 2.0.0
+* Last Updated: 2024-01-29
+*/
+
 :root {
     /* Color Palette */
     --pto-green: #059669;
@@ -17,6 +23,13 @@
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
+    
+    /* Enhanced Calendar Variables */
+    --calendar-event-radius: 4px;
+    --calendar-hover-bg: rgba(37, 99, 235, 0.05);
+    --calendar-highlight-bg: rgba(37, 99, 235, 0.15);
+    --bank-holiday-text: #B45309;
+    --bank-holiday-bg-opacity: 0.15;
 }
 
 /* Base Styles */
@@ -100,6 +113,7 @@ body {
     object-fit: contain;
 }
 
+/* Animations */
 .animate-spin {
     animation: float 6s ease-in-out infinite;
 }
@@ -284,31 +298,52 @@ body {
     min-height: 700px;
 }
 
-/* Calendar Event Styles */
+/* Enhanced Calendar Styles */
 .fc-event.bank-holiday {
     background-color: var(--bank-holiday-orange) !important;
     border-color: var(--bank-holiday-orange) !important;
-    color: var(--text-primary) !important;
-    font-weight: 500;
-    padding: 2px 4px;
-    margin: 1px 0;
+    color: var(--bank-holiday-text) !important;
+    font-weight: 600 !important;
+    padding: 2px 6px !important;
+    margin: 1px 0 !important;
+    text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.8);
+    font-size: 0.9em !important;
+    border-radius: var(--calendar-event-radius) !important;
 }
 
 .bank-holiday-event {
     background-color: rgba(245, 158, 11, 0.2);
     border-radius: var(--radius-sm);
-    padding: 2px 4px;
+    padding: 3px 6px;
     margin: 1px 0;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--bank-holiday-text);
 }
 
 .fc-day-bank-holiday {
-    background-color: rgba(245, 158, 11, 0.1) !important;
+    background-color: rgba(245, 158, 11, var(--bank-holiday-bg-opacity)) !important;
 }
 
-.fc-daygrid-event-harness {
+/* Enhanced Calendar Event Styles */
+.pto-day {
+    background-color: var(--pto-green) !important;
+    border-color: var(--pto-green) !important;
+    color: white !important;
+    padding: 3px 6px !important;
+    margin: 1px 0 !important;
+    font-weight: 600 !important;
+    border-radius: var(--calendar-event-radius) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.2s ease-in-out !important;
+}
+
+.pto-day:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.fc .fc-daygrid-event-harness {
     margin-top: 2px !important;
 }
 
@@ -324,25 +359,29 @@ body {
     font-weight: 500;
 }
 
-/* Calendar Customization */
+/* Calendar Core Styles */
 .fc {
     height: 100%;
     background: var(--background-white);
 }
 
 .fc .fc-toolbar-title {
-    font-size: 1.25rem;
+    font-size: 1.35rem !important;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 .fc .fc-button {
     background: var(--background-white);
     border: 1px solid var(--border-light);
     color: var(--text-primary);
+    transition: all 0.2s ease;
 }
 
 .fc .fc-button:hover {
-    background-color: var(--background-light);
+    background-color: var(--calendar-hover-bg);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .fc .fc-button-primary:not(:disabled).fc-button-active {
@@ -351,16 +390,25 @@ body {
 }
 
 .fc .fc-day-today {
-    background-color: rgba(37, 99, 235, 0.05) !important;
+    background-color: var(--calendar-hover-bg) !important;
+}
+
+.fc .fc-highlight {
+    background-color: var(--calendar-highlight-bg) !important;
+    border: 2px solid var(--primary-blue) !important;
+}
+
+.fc .fc-day:hover {
+    background-color: var(--calendar-hover-bg);
 }
 
 .fc-event {
-    transition: transform 0.2s ease;
+    transition: all 0.2s ease-in-out !important;
 }
 
 .fc-event:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
 /* Modal Styles */
@@ -514,39 +562,6 @@ body {
     margin-top: 0.25rem;
 }
 
-/* Checkbox Group */
-.checkbox-group {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background: var(--background-light);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.checkbox-group label:hover {
-    background: var(--background-white);
-    border-color: var(--primary-blue);
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: 1.25rem;
-    height: 1.25rem;
-    border: 2px solid var(--border-light);
-    border-radius: 4px;
-    cursor: pointer;
-}
-
 /* Button Styles */
 .btn {
     padding: 0.625rem 1.25rem;
@@ -610,16 +625,45 @@ body {
     border-color: var(--primary-blue);
 }
 
-.month-item input[type="checkbox"] {
-    width: 1.25rem;
-    height: 1.25rem;
-    border: 2px solid var(--border-light);
-    border-radius: 4px;
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
 }
 
-.month-item span {
-    font-size: 0.9rem;
-    color: var(--text-primary);
+.loading:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(2px);
+}
+
+.loading-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.loading-indicator.hidden {
+    display: none;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-light);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 /* Animations */
@@ -652,53 +696,6 @@ body {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
-}
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* Loading States */
-.loading {
-    position: relative;
-    pointer-events: none;
-}
-
-.loading:after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(2px);
-}
-
-/* Loading Indicator */
-.loading-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(4px);
-}
-
-.loading-indicator.hidden {
-    display: none;
-}
-
-.loader {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--border-light);
-    border-top-color: var(--primary-blue);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
 }
 
 /* Responsive Design */
@@ -773,10 +770,6 @@ body {
     .month-selector {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    .btn {
-        padding: 0.5rem 1rem;
-    }
 }
 
 @media (max-width: 480px) {
@@ -819,10 +812,6 @@ body {
         flex-direction: column;
         gap: 0.5rem;
     }
-
-    .modal-footer .btn {
-        width: 100%;
-    }
 }
 
 /* Print Styles */
@@ -851,7 +840,6 @@ body {
         background: white;
     }
 
-    /* Ensure calendar prints properly */
     .fc {
         background: white !important;
     }
@@ -879,48 +867,7 @@ body {
     background-color: var(--primary-blue) !important;
 }
 
-/* Tooltip Styles */
-[data-tooltip] {
-    position: relative;
-}
-
-[data-tooltip]:before {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.5rem;
-    background: var(--text-primary);
-    color: white;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
-    z-index: 1000;
-}
-
-[data-tooltip]:hover:before {
-    opacity: 1;
-    visibility: visible;
-}
-
-.pto-day {
-    background-color: var(--pto-green) !important;
-    border-color: var(--pto-green) !important;
-    color: white !important;
-    padding: 2px 4px !important;
-    margin: 1px 0 !important;
-    font-weight: 500 !important;
-}
-
-.fc .fc-daygrid-event {
-    z-index: 6;
-    margin-top: 1px;
-}
-
-.fc .fc-daygrid-day-events {
-    min-height: 1.5em;
+/* Utility Classes */
+.hidden {
+    display: none !important;
 }
