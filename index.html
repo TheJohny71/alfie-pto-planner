@@ -1,13 +1,32 @@
+<!--
+* Alfie PTO Planner Pro
+* https://github.com/thejohny/alfie-pto-planner
+*
+* @version   2.0.0
+* @date      2024-01-29
+* @author    TheJohny71 
+* @copyright 2024 TheJohny71
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Alfie PTO Planner Pro</title>
-    <link href="styles.css" rel="stylesheet">
+
+    <!-- Libraries -->
+    <!-- FullCalendar v5.11.3 -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet'>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
+    <!-- SweetAlert2 v11 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Custom styles and scripts with version parameters -->
+    <link href="styles.css?v=2.0.0" rel="stylesheet">
+    <script src="script.js?v=2.0.0" defer></script>
 </head>
 <body>
     <!-- Loading Indicator -->
@@ -114,7 +133,5 @@
             </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
