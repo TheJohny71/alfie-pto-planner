@@ -3,132 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar View | Alfie PTO Planner</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <title>Alfie PTO Planner Pro - Calendar</title>
+    <link href="styles.css" rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet'>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-light bg-alfie-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">
-                <img src="alfie-icon.png" alt="Alfie Icon" width="30" height="30" class="d-inline-block align-top">
-                Alfie PTO Planner
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Calendar View</a>
-                    </li>
-                </ul>
+<body>
+    <div id="appContainer" class="app-container">
+        <header class="app-header">
+            <!-- Header Left Section -->
+            <div class="header-left">
+                <img src="alfie-icon.png" alt="Alfie PTO Planner" class="logo">
+                <h1>Alfie PTO Planner Pro</h1>
             </div>
-        </div>
-    </nav>
+            
+            <!-- Header Right Section -->
+            <div class="header-controls">
+                <select id="yearSelect" class="year-select">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                </select>
+                <button id="setupPTOBtn" class="btn" data-tooltip="Set up your PTO preferences">Setup PTO</button>
+                <button id="exportBtn" class="btn" data-tooltip="Export your PTO schedule">Export</button>
+                <button id="settingsBtn" class="btn" data-tooltip="Adjust application settings">Settings</button>
+            </div>
+        </header>
 
-    <div class="container mt-4">
-        <h1 class="text-center mb-4 text-alfie-dark">Calendar and PTO Summary</h1>
-        <div class="row">
-            <div class="col-md-8">
-                <div id="calendar" class="bg-white p-3 rounded shadow-sm"></div>
-            </div>
-            <div class="col-md-4">
-                <div id="ptoSummaryContent" class="bg-white p-3 rounded shadow-sm">
-                    <h2 class="h4 mb-3 text-alfie-dark">PTO Summary</h2>
-                    <!-- PTO summary content will be dynamically inserted here -->
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <h2>PTO Summary</h2>
+                <div class="summary-card">
+                    <div class="summary-item">
+                        <span>Total PTO:</span>
+                        <span id="totalPTO">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Planned:</span>
+                        <span id="plannedPTO">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Remaining:</span>
+                        <span id="remainingPTO">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Bank Holidays:</span>
+                        <span id="bankHolidays">0</span>
+                    </div>
                 </div>
-                <div class="mt-3">
-                    <button id="downloadPDFBtn" class="btn btn-alfie-secondary">Download PDF</button>
-                    <button id="downloadExcelBtn" class="btn btn-alfie-secondary ms-2">Download Excel</button>
+
+                <div class="leave-types">
+                    <h3>Leave Types</h3>
+                    <div class="leave-type-item">
+                        <span class="color-dot" style="background-color: var(--pto-green)"></span>
+                        <span>PTO Day</span>
+                    </div>
+                    <div class="leave-type-item">
+                        <span class="color-dot" style="background-color: var(--bank-holiday-orange)"></span>
+                        <span>Bank Holiday</span>
+                    </div>
                 </div>
-            </div>
+            </aside>
+
+            <!-- Main Calendar Area -->
+            <main class="calendar-container">
+                <div id="calendar"></div>
+            </main>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let summaryData;
-            try {
-                summaryData = JSON.parse(localStorage.getItem('ptoSummary'));
-                if (!summaryData || !summaryData.suggestedPTO) {
-                    throw new Error("Invalid PTO data");
-                }
-            } catch (error) {
-                alert("No valid PTO data found. Please return to the form to submit your information.");
-                return;
-            }
-            
-            // Display Calendar
-            const calendarEl = document.getElementById("calendar");
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: "dayGridMonth",
-                initialDate: `${summaryData.suggestedPTO[0].split("-")[0]}-01-01`,
-                height: 'auto',
-                events: [
-                    ...summaryData.suggestedPTO.map(date => ({
-                        title: "PTO Day",
-                        start: date,
-                        color: "#4caf50"
-                    })),
-                    ...summaryData.bankHolidays.map(holiday => ({
-                        title: holiday.title,
-                        start: holiday.date,
-                        color: "#ff6347"
-                    })),
-                    ...summaryData.weekends.map(date => ({
-                        title: "Weekend",
-                        start: date,
-                        color: "#dcdcdc"
-                    }))
-                ]
-            });
-            calendar.render();
-
-            // Display PTO Summary
-            const ptoSummaryEl = document.getElementById("ptoSummaryContent");
-            ptoSummaryEl.innerHTML += `
-                <p><strong>Total PTO Days Available:</strong> ${summaryData.totalPTO}</p>
-                <p><strong>PTO Days Requested:</strong> ${summaryData.ptoThisYear}</p>
-                <p><strong>PTO Days Scheduled:</strong> ${summaryData.scheduledPTOCount}</p>
-                <p><strong>Remaining PTO Days:</strong> ${summaryData.remainingPTO}</p>
-                <p class="text-muted"><small>Last Updated: ${new Date().toLocaleString()}</small></p>
-            `;
-        });
-
-        // Download functions (you can move these to a separate JS file if preferred)
-        function downloadSummaryAsPDF() {
-            const element = document.getElementById('ptoSummaryContent');
-            html2pdf().from(element).save('PTO_Summary.pdf');
-        }
-
-        function downloadSummaryAsExcel() {
-            const summaryContent = document.getElementById('ptoSummaryContent').innerText;
-            const blob = new Blob([summaryContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", "PTO_Summary.csv");
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-
-        document.getElementById('downloadPDFBtn').addEventListener('click', downloadSummaryAsPDF);
-        document.getElementById('downloadExcelBtn').addEventListener('click', downloadSummaryAsExcel);
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
