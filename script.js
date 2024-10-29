@@ -422,13 +422,17 @@ class PTOManager {
         showSuccess('PTO day removed');
     }
 
-    generateEvents() {
-        debugLog('Generating events for calendar');
-        const events = [];
+   // Update the event generation to only include future holidays
+function generateEvents() {
+    const events = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-        // Add bank holidays
-        if (BANK_HOLIDAYS[currentYear]) {
-            BANK_HOLIDAYS[currentYear].forEach(holiday => {
+    // Add bank holidays
+    if (BANK_HOLIDAYS[currentYear]) {
+        BANK_HOLIDAYS[currentYear].forEach(holiday => {
+            const holidayDate = new Date(holiday.date);
+            if (holidayDate > today) {  // Only add future holidays
                 events.push({
                     title: holiday.title,
                     start: holiday.date,
@@ -445,27 +449,28 @@ class PTOManager {
                     className: 'bank-holiday',
                     display: 'block'
                 });
-            });
-        }
-
-        // Add PTO days
-        if (this.state.userData.selectedDates[currentYear]) {
-            this.state.userData.selectedDates[currentYear].forEach(date => {
-                events.push({
-                    title: 'PTO Day',
-                    start: date,
-                    allDay: true,
-                    className: 'pto-day',
-                    backgroundColor: CONFIG.COLORS.PTO,
-                    borderColor: CONFIG.COLORS.PTO,
-                    display: 'block',
-                    editable: false
-                });
-            });
-        }
-
-        return events;
+            }
+        });
     }
+
+    // Add PTO days (existing code remains the same)
+    if (userData.selectedDates && userData.selectedDates[currentYear]) {
+        userData.selectedDates[currentYear].forEach(date => {
+            events.push({
+                title: 'PTO Day',
+                start: date,
+                allDay: true,
+                className: 'pto-day',
+                backgroundColor: CONFIG.COLORS.PTO,
+                borderColor: CONFIG.COLORS.PTO,
+                display: 'block',
+                editable: false
+            });
+        });
+    }
+
+    return events;
+}
 
     handleEventMount(info) {
         const eventEl = info.el;
@@ -579,52 +584,36 @@ class UIManager {
         });
     }
 
-    addCalendarStyles() {
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = `
-            .fc-day-bank-holiday {
-                background-color: rgba(245, 158, 11, 0.1) !important;
-            }
-            
-            .bank-holiday {
-                font-weight: 500 !important;
-                font-size: 0.9em !important;
-                margin: 1px 0 !important;
-                padding: 2px !important;
-            }
+// Update the bank holiday styling
+function addCalendarStyles() {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        .fc-day-bank-holiday {
+            background-color: rgba(245, 158, 11, 0.1) !important;
+        }
+        
+        .bank-holiday {
+            font-weight: 600 !important;  /* Made bolder */
+            font-size: 0.95em !important; /* Slightly larger */
+            margin: 1px 0 !important;
+            padding: 2px !important;
+            color: #B45309 !important;    /* Darker orange for better contrast */
+            text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.8); /* Text outline for better readability */
+        }
 
-            .pto-day {
-                font-weight: 500 !important;
-                font-size: 0.9em !important;
-                margin: 1px 0 !important;
-                padding: 2px !important;
-                color: white !important;
-                background-color: var(--pto-green) !important;
-                border-color: var(--pto-green) !important;
-            }
+        .bank-holiday-bg {
+            opacity: 0.25;  /* Reduced opacity for better text contrast */
+        }
 
-            .fc .fc-daygrid-day.fc-day-bank-holiday {
-                background-color: rgba(245, 158, 11, 0.1) !important;
-            }
+        .fc .fc-daygrid-day.fc-day-bank-holiday {
+            background-color: rgba(245, 158, 11, 0.15) !important;
+        }
+    `;
+    document.head.appendChild(styleSheet);
+    debugLog('Calendar styles added');
+}   
 
-            .bank-holiday-bg {
-                opacity: 0.3;
-            }
-
-            .fc .fc-daygrid-event {
-                z-index: 6;
-                margin-top: 1px;
-            }
-
-            .fc .fc-daygrid-day-events {
-                min-height: 1.5em;
-            }
-        `;
-        document.head.appendChild(styleSheet);
-        debugLog('Calendar styles added');
-    }
-}
-
+    
 // Setup Wizard Management
 class SetupWizard {
     constructor(ptoManager) {
@@ -777,37 +766,46 @@ class SetupWizard {
         return true;
     }
 
-    populateBankHolidays() {
-        debugLog('Populating bank holidays for year:', currentYear);
-        const container = document.querySelector('.bank-holiday-list');
-        if (!container) {
-            debugLog('Bank holiday container not found');
-            return;
-        }
-
-        if (!BANK_HOLIDAYS[currentYear]) {
-            debugLog('No bank holidays found for year:', currentYear);
-            container.innerHTML = '<p>No bank holidays available for selected year.</p>';
-            return;
-        }
-
-        const holidaysList = BANK_HOLIDAYS[currentYear].map(holiday => `
-            <div class="holiday-item">
-                <label class="holiday-check">
-                    <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
-                    <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
-                </label>
-                <select class="extension-type" data-date="${holiday.date}">
-                    <option value="before">Day Before</option>
-                    <option value="after">Day After</option>
-                    <option value="both">Both Days</option>
-                </select>
-            </div>
-        `).join('');
-
-        container.innerHTML = holidaysList;
-        debugLog('Bank holidays populated');
+    // Update the bank holiday population in setup wizard
+function populateBankHolidays() {
+    debugLog('Populating bank holidays');
+    const container = document.querySelector('.bank-holiday-list');
+    if (!container) {
+        debugLog('Bank holiday container not found');
+        return;
     }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);  // Reset time component for accurate comparison
+
+    const futureHolidays = BANK_HOLIDAYS[currentYear]?.filter(holiday => {
+        const holidayDate = new Date(holiday.date);
+        return holidayDate > today;
+    });
+
+    if (!futureHolidays || futureHolidays.length === 0) {
+        debugLog('No future bank holidays found for year:', currentYear);
+        container.innerHTML = '<p>No upcoming bank holidays available for selected year.</p>';
+        return;
+    }
+
+    const holidaysList = futureHolidays.map(holiday => `
+        <div class="holiday-item">
+            <label class="holiday-check">
+                <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
+                <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
+            </label>
+            <select class="extension-type" data-date="${holiday.date}">
+                <option value="before">Day Before</option>
+                <option value="after">Day After</option>
+                <option value="both">Both Days</option>
+            </select>
+        </div>
+    `).join('');
+
+    container.innerHTML = holidaysList;
+    debugLog('Future bank holidays populated');
+}
 
     populateMonthSelector() {
         debugLog('Populating month selector');
@@ -1095,28 +1093,26 @@ class CalendarManager {
         return events;
     }
 
-    handleEventMount(info) {
-        debugLog('Mounting event', info.event.title);
-        const eventEl = info.el;
-        const event = info.event;
+    // Update the event mounting for better visibility
+function handleEventMount(info) {
+    debugLog('Mounting event', info.event.title);
+    const eventEl = info.el;
+    const event = info.event;
 
-        try {
-            if (event.classNames.includes('bank-holiday-bg')) {
-                eventEl.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
-            } else if (event.classNames.includes('bank-holiday')) {
-                eventEl.style.backgroundColor = 'transparent';
-                eventEl.style.borderColor = 'transparent';
-                eventEl.style.color = 'black';
-                eventEl.style.fontWeight = '500';
-            } else if (event.classNames.includes('pto-day')) {
-                eventEl.style.backgroundColor = CONFIG.COLORS.PTO;
-                eventEl.style.borderColor = CONFIG.COLORS.PTO;
-                eventEl.style.color = 'white';
-            }
-        } catch (error) {
-            console.error('Error mounting event:', error);
+    try {
+        if (event.classNames.includes('bank-holiday-bg')) {
+            eventEl.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
+        } else if (event.classNames.includes('bank-holiday')) {
+            eventEl.style.backgroundColor = 'transparent';
+            eventEl.style.borderColor = 'transparent';
+            eventEl.style.color = '#B45309';  // Darker orange
+            eventEl.style.fontWeight = '600';
+            eventEl.style.textShadow = '0px 0px 1px rgba(255, 255, 255, 0.8)';
         }
+    } catch (error) {
+        console.error('Error mounting event:', error);
     }
+}
 
     handleEventClick(info) {
         debugLog('Event clicked', { title: info.event.title, date: info.event.start });
