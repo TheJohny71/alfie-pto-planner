@@ -822,6 +822,253 @@ class ExportManager {
     }
 }
 
+class CalendarManager {
+    constructor(ptoManager) {
+        this.ptoManager = ptoManager;
+        this.calendarEl = null;
+        this.calendar = null;
+        this.eventCache = new Map();
+        this.lastRefresh = null;
+        this.currentView = 'dayGridMonth';
+    }
+
+    async initialize() {
+        debugLog('Initializing calendar manager');
+        this.calendarEl = document.getElementById('calendar');
+        
+        if (!this.calendarEl) {
+            throw new Error('Calendar element not found');
+        }
+
+        await this.setupCalendar();
+        this.markBankHolidays();
+    }
+
+    async setupCalendar() {
+        debugLog('Setting up calendar');
+        
+        try {
+            if (typeof FullCalendar === 'undefined') {
+                throw new Error('FullCalendar library not loaded');
+            }
+
+            this.calendar = new FullCalendar.Calendar(this.calendarEl, {
+                initialView: 'dayGridMonth',
+                firstDay: 1,
+                initialDate: `${currentYear}-01-01`,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth'
+                },
+                selectable: true,
+                selectConstraint: {
+                    start: `${currentYear}-01-01`,
+                    end: `${currentYear}-12-31`,
+                    startTime: '09:00',
+                    endTime: '17:00'
+                },
+                businessHours: CONFIG.BUSINESS_HOURS,
+                nowIndicator: true,
+                scrollTime: '09:00:00',
+                slotMinTime: '09:00:00',
+                slotMaxTime: '17:00:00',
+                select: (selectInfo) => this.handleDateSelection(selectInfo),
+                eventDidMount: (info) => {
+                    this.handleEventMount(info);
+                    this.addEventHoverEffect(info);
+                },
+                events: (info) => this.generateEvents(info),
+                eventClick: (info) => this.handleEventClick(info),
+                dayCellDidMount: (arg) => this.handleDayCellMount(arg),
+                displayEventTime: false,
+                eventDisplay: 'block',
+                height: 'auto',
+                dayMaxEvents: true,
+                eventColor: CONFIG.COLORS.PTO,
+                selectOverlap: false,
+                datesSet: (dateInfo) => {
+                    const newYear = dateInfo.start.getFullYear();
+                    if (newYear !== currentYear) {
+                        debugLog('Year changed in calendar view', { from: currentYear, to: newYear });
+                        currentYear = newYear;
+                        this.refreshCalendar();
+                    }
+                }
+            });
+
+            debugLog('Calendar configuration set');
+            this.calendar.render();
+            debugLog('Calendar rendered');
+
+        } catch (error) {
+            console.error('Calendar initialization error:', error);
+            throw error;
+        }
+    }
+
+    handleDateSelection(selectInfo) {
+        debugLog('Date selection started', selectInfo);
+        if (!this.ptoManager.state.userData.totalPTO) {
+            this.ptoManager.uiManager.showError('Please complete PTO setup first');
+            return;
+        }
+
+        const startDate = selectInfo.start;
+        const endDate = selectInfo.end;
+
+        if (!this.validateDateSelection(startDate, endDate)) {
+            return;
+        }
+
+        const workingDays = calculateWorkingDays(startDate, endDate);
+        if (this.ptoManager.state.userData.plannedPTO + workingDays > this.ptoManager.state.userData.totalPTO) {
+            this.ptoManager.uiManager.showError(
+                `Not enough PTO days remaining. You have ${
+                    this.ptoManager.state.userData.totalPTO - this.ptoManager.state.userData.plannedPTO
+                } days left.`
+            );
+            return;
+        }
+
+        this.confirmPTOSelection(startDate, endDate);
+    }
+
+    validateDateSelection(start, end) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (start < today) {
+            this.ptoManager.uiManager.showError('Cannot select past dates');
+            return false;
+        }
+
+        if (isWeekend(start) || isWeekend(end)) {
+            this.ptoManager.uiManager.showError('Cannot select weekends');
+            return false;
+        }
+
+        if (isBankHoliday(start) || isBankHoliday(end)) {
+            this.ptoManager.uiManager.showError('Cannot select bank holidays');
+            return false;
+        }
+
+        return true;
+    }
+
+    handleEventClick(info) {
+        debugLog('Event clicked', { title: info.event.title, date: info.event.start });
+        if (info.event.classNames.includes('pto-day')) {
+            this.confirmRemovePTODay(info.event);
+        }
+    }
+
+    confirmPTOSelection(startDate, endDate) {
+        Swal.fire({
+            title: 'Add PTO Days',
+            text: `Add PTO from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: CONFIG.COLORS.PTO,
+            confirmButtonText: 'Add PTO'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                debugLog('User confirmed PTO addition');
+                this.addPTODays(startDate, endDate);
+            }
+        });
+    }
+
+    addPTODays(startDate, endDate) {
+        debugLog('Adding PTO days', { startDate, endDate });
+        let currentDate = new Date(startDate);
+        let addedDays = 0;
+
+        while (currentDate < endDate) {
+            if (!isWeekend(currentDate) && !isBankHoliday(currentDate)) {
+                const dateStr = formatDate(currentDate);
+                if (!this.ptoManager.state.userData.selectedDates[currentYear].includes(dateStr)) {
+                    this.ptoManager.state.userData.selectedDates[currentYear].push(dateStr);
+                    addedDays++;
+                }
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        if (addedDays > 0) {
+            this.ptoManager.state.userData.plannedPTO += addedDays;
+            this.refreshCalendar();
+            this.ptoManager.updateSummary();
+            this.ptoManager.storageManager.save(this.ptoManager.state.userData);
+            this.ptoManager.uiManager.showSuccess(`Added ${addedDays} PTO day${addedDays > 1 ? 's' : ''}`);
+        }
+    }
+
+    markBankHolidays() {
+        if (BANK_HOLIDAYS[currentYear]) {
+            BANK_HOLIDAYS[currentYear].forEach(holiday => {
+                const dayEl = document.querySelector(`td[data-date="${holiday.date}"]`);
+                if (dayEl) {
+                    dayEl.classList.add('fc-day-bank-holiday');
+                    dayEl.setAttribute('title', holiday.title);
+                }
+            });
+        }
+    }
+
+    generateEvents() {
+        const events = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Add bank holidays
+        if (BANK_HOLIDAYS[currentYear]) {
+            BANK_HOLIDAYS[currentYear].forEach(holiday => {
+                const holidayDate = new Date(holiday.date);
+                if (holidayDate >= today) {
+                    events.push({
+                        title: holiday.title,
+                        start: holiday.date,
+                        allDay: true,
+                        className: 'bank-holiday-bg',
+                        display: 'background',
+                        backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
+                    });
+
+                    events.push({
+                        title: holiday.title,
+                        start: holiday.date,
+                        allDay: true,
+                        className: 'bank-holiday',
+                        display: 'block'
+                    });
+                }
+            });
+        }
+
+        // Add PTO days
+        if (this.ptoManager.state.userData.selectedDates[this.ptoManager.state.currentYear]) {
+            this.ptoManager.state.userData.selectedDates[this.ptoManager.state.currentYear].forEach(date => {
+                const eventDate = new Date(date);
+                if (eventDate >= today) {
+                    events.push({
+                        title: 'PTO Day',
+                        start: date,
+                        allDay: true,
+                        className: 'pto-day',
+                        backgroundColor: CONFIG.COLORS.PTO,
+                        borderColor: CONFIG.COLORS.PTO,
+                        display: 'block',
+                        editable: false
+                    });
+                }
+            });
+        }
+
+        return events;
+    }
+}
+
 // Application Integration
 class App {
     constructor() {
@@ -893,7 +1140,7 @@ class App {
                 });
             }
 
-                        window.addEventListener('focus', () => {
+            window.addEventListener('focus', () => {
                 if (this.calendarManager.calendar) {
                     this.calendarManager.refreshCalendar();
                     debugLog('Calendar refreshed on window focus');
