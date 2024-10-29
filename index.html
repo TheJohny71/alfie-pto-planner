@@ -24,8 +24,8 @@
     <!-- SweetAlert2 v11 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Custom styles and scripts with version parameters -->
-    <link href="styles.css?v=2.0.0" rel="stylesheet">
+    <!-- Custom styles and scripts -->
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
     <!-- Loading Indicator -->
@@ -76,74 +76,6 @@
         </div>
     </div>
 
-    <!-- Main Application Container -->
-    <div id="appContainer" class="app-container hidden">
-        <header class="app-header">
-            <!-- Header Left Section -->
-            <div class="header-left">
-                <img src="alfie-icon.png" alt="Alfie PTO Planner" class="logo">
-                <h1>Alfie PTO Planner Pro</h1>
-            </div>
-            
-            <!-- Header Right Section -->
-            <div class="header-controls">
-                <select id="yearSelect" class="year-select">
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
-                </select>
-                <button id="setupPTOBtn" class="btn" data-tooltip="Set up your PTO preferences">Setup PTO</button>
-                <button id="exportBtn" class="btn" data-tooltip="Export your PTO schedule">Export</button>
-                <button id="settingsBtn" class="btn" data-tooltip="Adjust application settings">Settings</button>
-            </div>
-        </header>
-
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <h2>PTO Summary</h2>
-                <div class="summary-card">
-                    <div class="summary-item">
-                        <span>Total PTO:</span>
-                        <span id="totalPTO">0</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Planned:</span>
-                        <span id="plannedPTO">0</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Remaining:</span>
-                        <span id="remainingPTO">0</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Bank Holidays:</span>
-                        <span id="bankHolidays">0</span>
-                    </div>
-                </div>
-
-                <div class="leave-types">
-                    <h3>Leave Types</h3>
-                    <div class="leave-type-item">
-                        <span class="color-dot" style="background-color: var(--pto-green)"></span>
-                        <span>PTO Day</span>
-                    </div>
-                    <div class="leave-type-item">
-                        <span class="color-dot" style="background-color: var(--bank-holiday-orange)"></span>
-                        <span>Bank Holiday</span>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Main Calendar Area -->
-            <main class="calendar-container">
-                <div id="calendar"></div>
-            </main>
-        </div>
-    </div>
-
     <!-- Setup Modal -->
     <div id="setupModal" class="modal">
         <div class="modal-content">
@@ -168,7 +100,7 @@
                 <!-- Step 2: Bank Holiday Extensions -->
                 <div class="wizard-step" data-step="2" style="display: none;">
                     <h3>Step 2: Bank Holiday Extensions</h3>
-                    <p class="step-description">Select bank holidays you'd like to extend with additional days off:</p>
+                    <p class="step-description">Select bank holidays you'd like to extend:</p>
                     <div class="bank-holiday-list">
                         <!-- Bank holidays will be populated dynamically -->
                     </div>
@@ -192,7 +124,7 @@
         </div>
     </div>
 
-    <!-- Script with version parameter -->
-    <script src="script.js?v=2.0.0" defer></script>
+    <!-- Script -->
+    <script src="script.js"></script>
 </body>
 </html>
