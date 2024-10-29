@@ -893,6 +893,115 @@ class App {
                 });
             }
 
-            window.addEventListener('focus', () => {
+                        window.addEventListener('focus', () => {
                 if (this.calendarManager.calendar) {
-                    this.calendarManager.refreshCalen
+                    this.calendarManager.refreshCalendar();
+                    debugLog('Calendar refreshed on window focus');
+                }
+            });
+
+            debugLog('All main event listeners setup complete');
+        } catch (error) {
+            console.error('Error setting up event listeners:', error);
+            throw new Error('Failed to setup application controls');
+        }
+    }
+
+    handleGetStarted() {
+        debugLog('Get Started button clicked');
+        try {
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const appContainer = document.getElementById('appContainer');
+            
+            welcomeScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            
+            setTimeout(() => {
+                this.setupWizard.initialize();
+            }, CONFIG.ANIMATION_DELAY);
+        } catch (error) {
+            console.error('Error in Get Started handler:', error);
+            this.ptoManager.uiManager.showError('Failed to start application setup');
+        }
+    }
+
+    handleYearChange(e) {
+        const newYear = parseInt(e.target.value);
+        debugLog('Year change requested', { from: currentYear, to: newYear });
+        
+        if (newYear !== currentYear) {
+            currentYear = newYear;
+            if (this.calendarManager.calendar) {
+                this.calendarManager.calendar.gotoDate(`${currentYear}-01-01`);
+                this.calendarManager.refreshCalendar();
+            }
+        }
+    }
+
+    setupDebugUtilities() {
+        window.debugApp = {
+            getCurrentState: () => ({
+                userData: this.ptoManager.state.userData,
+                currentYear,
+                currentStep: this.setupWizard.currentStep,
+                hasSetup: this.setupWizard.hasSetup,
+                calendarInitialized: !!this.calendarManager.calendar
+            }),
+            clearData: () => {
+                localStorage.clear();
+                location.reload();
+            },
+            reloadCalendar: () => {
+                if (this.calendarManager.calendar) {
+                    this.calendarManager.refreshCalendar();
+                    return 'Calendar refreshed';
+                }
+                return 'Calendar not initialized';
+            }
+        };
+
+        console.log('Debug utilities available. Use window.debugApp to access debug functions.');
+    }
+}
+
+// Error Handling
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    console.error('Global error:', { msg, url, lineNo, columnNo, error });
+    debugLog('Global error caught', msg);
+    return false;
+};
+
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    debugLog('Unhandled promise rejection', event.reason);
+});
+
+// Application Initialization
+document.addEventListener('DOMContentLoaded', function() {
+    debugLog('DOM Content Loaded - Starting initialization');
+    
+    try {
+        // Create and initialize the application
+        const app = new App();
+        app.initialize().catch(error => {
+            console.error('Application initialization failed:', error);
+        });
+    } catch (error) {
+        console.error('Critical initialization error:', error);
+        if (DEBUG) {
+            console.error('Detailed error:', error.stack);
+        }
+    }
+});
+
+// Export necessary classes if using modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        App,
+        PTOManager,
+        CalendarManager,
+        UIManager,
+        SetupWizard,
+        ExportManager
+    };
+}
