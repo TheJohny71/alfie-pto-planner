@@ -411,39 +411,47 @@ class SetupWizard {
         return true;
     }
 
-    populateBankHolidays() {
-        const container = document.querySelector('.bank-holiday-list');
-        if (!container) return;
+   // In SetupWizard class
+populateBankHolidays() {
+    const container = document.querySelector('.bank-holiday-list');
+    if (!container) return;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const futureHolidays = BANK_HOLIDAYS[currentYear]?.filter(holiday => {
-            const holidayDate = new Date(holiday.date);
-            return holidayDate > today;
-        });
-
-        if (!futureHolidays || futureHolidays.length === 0) {
-            container.innerHTML = '<p>No upcoming bank holidays available.</p>';
-            return;
-        }
-
-        const holidaysList = futureHolidays.map(holiday => `
-            <div class="holiday-item">
-                <label class="holiday-check">
-                    <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
-                    <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
-                </label>
-                <select class="extension-type" data-date="${holiday.date}">
-                    <option value="before">Day Before</option>
-                    <option value="after">Day After</option>
-                    <option value="both">Both Days</option>
-                </select>
-            </div>
-        `).join('');
-
-        container.innerHTML = holidaysList;
+    // Group holidays by quarter
+    const currentYearHolidays = BANK_HOLIDAYS[currentYear];
+    if (!currentYearHolidays) {
+        container.innerHTML = '<p>No bank holidays available for selected year.</p>';
+        return;
     }
+
+    const holidaysHtml = currentYearHolidays.map(holiday => `
+        <div class="holiday-item">
+            <label class="holiday-check">
+                <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
+                <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
+            </label>
+            <select class="extension-type" data-date="${holiday.date}">
+                <option value="before">Day Before</option>
+                <option value="after">Day After</option>
+                <option value="both">Both Days</option>
+            </select>
+        </div>
+    `).join('');
+
+    container.innerHTML = holidaysHtml;
+    
+    // Add click handlers for selections
+    this.setupHolidayListeners();
+}
+
+setupHolidayListeners() {
+    const holidayCheckboxes = document.querySelectorAll('.holiday-item input[type="checkbox"]');
+    holidayCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const select = e.target.closest('.holiday-item').querySelector('.extension-type');
+            select.disabled = !e.target.checked;
+        });
+    });
+}
 
     populateMonthSelector() {
         const container = document.querySelector('.month-selector');
