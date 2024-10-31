@@ -528,9 +528,10 @@ setupHolidayListeners() {
 class PTOManager {
     constructor() {
         this.state = {
+            calendar: null,
             currentYear: CONFIG.INITIAL_YEAR,
             userData: {
-                totalPTO: 0,
+                totalPTO: CONFIG.DEFAULT_PTO,
                 plannedPTO: 0,
                 selectedDates: {},
                 preferences: {
@@ -539,16 +540,12 @@ class PTOManager {
                 }
             }
         };
-
+        
         this.eventEmitter = new EventEmitter();
         this.storageManager = new StorageManager();
         this.uiManager = new UIManager(this);
         this.calendarManager = new CalendarManager(this);
         this.setupWizard = new SetupWizard(this);
-
-        if (CONFIG.DEBUG) {
-            window.debugApp = this.createDebugUtilities();
-        }
     }
 
     async initialize() {
@@ -557,7 +554,6 @@ class PTOManager {
         
         try {
             await this.loadSavedData();
-            await this.calendarManager.initialize();
             this.setupEventListeners();
             this.uiManager.addCalendarStyles();
         } catch (error) {
@@ -571,33 +567,52 @@ class PTOManager {
     setupEventListeners() {
         const getStartedBtn = document.getElementById('getStartedBtn');
         const setupPTOBtn = document.getElementById('setupPTOBtn');
-        const exportBtn = document.getElementById('exportBtn');
         const yearSelect = document.getElementById('yearSelect');
 
-        if (getStartedBtn) getStartedBtn.addEventListener('click', () => this.handleGetStarted());
-        if (setupPTOBtn) setupPTOBtn.addEventListener('click', () => this.setupWizard.initialize());
-        if (exportBtn) exportBtn.addEventListener('click', () => this.exportCalendar());
-        if (yearSelect) yearSelect.addEventListener('change', (e) => this.handleYearChange(e));
+        if (getStartedBtn) {
+            getStartedBtn.addEventListener('click', () => this.handleGetStarted());
+        }
+
+        if (setupPTOBtn) {
+            setupPTOBtn.addEventListener('click', () => this.setupWizard.initialize());
+        }
+
+        if (yearSelect) {
+            yearSelect.addEventListener('change', (e) => this.handleYearChange(e));
+        }
     }
 
     handleGetStarted() {
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const appContainer = document.getElementById('appContainer');
-        
-        if (welcomeScreen && appContainer) {
-            welcomeScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            this.setupWizard.initialize();
+        debugLog('Get Started button clicked');
+        try {
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const appContainer = document.getElementById('appContainer');
+            
+            if (welcomeScreen && appContainer) {
+                welcomeScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                
+                // Initialize calendar after showing app container
+                this.calendarManager.initialize().then(() => {
+                    this.setupWizard.initialize();
+                }).catch(error => {
+                    console.error('Calendar initialization error:', error);
+                    this.uiManager.showError('Failed to initialize calendar');
+                });
+            }
+        } catch (error) {
+            console.error('Error in Get Started handler:', error);
+            this.uiManager.showError('Failed to start application setup');
         }
     }
 
-    handleYearChange(e) {
-        const newYear = parseInt(e.target.value);
-        if (newYear !== this.state.currentYear) {
-            this.state.currentYear = newYear;
-            this.calendarManager.refreshCalendar();
+    async loadSavedData() {
+        const savedData = await this.storageManager.load();
+        if (savedData) {
+            this.state.userData = savedData;
         }
     }
+}
 
     exportCalendar() {
         const events = this.calendarManager.calendar.getEvents()
