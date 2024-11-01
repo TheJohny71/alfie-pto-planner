@@ -567,7 +567,14 @@ class PTOManager {
             await this.loadSavedData();
             this.setupEventListeners();
             this.uiManager.addCalendarStyles();
-            await this.calendarManager.initialize();
+            
+            // Only initialize calendar if we're past the welcome screen
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen.classList.contains('hidden')) {
+                await this.calendarManager.initialize();
+            }
+            
+            this.uiManager.updateSummary();
         } catch (error) {
             console.error('Initialization error:', error);
             this.uiManager.showError('Failed to initialize application');
@@ -577,55 +584,112 @@ class PTOManager {
     }
 
     setupEventListeners() {
+        // Get Started Button
         const getStartedBtn = document.getElementById('getStartedBtn');
-        const setupPTOBtn = document.getElementById('setupPTOBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const yearSelect = document.getElementById('yearSelect');
-
         if (getStartedBtn) {
-            getStartedBtn.addEventListener('click', () => this.handleGetStarted());
+            getStartedBtn.addEventListener('click', () => {
+                debugLog('Get Started button clicked');
+                this.handleGetStarted();
+            });
         }
 
+        // Setup PTO Button
+        const setupPTOBtn = document.getElementById('setupPTOBtn');
         if (setupPTOBtn) {
-            setupPTOBtn.addEventListener('click', () => this.setupWizard.initialize());
+            setupPTOBtn.addEventListener('click', () => {
+                debugLog('Setup PTO button clicked');
+                this.setupWizard.initialize();
+            });
         }
 
+        // Export Button
+        const exportBtn = document.getElementById('exportBtn');
         if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportCalendar());
+            exportBtn.addEventListener('click', () => {
+                debugLog('Export button clicked');
+                this.exportCalendar();
+            });
         }
 
+        // Year Select
+        const yearSelect = document.getElementById('yearSelect');
         if (yearSelect) {
-            yearSelect.addEventListener('change', (e) => this.handleYearChange(e));
+            yearSelect.addEventListener('change', (e) => {
+                debugLog('Year changed');
+                this.handleYearChange(e);
+            });
         }
     }
 
     handleGetStarted() {
-        debugLog('Get Started clicked');
+        debugLog('Handling Get Started action');
         const welcomeScreen = document.getElementById('welcomeScreen');
         const appContainer = document.getElementById('appContainer');
         
         if (welcomeScreen && appContainer) {
             welcomeScreen.classList.add('hidden');
             appContainer.classList.remove('hidden');
-            this.setupWizard.initialize();
+            
+            // Initialize calendar after welcome screen is hidden
+            this.calendarManager.initialize().then(() => {
+                debugLog('Calendar initialized after welcome screen');
+                this.setupWizard.initialize();
+            }).catch(error => {
+                console.error('Failed to initialize calendar:', error);
+                this.uiManager.showError('Failed to initialize calendar');
+            });
+        } else {
+            console.error('Welcome screen or app container elements not found');
         }
     }
 
     handleYearChange(e) {
         const newYear = parseInt(e.target.value);
+        debugLog('Year changing to:', newYear);
+        
         if (newYear !== GlobalState.getCurrentYear()) {
             GlobalState.setCurrentYear(newYear);
             if (!this.state.userData.selectedDates[newYear]) {
                 this.state.userData.selectedDates[newYear] = [];
             }
             this.calendarManager.refreshCalendar();
+            this.uiManager.updateSummary();
         }
     }
 
     async loadSavedData() {
+        debugLog('Loading saved data');
         const savedData = await this.storageManager.load();
         if (savedData) {
             this.state.userData = savedData;
+            debugLog('Saved data loaded:', savedData);
+        }
+    }
+
+    async exportCalendar() {
+        debugLog('Exporting calendar');
+        try {
+            const events = this.calendarManager.generateEvents();
+            const exportData = {
+                events: events,
+                userData: this.state.userData,
+                exportDate: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pto-calendar-export-${GlobalState.getCurrentYear()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            this.uiManager.showSuccess('Calendar exported successfully');
+        } catch (error) {
+            console.error('Export error:', error);
+            this.uiManager.showError('Failed to export calendar');
         }
     }
 
@@ -639,6 +703,10 @@ class PTOManager {
             clearData: () => {
                 localStorage.clear();
                 location.reload();
+            },
+            forceRefresh: () => {
+                this.calendarManager.refreshCalendar();
+                this.uiManager.updateSummary();
             }
         };
     }
