@@ -16,20 +16,12 @@
     <!-- Custom styles and scripts -->
     <link href="styles.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="alfie-icon.png">
-    
-    <!-- Ensure scripts are loaded -->
-    <script>
-        window.addEventListener('error', function(e) {
-            console.error('Resource loading error:', e.target.src || e.target.href);
-        });
-    </script>
+    <script src="script.js" defer></script>
 </head>
 <body>
     <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-indicator hidden" aria-hidden="true">
-        <div class="spinner" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
+    <div id="loadingIndicator" class="loading-indicator hidden">
+        <div class="spinner"></div>
     </div>
 
     <!-- Welcome Screen -->
@@ -38,7 +30,7 @@
             <!-- Logo and Title Section -->
             <div class="welcome-header">
                 <div class="logo-container">
-                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo animate-float">
+                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo">
                 </div>
                 <div class="welcome-title">
                     <h1>Welcome to Alfie PTO Planner Pro</h1>
@@ -48,8 +40,8 @@
 
             <!-- Features Grid -->
             <div class="features-grid">
-                <div class="feature-item">
-                    <span class="feature-icon">📅</span>
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
                     <h3>Calendar View</h3>
                     <ul>
                         <li>Interactive calendar interface</li>
@@ -57,8 +49,9 @@
                         <li>Visual PTO tracking</li>
                     </ul>
                 </div>
-                <div class="feature-item">
-                    <span class="feature-icon">🏖️</span>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
                     <h3>Bank Holidays</h3>
                     <ul>
                         <li>Automatic holiday tracking</li>
@@ -66,8 +59,9 @@
                         <li>Regional customization</li>
                     </ul>
                 </div>
-                <div class="feature-item">
-                    <span class="feature-icon">📊</span>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
                     <h3>PTO Summary</h3>
                     <ul>
                         <li>Real-time PTO balance</li>
@@ -75,8 +69,9 @@
                         <li>Year-end projections</li>
                     </ul>
                 </div>
-                <div class="feature-item">
-                    <span class="feature-icon">📱</span>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
                     <h3>Accessibility</h3>
                     <ul>
                         <li>Mobile friendly design</li>
@@ -93,144 +88,130 @@
         </div>
     </div>
 
-    <!-- Main Application Container -->
-    <div id="appContainer" class="app-wrapper hidden" data-state="hidden">
+    <!-- Main App Container -->
+    <div id="appContainer" class="app-container hidden">
+        <!-- Header -->
         <header class="app-header">
-            <!-- Header Left Section -->
-            <div class="header-left">
-                <img src="alfie-icon.png" alt="Alfie PTO Planner" class="logo">
+            <div class="brand">
+                <img src="alfie-icon.png" alt="Alfie Icon" class="app-logo">
                 <h1>Alfie PTO Planner Pro</h1>
             </div>
-            
-            <!-- Header Right Section -->
             <div class="header-controls">
-                <select id="yearSelect" class="year-select" data-current-year="2024">
+                <select id="yearSelect" class="year-select">
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
                     <option value="2027">2027</option>
                     <option value="2028">2028</option>
                 </select>
-                <button id="setupPTOBtn" class="btn" data-tooltip="Set up your PTO preferences">
-                    <span class="btn-icon">⚙️</span> Setup PTO
+                <button id="setupPTOBtn" class="btn">
+                    ⚙️ Setup PTO
                 </button>
-                <button id="exportBtn" class="btn" data-tooltip="Export your PTO schedule">
-                    <span class="btn-icon">📥</span> Export
+                <button id="exportBtn" class="btn">
+                    📤 Export
                 </button>
             </div>
         </header>
 
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Left Sidebar -->
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
             <aside class="sidebar">
-                <!-- PTO Summary Card -->
                 <div class="summary-card">
                     <h2>PTO Summary</h2>
-                    <div class="summary-stats">
-                        <div class="stat-item" data-stat="total">
-                            <label>Total PTO</label>
-                            <span id="totalPTO" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item" data-stat="used">
-                            <label>Used</label>
-                            <span id="plannedPTO" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item highlight" data-stat="remaining">
-                            <label>Remaining</label>
-                            <span id="remainingPTO" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item" data-stat="bankHolidays">
-                            <label>Bank Holidays</label>
-                            <span id="bankHolidays" class="stat-value">0</span>
-                        </div>
+                    <div class="summary-item">
+                        <span>Total PTO</span>
+                        <span id="totalPTO">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Used</span>
+                        <span id="plannedPTO">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Remaining</span>
+                        <span id="remainingPTO">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Bank Holidays</span>
+                        <span id="bankHolidays">0</span>
                     </div>
                 </div>
 
-                <!-- Leave Types Legend -->
-                <div class="leave-legend">
+                <div class="leave-types">
                     <h3>Leave Types</h3>
-                    <div class="legend-item">
-                        <span class="color-dot pto"></span>
+                    <div class="leave-type">
+                        <span class="leave-indicator pto"></span>
                         <span>PTO Day</span>
                     </div>
-                    <div class="legend-item">
-                        <span class="color-dot holiday"></span>
+                    <div class="leave-type">
+                        <span class="leave-indicator holiday"></span>
                         <span>Bank Holiday</span>
                     </div>
                 </div>
 
-                <!-- Upcoming Holidays -->
                 <div class="upcoming-holidays">
                     <h3>Upcoming Holidays</h3>
-                    <div id="holidaysList" class="holidays-list">
+                    <div id="upcomingHolidaysList" class="holiday-list">
                         <!-- Dynamically populated -->
                     </div>
                 </div>
             </aside>
 
-            <!-- Main Calendar Area -->
-            <main class="calendar-container" data-view="month">
+            <!-- Calendar -->
+            <main class="calendar-container">
                 <div id="calendar"></div>
             </main>
         </div>
     </div>
 
     <!-- Setup Modal -->
-    <div id="setupModal" class="modal" data-state="hidden" aria-hidden="true">
+    <div id="setupModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>PTO Setup</h2>
-                <button id="closeSetup" class="close-modal" aria-label="Close modal">&times;</button>
+                <button id="closeSetup" class="close-btn">&times;</button>
             </div>
-            <div class="modal-body">
-                <!-- Step 1: Basic PTO Setup -->
-                <div class="wizard-step" data-step="1" data-state="active">
-                    <h3>Step 1: PTO Allocation</h3>
-                    <div class="form-group">
-                        <label for="totalPTOInput">Total PTO Days:</label>
-                        <input type="number" id="totalPTOInput" min="0" max="50" required>
-                        <small>Maximum 50 days per year</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="plannedPTOInput">Already Planned PTO Days:</label>
-                        <input type="number" id="plannedPTOInput" min="0" value="0" required>
-                        <small>Days already scheduled for this year</small>
-                    </div>
+            
+            <!-- Step 1: PTO Allocation -->
+            <div class="wizard-step" data-step="1">
+                <h3>Step 1: PTO Allocation</h3>
+                <div class="form-group">
+                    <label for="totalPTOInput">Total PTO Days:</label>
+                    <input type="number" id="totalPTOInput" min="0" max="50" class="form-control">
+                    <small class="help-text">Maximum 50 days per year</small>
                 </div>
-
-                <!-- Step 2: Bank Holiday Extensions -->
-                <div class="wizard-step" data-step="2" data-state="hidden">
-                    <h3>Bank Holiday Extensions</h3>
-                    <p class="step-description">Customize your bank holiday preferences:</p>
-                    
-                    <div class="bank-holidays-container">
-                        <div class="bank-holiday-list">
-                            <!-- Dynamically populated -->
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="plannedPTOInput">Already Planned PTO Days:</label>
+                    <input type="number" id="plannedPTOInput" min="0" class="form-control" value="0">
+                    <small class="help-text">Days already scheduled for this year</small>
                 </div>
+            </div>
 
-                <!-- Step 3: Preferences -->
-                <div class="wizard-step" data-step="3" data-state="hidden">
-                    <h3>Step 3: Preferences</h3>
-                    <div class="preferences-section">
-                        <h4>Preferred Months</h4>
-                        <p class="section-description">Select months you typically take PTO:</p>
-                        <div class="month-selector">
-                            <!-- Dynamically populated -->
-                        </div>
+            <!-- Step 2: Bank Holiday Extensions -->
+            <div class="wizard-step" data-step="2" data-state="hidden">
+                <h3>Bank Holiday Extensions</h3>
+                <p class="step-description">Customize your bank holiday preferences:</p>
+                <div class="bank-holidays-container">
+                    <div class="bank-holiday-list">
+                        <!-- Dynamically populated -->
                     </div>
                 </div>
             </div>
+
+            <!-- Step 3: Preferences -->
+            <div class="wizard-step" data-step="3" data-state="hidden">
+                <h3>Preferred Months</h3>
+                <p class="step-description">Select months you typically take PTO:</p>
+                <div class="month-selector">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
             <div class="modal-footer">
-                <button id="prevStep" class="btn" data-action="prev">Previous</button>
-                <button id="nextStep" class="btn btn-primary" data-action="next">Next</button>
+                <button id="prevStep" class="btn">Previous</button>
+                <button id="nextStep" class="btn btn-primary">Next</button>
             </div>
         </div>
     </div>
-
-    <!-- Script -->
-    <script src="script.js"></script>
 </body>
 </html>
