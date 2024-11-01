@@ -27,63 +27,79 @@
     <!-- Welcome Screen -->
     <div id="welcomeScreen" class="welcome-screen" data-state="visible">
         <div class="welcome-content">
-            <!-- Logo and Title Section -->
-            <div class="welcome-header">
-                <div class="logo-container">
-                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo">
-                </div>
-                <div class="welcome-title">
-                    <h1>Welcome to Alfie PTO Planner Pro</h1>
-                    <p class="subtitle">Smart PTO Management Made Simple</p>
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo animate-float">
+                    <h1 class="hero-title">Welcome to Alfie PTO Planner Pro</h1>
+                    <p class="hero-subtitle">Smart PTO Management Made Simple</p>
                 </div>
             </div>
 
             <!-- Features Grid -->
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📅</div>
-                    <h3>Calendar View</h3>
-                    <ul>
-                        <li>Interactive calendar interface</li>
-                        <li>Easy date selection</li>
-                        <li>Visual PTO tracking</li>
-                    </ul>
-                </div>
+            <div class="features-container">
+                <div class="features-grid">
+                    <div class="feature-card" data-aos="fade-up">
+                        <div class="feature-icon-wrapper">
+                            <span class="feature-icon">📅</span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Calendar View</h3>
+                            <ul>
+                                <li>Interactive calendar interface</li>
+                                <li>Easy date selection</li>
+                                <li>Visual PTO tracking</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Bank Holidays</h3>
-                    <ul>
-                        <li>Automatic holiday tracking</li>
-                        <li>Holiday extensions</li>
-                        <li>Regional customization</li>
-                    </ul>
-                </div>
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="feature-icon-wrapper">
+                            <span class="feature-icon">🎯</span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Bank Holidays</h3>
+                            <ul>
+                                <li>Automatic holiday tracking</li>
+                                <li>Holiday extensions</li>
+                                <li>Regional customization</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>PTO Summary</h3>
-                    <ul>
-                        <li>Real-time PTO balance</li>
-                        <li>Usage statistics</li>
-                        <li>Year-end projections</li>
-                    </ul>
-                </div>
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="feature-icon-wrapper">
+                            <span class="feature-icon">📊</span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>PTO Summary</h3>
+                            <ul>
+                                <li>Real-time PTO balance</li>
+                                <li>Usage statistics</li>
+                                <li>Year-end projections</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Accessibility</h3>
-                    <ul>
-                        <li>Mobile friendly design</li>
-                        <li>Easy data export</li>
-                        <li>Cross-device sync</li>
-                    </ul>
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="feature-icon-wrapper">
+                            <span class="feature-icon">📱</span>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Accessibility</h3>
+                            <ul>
+                                <li>Mobile friendly design</li>
+                                <li>Easy data export</li>
+                                <li>Cross-device sync</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <button id="getStartedBtn" class="btn btn-primary pulse-effect">
+            <button id="getStartedBtn" class="btn btn-primary animate-pulse">
                 Get Started
-                <span class="btn-icon">→</span>
+                <span class="btn-arrow">→</span>
             </button>
         </div>
     </div>
@@ -138,20 +154,20 @@
                 </div>
 
                 <div class="leave-types">
-    <h3>Leave Types</h3>
-    <div class="leave-type">
-        <span class="leave-indicator pto"></span>
-        <span>PTO Day</span>
-    </div>
-    <div class="leave-type">
-        <span class="leave-indicator holiday"></span>
-        <span>Bank Holiday</span>
-    </div>
-    <div class="leave-type">
-        <span class="leave-indicator weekend"></span>
-        <span>Weekend</span>
-    </div>
-</div>
+                    <h3>Leave Types</h3>
+                    <div class="leave-type">
+                        <span class="leave-indicator pto"></span>
+                        <span>PTO Day</span>
+                    </div>
+                    <div class="leave-type">
+                        <span class="leave-indicator holiday"></span>
+                        <span>Bank Holiday</span>
+                    </div>
+                    <div class="leave-type">
+                        <span class="leave-indicator weekend"></span>
+                        <span>Weekend</span>
+                    </div>
+                </div>
 
                 <div class="upcoming-holidays">
                     <h3>Upcoming Holidays</h3>
