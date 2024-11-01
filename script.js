@@ -1185,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function handleError(error, context = '') {
+        function handleError(error, context = '') {
         console.error(`Error in ${context}:`, error);
         
         // Log error to analytics or error tracking service
