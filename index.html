@@ -26,83 +26,40 @@
 
     <!-- Welcome Screen -->
     <div id="welcomeScreen" class="welcome-screen" data-state="visible">
-        <div class="welcome-gradient-bg">
-            <div class="animated-circles">
-                <div class="circle"></div>
-                <div class="circle"></div>
-                <div class="circle"></div>
+        <div class="welcome-content">
+            <div class="hero-section">
+                <h1 class="hero-title">
+                    <span class="gradient-text">Alfie PTO Planner Pro</span>
+                </h1>
+                <p class="hero-subtitle">Your companion to a seamless year of leave</p>
             </div>
-            
-            <div class="welcome-content">
-                <div class="hero-section">
-                    <div class="logo-container">
-                        <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo floating">
-                        <div class="logo-rings">
-                            <div class="ring"></div>
-                            <div class="ring"></div>
-                            <div class="ring"></div>
-                        </div>
-                    </div>
-                    
-                    <h1 class="hero-title">
-                        <span class="gradient-text">Alfie</span>
-                        <span class="thin-text">PTO Planner Pro</span>
-                    </h1>
-                    <p class="hero-subtitle">Reimagining Time Off Management</p>
+
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <h3>Smart Calendar</h3>
+                    <p>Interactive planning with intelligent date suggestions</p>
                 </div>
-
-                <div class="feature-cards-container">
-                    <div class="feature-scroll">
-                        <div class="feature-card glass-morphism">
-                            <div class="feature-icon calendar-icon">
-                                <svg viewBox="0 0 24 24" class="feature-svg">
-                                    <path d="M19 4h-1V3c0-.6-.4-1-1-1s-1 .4-1 1v1H8V3c0-.6-.4-1-1-1s-1 .4-1 1v1H5C3.3 4 2 5.3 2 7v12c0 1.7 1.3 3 3 3h14c1.7 0 3-1.3 3-3V7c0-1.7-1.3-3-3-3z"/>
-                                </svg>
-                            </div>
-                            <h3>Smart Calendar</h3>
-                            <p>Interactive planning with intelligent date suggestions</p>
-                        </div>
-
-                        <div class="feature-card glass-morphism">
-                            <div class="feature-icon holiday-icon">
-                                <svg viewBox="0 0 24 24" class="feature-svg">
-                                    <path d="M12 2L1 12h3v8h16v-8h3L12 2z"/>
-                                </svg>
-                            </div>
-                            <h3>Holiday Sync</h3>
-                            <p>Automatic bank holiday integration & tracking</p>
-                        </div>
-
-                        <div class="feature-card glass-morphism">
-                            <div class="feature-icon analytics-icon">
-                                <svg viewBox="0 0 24 24" class="feature-svg">
-                                    <path d="M3 13h6v8H3v-8zM9 3h6v18H9V3zm6 8h6v10h-6V11z"/>
-                                </svg>
-                            </div>
-                            <h3>Smart Analytics</h3>
-                            <p>Real-time insights into your time off patterns</p>
-                        </div>
-                    </div>
+                <div class="feature-card">
+                    <h3>Holiday Sync</h3>
+                    <p>Automatic bank holiday integration & tracking</p>
                 </div>
-
-                <div class="cta-section">
-                    <button id="getStartedBtn" class="cta-button">
-                        <span class="button-text">Get Started</span>
-                        <span class="button-icon">→</span>
-                    </button>
-                    <p class="cta-subtext">Experience the future of PTO management</p>
+                <div class="feature-card">
+                    <h3>Smart Analytics</h3>
+                    <p>Real-time insights into your time off patterns</p>
                 </div>
             </div>
+
+            <button id="getStartedBtn" class="cta-button">Get Started</button>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="appContainer" class="app-container hidden">
         <!-- Header -->
-        <header class="app-header glass-morphism">
+        <header class="app-header">
             <div class="brand">
-                <img src="alfie-icon.png" alt="Alfie Icon" class="app-logo floating">
-                <h1>Alfie <span class="thin-text">PTO Planner Pro</span></h1>
+                <img src="alfie-icon.png" alt="Alfie Icon" class="app-logo">
+                <h1>Alfie PTO Planner Pro</h1>
             </div>
             <div class="header-controls">
                 <select id="yearSelect" class="modern-select">
@@ -112,42 +69,38 @@
                     <option value="2027">2027</option>
                     <option value="2028">2028</option>
                 </select>
-                <button id="setupPTOBtn" class="modern-button">
-                    <span class="button-icon">⚙️</span>
-                    <span>Setup PTO</span>
-                </button>
-                <button id="exportBtn" class="modern-button">
-                    <span class="button-icon">📤</span>
-                    <span>Export</span>
-                </button>
+                <button id="setupPTOBtn" class="modern-button">Setup PTO</button>
+                <button id="exportBtn" class="modern-button">Export</button>
             </div>
         </header>
 
         <!-- Main Content -->
         <div class="main-content">
             <!-- Sidebar -->
-            <aside class="sidebar glass-morphism">
+            <aside class="sidebar">
                 <div class="summary-card">
                     <h2>PTO Summary</h2>
-                    <div class="summary-item">
-                        <span>Total PTO</span>
-                        <span id="totalPTO">0</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Used</span>
-                        <span id="plannedPTO">0</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Remaining</span>
-                        <span id="remainingPTO">0</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Bank Holidays</span>
-                        <span id="bankHolidays">0</span>
+                    <div class="summary-content">
+                        <div class="summary-item">
+                            <span>Total PTO</span>
+                            <span id="totalPTO">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Used</span>
+                            <span id="plannedPTO">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Remaining</span>
+                            <span id="remainingPTO">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Bank Holidays</span>
+                            <span id="bankHolidays">0</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="leave-types glass-card">
+                <div class="leave-types">
                     <h3>Leave Types</h3>
                     <div class="leave-type">
                         <span class="leave-indicator pto"></span>
@@ -163,7 +116,7 @@
                     </div>
                 </div>
 
-                <div class="upcoming-holidays glass-card">
+                <div class="upcoming-holidays">
                     <h3>Upcoming Holidays</h3>
                     <div id="upcomingHolidaysList" class="holiday-list">
                         <!-- Dynamically populated -->
@@ -172,7 +125,7 @@
             </aside>
 
             <!-- Calendar -->
-            <main class="calendar-container glass-morphism">
+            <main class="calendar-container">
                 <div id="calendar"></div>
             </main>
         </div>
@@ -180,7 +133,7 @@
 
     <!-- Setup Modal -->
     <div id="setupModal" class="modal" style="display: none;">
-        <div class="modal-content glass-morphism">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2>PTO Setup</h2>
                 <button id="closeSetup" class="close-btn">&times;</button>
@@ -207,10 +160,10 @@
                 <p class="step-description">Customize your bank holiday preferences:</p>
                 <div class="bank-holidays-container">
                     <div class="bank-holiday-list">
-                        <!-- Dynamically populated with holiday items -->
+                        <!-- Template for bank holiday items -->
                         <div class="bank-holiday-item" data-template>
                             <div class="holiday-info">
-                                <strong class="holiday-date"></strong>
+                                <span class="holiday-date"></span>
                                 <span class="holiday-name"></span>
                             </div>
                             <select class="holiday-extension modern-select">
