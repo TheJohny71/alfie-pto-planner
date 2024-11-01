@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('beforeunload', handleBeforeUnload);
     }
 });
-        // Part 2 - Event Handling and PTO Management
+            // Part 2 - Event Handling and PTO Management
     function handleDateSelect(selectInfo) {
         const startDate = new Date(selectInfo.start);
         const endDate = new Date(selectInfo.end);
@@ -312,6 +312,63 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+    }
+
+    function deletePTOEvent(event) {
+        Swal.fire({
+            title: 'Delete PTO',
+            text: 'Are you sure you want to delete this PTO request?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const dateStr = event.start.toISOString().split('T')[0];
+                ptoEvents.delete(dateStr);
+                event.remove();
+                updatePTOCount();
+                saveToLocalStorage();
+                showSuccess('PTO request deleted successfully');
+            }
+        });
+    }
+
+    function editPTOEvent(event) {
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+
+        Swal.fire({
+            title: 'Edit PTO',
+            html: `
+                <div class="pto-edit-form">
+                    <div class="form-group">
+                        <label>Start Date: ${formatDate(startDate)}</label>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date: ${formatDate(endDate)}</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPtoNotes">Notes:</label>
+                        <textarea id="editPtoNotes" class="swal2-textarea">${event.extendedProps.notes || ''}</textarea>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Save Changes',
+            cancelButtonText: 'Cancel',
+            preConfirm: () => {
+                return {
+                    notes: document.getElementById('editPtoNotes').value
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.setExtendedProp('notes', result.value.notes);
+                saveToLocalStorage();
+                showSuccess('PTO request updated successfully');
+            }
+        });
     }
         // Part 3 - Wizard and Setup Management
     function updateWizardStep(direction) {
