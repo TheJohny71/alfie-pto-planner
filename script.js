@@ -1,7 +1,6 @@
 // Part 1: Configuration and Core Setup
 // =========================================
 
-// Global Configuration
 const CONFIG = {
     DEBUG: true,
     COLORS: {
@@ -26,31 +25,6 @@ const GlobalState = {
     }
 };
 
-// Debug State Management
-window.debugState = {
-    lastAction: null,
-    selectedDates: [],
-    events: []
-};
-
-// Debug Utilities
-function debugLog(message, data) {
-    if (CONFIG.DEBUG) {
-        console.log(`DEBUG: ${message}`, data || '');
-    }
-}
-
-function logState(action, data) {
-    if (CONFIG.DEBUG) {
-        window.debugState.lastAction = action;
-        console.group(`PTO Action: ${action}`);
-        console.log('Data:', data);
-        console.log('Current userData:', JSON.parse(JSON.stringify(userData)));
-        console.log('Calendar State:', calendar ? 'Initialized' : 'Not Initialized');
-        console.groupEnd();
-    }
-}
-
 // Bank Holidays Data
 const BANK_HOLIDAYS = {
     2024: [
@@ -72,18 +46,15 @@ const BANK_HOLIDAYS = {
         { date: '2025-08-25', title: "Summer Bank Holiday" },
         { date: '2025-12-25', title: "Christmas Day" },
         { date: '2025-12-26', title: "Boxing Day" }
-    ],
-    2026: [
-        { date: '2026-01-01', title: "New Year's Day" },
-        { date: '2026-04-03', title: "Good Friday" },
-        { date: '2026-04-06', title: "Easter Monday" },
-        { date: '2026-05-04', title: "Early May Bank Holiday" },
-        { date: '2026-05-25', title: "Spring Bank Holiday" },
-        { date: '2026-08-31', title: "Summer Bank Holiday" },
-        { date: '2026-12-25', title: "Christmas Day" },
-        { date: '2026-12-28', title: "Boxing Day (Substitute Day)" }
     ]
 };
+
+// Debug Utilities
+function debugLog(message, data) {
+    if (CONFIG.DEBUG) {
+        console.log(`DEBUG: ${message}`, data || '');
+    }
+}
 
 // Core Helper Functions
 function formatDisplayDate(date) {
@@ -111,8 +82,9 @@ function isBankHoliday(date) {
 function calculateWorkingDays(start, end) {
     let count = 0;
     let current = new Date(start);
+    const endDate = new Date(end);
     
-    while (current <= end) {
+    while (current <= endDate) {
         if (!isWeekend(current) && !isBankHoliday(current)) {
             count++;
         }
@@ -124,7 +96,6 @@ function calculateWorkingDays(start, end) {
 // Part 2: Core Classes
 // =========================================
 
-// Event Management
 class EventEmitter {
     constructor() {
         this.events = new Map();
@@ -144,7 +115,6 @@ class EventEmitter {
     }
 }
 
-// Storage Management
 class StorageManager {
     constructor() {
         this.storageKey = 'alfie_pto_data_v1';
@@ -165,7 +135,6 @@ class StorageManager {
     async load() {
         try {
             const data = localStorage.getItem(this.storageKey);
-            debugLog('Data loaded', data);
             return data ? JSON.parse(data) : null;
         } catch (error) {
             console.error('Load error:', error);
@@ -174,7 +143,6 @@ class StorageManager {
     }
 }
 
-// UI Management
 class UIManager {
     constructor(ptoManager) {
         this.ptoManager = ptoManager;
@@ -184,7 +152,6 @@ class UIManager {
         const loader = document.getElementById('loadingIndicator');
         if (loader) {
             loader.classList.remove('hidden');
-            debugLog('Loading indicator shown');
         }
     }
 
@@ -192,12 +159,10 @@ class UIManager {
         const loader = document.getElementById('loadingIndicator');
         if (loader) {
             loader.classList.add('hidden');
-            debugLog('Loading indicator hidden');
         }
     }
 
     showError(message) {
-        debugLog('Error:', message);
         Swal.fire({
             title: 'Error',
             text: message,
@@ -207,7 +172,6 @@ class UIManager {
     }
 
     showSuccess(message) {
-        debugLog('Success:', message);
         Swal.fire({
             title: 'Success',
             text: message,
@@ -223,16 +187,13 @@ class UIManager {
             .fc-day-bank-holiday {
                 background-color: rgba(245, 158, 11, 0.1) !important;
             }
-            
             .bank-holiday {
                 font-weight: 600 !important;
                 font-size: 0.95em !important;
                 margin: 1px 0 !important;
                 padding: 2px !important;
                 color: #B45309 !important;
-                text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.8);
             }
-
             .pto-day {
                 font-weight: 500 !important;
                 font-size: 0.9em !important;
@@ -244,7 +205,6 @@ class UIManager {
             }
         `;
         document.head.appendChild(styleSheet);
-        debugLog('Calendar styles added');
     }
 
     updateSummary() {
@@ -261,8 +221,8 @@ class UIManager {
             elements.remainingPTO.textContent = 
                 this.ptoManager.state.userData.totalPTO - this.ptoManager.state.userData.plannedPTO;
         }
-        if (elements.bankHolidays && BANK_HOLIDAYS[GlobalState.getCurrentYear()]) {
-            elements.bankHolidays.textContent = BANK_HOLIDAYS[GlobalState.getCurrentYear()].length;
+        if (elements.bankHolidays) {
+            elements.bankHolidays.textContent = BANK_HOLIDAYS[GlobalState.getCurrentYear()]?.length || 0;
         }
     }
 }
@@ -301,7 +261,6 @@ class CalendarManager {
                 },
                 select: (selectInfo) => this.handleDateSelection(selectInfo),
                 eventDidMount: (info) => {
-                    // Add any event-specific styling here
                     if (info.event.classNames.includes('bank-holiday')) {
                         info.el.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
                     }
@@ -311,15 +270,7 @@ class CalendarManager {
                     successCallback(events);
                 },
                 eventClick: (info) => {
-                    // Handle event clicks here
                     debugLog('Event clicked:', info.event);
-                },
-                dayCellDidMount: (arg) => {
-                    // Handle day cell mounting here
-                    const date = arg.date;
-                    if (isBankHoliday(date)) {
-                        arg.el.classList.add('fc-day-bank-holiday');
-                    }
                 },
                 displayEventTime: false,
                 eventDisplay: 'block',
@@ -339,22 +290,21 @@ class CalendarManager {
         }
     }
 
-    // ... rest of your CalendarManager methods remain the same ...
-}
-
     handleDateSelection(selectInfo) {
-        debugLog('Date selection started', selectInfo);
         const startDate = selectInfo.start;
         const endDate = selectInfo.end;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        if (startDate < today) {
+        
+        if (startDate < new Date()) {
             this.ptoManager.uiManager.showError('Cannot select past dates');
             return;
         }
 
         const workingDays = calculateWorkingDays(startDate, endDate);
+        if (workingDays === 0) {
+            this.ptoManager.uiManager.showError('No working days selected');
+            return;
+        }
+
         if (this.ptoManager.state.userData.plannedPTO + workingDays > this.ptoManager.state.userData.totalPTO) {
             this.ptoManager.uiManager.showError(
                 `Not enough PTO days remaining. You have ${
@@ -364,42 +314,54 @@ class CalendarManager {
             return;
         }
 
-        this.confirmPTOSelection(startDate, endDate);
-    }
-
-    markBankHolidays() {
-        debugLog('Marking bank holidays');
-        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
-        if (!currentYearHolidays) return;
-
-        currentYearHolidays.forEach(holiday => {
-            const dateStr = holiday.date;
-            const dayEl = document.querySelector(`td[data-date="${dateStr}"]`);
-            if (dayEl) {
-                dayEl.classList.add('fc-day-bank-holiday');
-                dayEl.setAttribute('title', holiday.title);
+        Swal.fire({
+            title: 'Confirm PTO Selection',
+            text: `Add ${workingDays} PTO day(s) from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: CONFIG.COLORS.PTO,
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, add PTO'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.addPTODays(startDate, endDate);
             }
         });
     }
 
-    refreshCalendar() {
-        if (this.calendar) {
-            this.calendar.removeAllEvents();
-            const events = this.generateEvents();
-            this.calendar.addEventSource(events);
-            this.calendar.render();
-            
-            setTimeout(() => {
-                this.markBankHolidays();
-            }, CONFIG.ANIMATION_DELAY);
+    addPTODays(start, end) {
+        const currentYear = GlobalState.getCurrentYear();
+        if (!this.ptoManager.state.userData.selectedDates[currentYear]) {
+            this.ptoManager.state.userData.selectedDates[currentYear] = [];
         }
+
+        let current = new Date(start);
+        const endDate = new Date(end);
+        let addedDays = 0;
+
+        while (current < endDate) {
+            if (!isWeekend(current) && !isBankHoliday(current)) {
+                const dateStr = formatDate(current);
+                if (!this.ptoManager.state.userData.selectedDates[currentYear].includes(dateStr)) {
+                    this.ptoManager.state.userData.selectedDates[currentYear].push(dateStr);
+                    addedDays++;
+                }
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        this.ptoManager.state.userData.plannedPTO += addedDays;
+        this.ptoManager.storageManager.save(this.ptoManager.state.userData);
+        this.refreshCalendar();
+        this.ptoManager.uiManager.updateSummary();
+        this.ptoManager.uiManager.showSuccess(`Added ${addedDays} PTO day(s)`);
     }
 
     generateEvents() {
         const events = [];
-        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
         
         // Add bank holidays
+        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
         if (currentYearHolidays) {
             currentYearHolidays.forEach(holiday => {
                 events.push({
@@ -424,6 +386,28 @@ class CalendarManager {
 
         return events;
     }
+
+    markBankHolidays() {
+        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
+        if (!currentYearHolidays) return;
+
+        currentYearHolidays.forEach(holiday => {
+            const dateEl = document.querySelector(`td[data-date="${holiday.date}"]`);
+            if (dateEl) {
+                dateEl.classList.add('fc-day-bank-holiday');
+                dateEl.setAttribute('title', holiday.title);
+            }
+        });
+    }
+
+    refreshCalendar() {
+        if (this.calendar) {
+            this.calendar.removeAllEvents();
+            const events = this.generateEvents();
+            this.calendar.addEventSource(events);
+            this.markBankHolidays();
+        }
+    }
 }
 // Part 4: Setup Wizard
 // =========================================
@@ -444,91 +428,99 @@ class SetupWizard {
             return;
         }
 
-        try {
-            modal.style.display = 'flex';
-            this.showStep(1);
-            this.populateBankHolidays();
-            this.populateMonthSelector();
-            this.setupEventListeners();
-        } catch (error) {
-            console.error('Setup wizard initialization error:', error);
-            this.ptoManager.uiManager.showError('Failed to initialize setup wizard');
+        modal.style.display = 'flex';
+        this.showStep(1);
+        this.setupEventListeners();
+    }
+
+    showStep(step) {
+        document.querySelectorAll('.wizard-step').forEach(el => {
+            el.setAttribute('data-state', 'hidden');
+        });
+        
+        const stepElement = document.querySelector(`.wizard-step[data-step="${step}"]`);
+        if (stepElement) {
+            stepElement.setAttribute('data-state', 'active');
+        }
+
+        const prevBtn = document.getElementById('prevStep');
+        const nextBtn = document.getElementById('nextStep');
+
+        if (prevBtn) prevBtn.style.display = step === 1 ? 'none' : 'block';
+        if (nextBtn) {
+            nextBtn.textContent = step === this.totalSteps ? 'Finish' : 'Next';
         }
     }
 
-    populateBankHolidays() {
-        debugLog('Populating bank holidays');
-        const container = document.querySelector('.bank-holiday-list');
-        if (!container) return;
+    setupEventListeners() {
+        const prevBtn = document.getElementById('prevStep');
+        const nextBtn = document.getElementById('nextStep');
+        const closeBtn = document.getElementById('closeSetup');
 
-        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
-        if (!currentYearHolidays) {
-            container.innerHTML = '<p>No bank holidays available for selected year.</p>';
-            return;
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (this.currentStep > 1) {
+                    this.currentStep--;
+                    this.showStep(this.currentStep);
+                }
+            });
         }
 
-        const holidaysHtml = currentYearHolidays.map(holiday => `
-            <div class="holiday-item">
-                <label class="holiday-check">
-                    <input type="checkbox" id="holiday-${holiday.date}" data-date="${holiday.date}">
-                    <span>${holiday.title} (${formatDisplayDate(new Date(holiday.date))})</span>
-                </label>
-                <select class="extension-type" data-date="${holiday.date}">
-                    <option value="before">Day Before</option>
-                    <option value="after">Day After</option>
-                    <option value="both">Both Days</option>
-                </select>
-            </div>
-        `).join('');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (this.currentStep < this.totalSteps) {
+                    this.currentStep++;
+                    this.showStep(this.currentStep);
+                } else {
+                    this.saveAndClose();
+                }
+            });
+        }
 
-        container.innerHTML = holidaysHtml;
-        this.setupHolidayListeners();
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.handleClose();
+            });
+        }
     }
 
-    saveWizardData() {
+    saveAndClose() {
         const totalPTOInput = document.getElementById('totalPTOInput');
         const plannedPTOInput = document.getElementById('plannedPTOInput');
 
         if (totalPTOInput && plannedPTOInput) {
-            try {
-                this.ptoManager.state.userData.totalPTO = parseInt(totalPTOInput.value);
-                this.ptoManager.state.userData.plannedPTO = parseInt(plannedPTOInput.value);
+            const totalPTO = parseInt(totalPTOInput.value);
+            const plannedPTO = parseInt(plannedPTOInput.value);
 
-                this.ptoManager.state.userData.preferences = {
-                    schoolHolidays: Array.from(
-                        document.querySelectorAll('input[name="schoolHolidays"]:checked')
-                    ).map(input => input.value),
-
-                    preferredMonths: Array.from(
-                        document.querySelectorAll('input[name="preferredMonth"]:checked')
-                    ).map(input => input.value),
-
-                    extendBankHolidays: Array.from(
-                        document.querySelectorAll('.holiday-item input[type="checkbox"]:checked')
-                    ).map(input => ({
-                        date: input.dataset.date,
-                        extensionType: input.closest('.holiday-item')
-                            .querySelector('.extension-type').value
-                    }))
-                };
-
-                this.ptoManager.storageManager.save(this.ptoManager.state.userData);
-                this.handleModalClose();
-                
-                if (!this.ptoManager.calendarManager.calendar) {
-                    this.ptoManager.calendarManager.initialize();
-                } else {
-                    this.ptoManager.calendarManager.refreshCalendar();
-                }
-
-                this.ptoManager.uiManager.showSuccess('PTO setup completed successfully');
-            } catch (error) {
-                console.error('Error saving wizard data:', error);
-                this.ptoManager.uiManager.showError('Failed to save setup data');
+            if (isNaN(totalPTO) || totalPTO < 0 || totalPTO > CONFIG.MAX_PTO) {
+                this.ptoManager.uiManager.showError(`Please enter a valid PTO amount (0-${CONFIG.MAX_PTO})`);
+                return;
             }
+
+            if (isNaN(plannedPTO) || plannedPTO < 0 || plannedPTO > totalPTO) {
+                this.ptoManager.uiManager.showError('Planned PTO cannot exceed total PTO');
+                return;
+            }
+
+            this.ptoManager.state.userData.totalPTO = totalPTO;
+            this.ptoManager.state.userData.plannedPTO = plannedPTO;
+            this.ptoManager.storageManager.save(this.ptoManager.state.userData);
+            this.handleClose();
+            this.ptoManager.uiManager.updateSummary();
+            this.ptoManager.uiManager.showSuccess('PTO setup completed successfully');
+        }
+    }
+
+    handleClose() {
+        const modal = document.getElementById('setupModal');
+        if (modal) {
+            modal.style.display = 'none';
+            this.currentStep = 1;
+            this.showStep(1);
         }
     }
 }
+
 // Part 5: Main PTO Manager and Initialization
 // =========================================
 
@@ -553,10 +545,6 @@ class PTOManager {
         this.uiManager = new UIManager(this);
         this.calendarManager = new CalendarManager(this);
         this.setupWizard = new SetupWizard(this);
-
-        if (CONFIG.DEBUG) {
-            window.debugApp = this.createDebugUtilities();
-        }
     }
 
     async initialize() {
@@ -567,13 +555,6 @@ class PTOManager {
             await this.loadSavedData();
             this.setupEventListeners();
             this.uiManager.addCalendarStyles();
-            
-            // Only initialize calendar if we're past the welcome screen
-            const welcomeScreen = document.getElementById('welcomeScreen');
-            if (welcomeScreen.classList.contains('hidden')) {
-                await this.calendarManager.initialize();
-            }
-            
             this.uiManager.updateSummary();
         } catch (error) {
             console.error('Initialization error:', error);
@@ -584,40 +565,24 @@ class PTOManager {
     }
 
     setupEventListeners() {
-        // Get Started Button
         const getStartedBtn = document.getElementById('getStartedBtn');
         if (getStartedBtn) {
-            getStartedBtn.addEventListener('click', () => {
-                debugLog('Get Started button clicked');
-                this.handleGetStarted();
-            });
+            getStartedBtn.addEventListener('click', () => this.handleGetStarted());
         }
 
-        // Setup PTO Button
         const setupPTOBtn = document.getElementById('setupPTOBtn');
         if (setupPTOBtn) {
-            setupPTOBtn.addEventListener('click', () => {
-                debugLog('Setup PTO button clicked');
-                this.setupWizard.initialize();
-            });
+            setupPTOBtn.addEventListener('click', () => this.setupWizard.initialize());
         }
 
-        // Export Button
         const exportBtn = document.getElementById('exportBtn');
         if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                debugLog('Export button clicked');
-                this.exportCalendar();
-            });
+            exportBtn.addEventListener('click', () => this.exportCalendar());
         }
 
-        // Year Select
         const yearSelect = document.getElementById('yearSelect');
         if (yearSelect) {
-            yearSelect.addEventListener('change', (e) => {
-                debugLog('Year changed');
-                this.handleYearChange(e);
-            });
+            yearSelect.addEventListener('change', (e) => this.handleYearChange(e));
         }
     }
 
@@ -630,7 +595,6 @@ class PTOManager {
             welcomeScreen.classList.add('hidden');
             appContainer.classList.remove('hidden');
             
-            // Initialize calendar after welcome screen is hidden
             this.calendarManager.initialize().then(() => {
                 debugLog('Calendar initialized after welcome screen');
                 this.setupWizard.initialize();
@@ -638,15 +602,11 @@ class PTOManager {
                 console.error('Failed to initialize calendar:', error);
                 this.uiManager.showError('Failed to initialize calendar');
             });
-        } else {
-            console.error('Welcome screen or app container elements not found');
         }
     }
 
     handleYearChange(e) {
         const newYear = parseInt(e.target.value);
-        debugLog('Year changing to:', newYear);
-        
         if (newYear !== GlobalState.getCurrentYear()) {
             GlobalState.setCurrentYear(newYear);
             if (!this.state.userData.selectedDates[newYear]) {
@@ -658,20 +618,16 @@ class PTOManager {
     }
 
     async loadSavedData() {
-        debugLog('Loading saved data');
         const savedData = await this.storageManager.load();
         if (savedData) {
             this.state.userData = savedData;
-            debugLog('Saved data loaded:', savedData);
         }
     }
 
     async exportCalendar() {
-        debugLog('Exporting calendar');
         try {
-            const events = this.calendarManager.generateEvents();
             const exportData = {
-                events: events,
+                events: this.calendarManager.generateEvents(),
                 userData: this.state.userData,
                 exportDate: new Date().toISOString()
             };
@@ -692,24 +648,6 @@ class PTOManager {
             this.uiManager.showError('Failed to export calendar');
         }
     }
-
-    createDebugUtilities() {
-        return {
-            getCurrentState: () => ({
-                userData: this.state.userData,
-                currentYear: GlobalState.getCurrentYear(),
-                calendarInitialized: !!this.calendarManager.calendar
-            }),
-            clearData: () => {
-                localStorage.clear();
-                location.reload();
-            },
-            forceRefresh: () => {
-                this.calendarManager.refreshCalendar();
-                this.uiManager.updateSummary();
-            }
-        };
-    }
 }
 
 // Initialize application
@@ -720,14 +658,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const app = new PTOManager();
         app.initialize().catch(error => {
             console.error('Application initialization failed:', error);
-            if (CONFIG.DEBUG) {
-                console.error('Detailed error:', error.stack);
-            }
         });
     } catch (error) {
         console.error('Critical initialization error:', error);
-        if (CONFIG.DEBUG) {
-            console.error('Detailed error:', error.stack);
-        }
     }
 });
