@@ -300,10 +300,27 @@ class CalendarManager {
                     end: `${GlobalState.getCurrentYear()}-12-31`
                 },
                 select: (selectInfo) => this.handleDateSelection(selectInfo),
-                eventDidMount: (info) => this.handleEventMount(info),
-                events: (info) => this.generateEvents(info),
-                eventClick: (info) => this.handleEventClick(info),
-                dayCellDidMount: (arg) => this.handleDayCellMount(arg),
+                eventDidMount: (info) => {
+                    // Add any event-specific styling here
+                    if (info.event.classNames.includes('bank-holiday')) {
+                        info.el.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
+                    }
+                },
+                events: (info, successCallback) => {
+                    const events = this.generateEvents();
+                    successCallback(events);
+                },
+                eventClick: (info) => {
+                    // Handle event clicks here
+                    debugLog('Event clicked:', info.event);
+                },
+                dayCellDidMount: (arg) => {
+                    // Handle day cell mounting here
+                    const date = arg.date;
+                    if (isBankHoliday(date)) {
+                        arg.el.classList.add('fc-day-bank-holiday');
+                    }
+                },
                 displayEventTime: false,
                 eventDisplay: 'block',
                 height: 'auto',
@@ -321,6 +338,9 @@ class CalendarManager {
             throw error;
         }
     }
+
+    // ... rest of your CalendarManager methods remain the same ...
+}
 
     handleDateSelection(selectInfo) {
         debugLog('Date selection started', selectInfo);
