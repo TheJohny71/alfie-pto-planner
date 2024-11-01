@@ -58,9 +58,68 @@ document.addEventListener('DOMContentLoaded', function() {
             { date: '2025-08-25', name: "Summer Bank Holiday" },
             { date: '2025-12-25', name: "Christmas Day" },
             { date: '2025-12-26', name: "Boxing Day" }
-        ],
-        // Add more years as needed
+        ]
     };
+
+    // Load Events Function (defined before calendar initialization)
+    function loadEvents(fetchInfo, successCallback, failureCallback) {
+        try {
+            const events = [];
+            const year = new Date(fetchInfo.start).getFullYear();
+            
+            // Add bank holidays
+            if (bankHolidays[year]) {
+                bankHolidays[year].forEach(holiday => {
+                    if (selectedHolidays.has(holiday.date)) {
+                        events.push({
+                            title: holiday.name,
+                            start: holiday.date,
+                            allDay: true,
+                            backgroundColor: 'var(--holiday-color)',
+                            borderColor: 'var(--holiday-color)',
+                            editable: false
+                        });
+
+                        // Add holiday extensions
+                        const extension = holidayExtensions.get(holiday.date);
+                        if (extension) {
+                            const holidayDate = new Date(holiday.date);
+                            let extensionDate;
+                            
+                            if (extension === 'before') {
+                                extensionDate = new Date(holidayDate);
+                                extensionDate.setDate(holidayDate.getDate() - 1);
+                            } else if (extension === 'after') {
+                                extensionDate = new Date(holidayDate);
+                                extensionDate.setDate(holidayDate.getDate() + 1);
+                            }
+
+                            if (extensionDate) {
+                                events.push({
+                                    title: 'Holiday Extension',
+                                    start: extensionDate.toISOString().split('T')[0],
+                                    allDay: true,
+                                    backgroundColor: 'var(--extension-color)',
+                                    borderColor: 'var(--extension-color)',
+                                    editable: false
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Add PTO events
+            ptoEvents.forEach(event => {
+                events.push(event);
+            });
+
+            successCallback(events);
+        } catch (error) {
+            console.error('Error loading events:', error);
+            if (failureCallback) failureCallback(error);
+        }
+    }
 
     // Initialize Calendar with Extended Configuration
     function initializeCalendar() {
@@ -110,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('keydown', handleKeyboardShortcuts);
         window.addEventListener('resize', handleWindowResize);
         window.addEventListener('beforeunload', handleBeforeUnload);
-    }  
+    }
+});
         // Part 2 - Event Handling and PTO Management
     function handleDateSelect(selectInfo) {
         const startDate = new Date(selectInfo.start);
