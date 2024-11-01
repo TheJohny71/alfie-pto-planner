@@ -15,6 +15,17 @@ const CONFIG = {
     ANIMATION_DELAY: 100
 };
 
+// Global State Management
+const GlobalState = {
+    currentYear: CONFIG.INITIAL_YEAR,
+    getCurrentYear: function() {
+        return this.currentYear;
+    },
+    setCurrentYear: function(year) {
+        this.currentYear = year;
+    }
+};
+
 // Debug State Management
 window.debugState = {
     lastAction: null,
@@ -42,36 +53,7 @@ function logState(action, data) {
 
 // Bank Holidays Data
 const BANK_HOLIDAYS = {
-    2024: [
-        { date: '2024-01-01', title: "New Year's Day" },
-        { date: '2024-03-29', title: "Good Friday" },
-        { date: '2024-04-01', title: "Easter Monday" },
-        { date: '2024-05-06', title: "Early May Bank Holiday" },
-        { date: '2024-05-27', title: "Spring Bank Holiday" },
-        { date: '2024-08-26', title: "Summer Bank Holiday" },
-        { date: '2024-12-25', title: "Christmas Day" },
-        { date: '2024-12-26', title: "Boxing Day" }
-    ],
-    2025: [
-        { date: '2025-01-01', title: "New Year's Day" },
-        { date: '2025-04-18', title: "Good Friday" },
-        { date: '2025-04-21', title: "Easter Monday" },
-        { date: '2025-05-05', title: "Early May Bank Holiday" },
-        { date: '2025-05-26', title: "Spring Bank Holiday" },
-        { date: '2025-08-25', title: "Summer Bank Holiday" },
-        { date: '2025-12-25', title: "Christmas Day" },
-        { date: '2025-12-26', title: "Boxing Day" }
-    ],
-    2026: [
-        { date: '2026-01-01', title: "New Year's Day" },
-        { date: '2026-04-03', title: "Good Friday" },
-        { date: '2026-04-06', title: "Easter Monday" },
-        { date: '2026-05-04', title: "Early May Bank Holiday" },
-        { date: '2026-05-25', title: "Spring Bank Holiday" },
-        { date: '2026-08-31', title: "Summer Bank Holiday" },
-        { date: '2026-12-25', title: "Christmas Day" },
-        { date: '2026-12-28', title: "Boxing Day (Substitute Day)" }
-    ]
+    // ... your existing BANK_HOLIDAYS data ...
 };
 
 // Core Helper Functions
@@ -94,7 +76,7 @@ function isWeekend(date) {
 
 function isBankHoliday(date) {
     const dateStr = formatDate(date);
-    return BANK_HOLIDAYS[currentYear]?.some(holiday => holiday.date === dateStr) || false;
+    return BANK_HOLIDAYS[GlobalState.getCurrentYear()]?.some(holiday => holiday.date === dateStr) || false;
 }
 
 function calculateWorkingDays(start, end) {
@@ -171,82 +153,7 @@ class UIManager {
         this.ptoManager = ptoManager;
     }
 
-    showLoading() {
-        const loader = document.getElementById('loadingIndicator');
-        if (loader) {
-            loader.classList.remove('hidden');
-            debugLog('Loading indicator shown');
-        }
-    }
-
-    hideLoading() {
-        const loader = document.getElementById('loadingIndicator');
-        if (loader) {
-            loader.classList.add('hidden');
-            debugLog('Loading indicator hidden');
-        }
-    }
-
-    showError(message) {
-        debugLog('Error:', message);
-        Swal.fire({
-            title: 'Error',
-            text: message,
-            icon: 'error',
-            confirmButtonColor: CONFIG.COLORS.PTO
-        });
-    }
-
-    showSuccess(message) {
-        debugLog('Success:', message);
-        Swal.fire({
-            title: 'Success',
-            text: message,
-            icon: 'success',
-            timer: 1500,
-            confirmButtonColor: CONFIG.COLORS.PTO
-        });
-    }
-
-    addCalendarStyles() {
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = `
-            .fc-day-bank-holiday {
-                background-color: rgba(245, 158, 11, 0.1) !important;
-            }
-            
-            .bank-holiday {
-                font-weight: 600 !important;
-                font-size: 0.95em !important;
-                margin: 1px 0 !important;
-                padding: 2px !important;
-                color: #B45309 !important;
-                text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.8);
-            }
-
-            .pto-day {
-                font-weight: 500 !important;
-                font-size: 0.9em !important;
-                margin: 1px 0 !important;
-                padding: 2px !important;
-                color: white !important;
-                background-color: var(--pto-green) !important;
-                border-color: var(--pto-green) !important;
-            }
-
-            .fc .fc-daygrid-event {
-                z-index: 6;
-                margin-top: 1px;
-            }
-
-            .fc .fc-daygrid-day-events {
-                min-height: 1.5em;
-            }
-        `;
-        document.head.appendChild(styleSheet);
-        debugLog('Calendar styles added');
-    }
-
+    // ... rest of your UIManager class methods ...
     updateSummary() {
         const elements = {
             totalPTO: document.getElementById('totalPTO'),
@@ -261,8 +168,8 @@ class UIManager {
             elements.remainingPTO.textContent = 
                 this.ptoManager.state.userData.totalPTO - this.ptoManager.state.userData.plannedPTO;
         }
-        if (elements.bankHolidays && BANK_HOLIDAYS[currentYear]) {
-            elements.bankHolidays.textContent = BANK_HOLIDAYS[currentYear].length;
+        if (elements.bankHolidays && BANK_HOLIDAYS[GlobalState.getCurrentYear()]) {
+            elements.bankHolidays.textContent = BANK_HOLIDAYS[GlobalState.getCurrentYear()].length;
         }
     }
 }
@@ -294,7 +201,7 @@ class CalendarManager {
             this.calendar = new FullCalendar.Calendar(this.calendarEl, {
                 initialView: 'dayGridMonth',
                 firstDay: 1,
-                initialDate: `${currentYear}-01-01`,
+                initialDate: `${GlobalState.getCurrentYear()}-01-01`,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -302,8 +209,8 @@ class CalendarManager {
                 },
                 selectable: true,
                 selectConstraint: {
-                    start: `${currentYear}-01-01`,
-                    end: `${currentYear}-12-31`
+                    start: `${GlobalState.getCurrentYear()}-01-01`,
+                    end: `${GlobalState.getCurrentYear()}-12-31`
                 },
                 select: (selectInfo) => this.handleDateSelection(selectInfo),
                 eventDidMount: (info) => this.handleEventMount(info),
@@ -326,6 +233,57 @@ class CalendarManager {
             console.error('Calendar initialization error:', error);
             throw error;
         }
+    }
+
+    generateEvents() {
+        const events = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Add bank holidays
+        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
+        if (currentYearHolidays) {
+            currentYearHolidays.forEach(holiday => {
+                const holidayDate = new Date(holiday.date);
+                if (holidayDate >= today) {
+                    events.push({
+                        title: holiday.title,
+                        start: holiday.date,
+                        allDay: true,
+                        className: 'bank-holiday-bg',
+                        display: 'background',
+                        backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
+                    });
+
+                    events.push({
+                        title: holiday.title,
+                        start: holiday.date,
+                        allDay: true,
+                        className: 'bank-holiday',
+                        display: 'block'
+                    });
+                }
+            });
+        }
+
+        // Add PTO days
+        const selectedDates = this.ptoManager.state.userData.selectedDates[GlobalState.getCurrentYear()];
+        if (selectedDates) {
+            selectedDates.forEach(date => {
+                events.push({
+                    title: 'PTO Day',
+                    start: date,
+                    allDay: true,
+                    className: 'pto-day',
+                    backgroundColor: CONFIG.COLORS.PTO,
+                    borderColor: CONFIG.COLORS.PTO,
+                    display: 'block',
+                    editable: false
+                });
+            });
+        }
+
+        return events;
     }
 
     handleDateSelection(selectInfo) {
@@ -357,123 +315,12 @@ class CalendarManager {
         this.confirmPTOSelection(startDate, endDate);
     }
 
-    validateDateSelection(start, end) {
-        if (isWeekend(start) || isWeekend(end)) {
-            this.ptoManager.uiManager.showError('Cannot select weekends');
-            return false;
-        }
-
-        if (isBankHoliday(start) || isBankHoliday(end)) {
-            this.ptoManager.uiManager.showError('Cannot select bank holidays');
-            return false;
-        }
-
-        return true;
-    }
-
-    confirmPTOSelection(startDate, endDate) {
-        Swal.fire({
-            title: 'Add PTO Days',
-            text: `Add PTO from ${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: CONFIG.COLORS.PTO,
-            confirmButtonText: 'Add PTO'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                debugLog('User confirmed PTO addition');
-                this.addPTODays(startDate, endDate);
-            }
-        });
-    }
-
-    generateEvents() {
-        const events = [];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // Add bank holidays
-        if (BANK_HOLIDAYS[currentYear]) {
-            BANK_HOLIDAYS[currentYear].forEach(holiday => {
-                const holidayDate = new Date(holiday.date);
-                if (holidayDate >= today) {
-                    events.push({
-                        title: holiday.title,
-                        start: holiday.date,
-                        allDay: true,
-                        className: 'bank-holiday-bg',
-                        display: 'background',
-                        backgroundColor: CONFIG.COLORS.BANK_HOLIDAY
-                    });
-
-                    events.push({
-                        title: holiday.title,
-                        start: holiday.date,
-                        allDay: true,
-                        className: 'bank-holiday',
-                        display: 'block'
-                    });
-                }
-            });
-        }
-
-        // Add PTO days
-        if (this.ptoManager.state.userData.selectedDates[currentYear]) {
-            this.ptoManager.state.userData.selectedDates[currentYear].forEach(date => {
-                events.push({
-                    title: 'PTO Day',
-                    start: date,
-                    allDay: true,
-                    className: 'pto-day',
-                    backgroundColor: CONFIG.COLORS.PTO,
-                    borderColor: CONFIG.COLORS.PTO,
-                    display: 'block',
-                    editable: false
-                });
-            });
-        }
-
-        return events;
-    }
-
-    handleEventMount(info) {
-        const eventEl = info.el;
-        const event = info.event;
-
-        try {
-            if (event.classNames.includes('bank-holiday-bg')) {
-                eventEl.style.backgroundColor = CONFIG.COLORS.BANK_HOLIDAY;
-            } else if (event.classNames.includes('bank-holiday')) {
-                eventEl.style.backgroundColor = 'transparent';
-                eventEl.style.borderColor = 'transparent';
-                eventEl.style.color = '#B45309';
-                eventEl.style.fontWeight = '600';
-                eventEl.style.textShadow = '0px 0px 1px rgba(255, 255, 255, 0.8)';
-            } else if (event.classNames.includes('pto-day')) {
-                eventEl.style.backgroundColor = CONFIG.COLORS.PTO;
-                eventEl.style.borderColor = CONFIG.COLORS.PTO;
-                eventEl.style.color = 'white';
-            }
-        } catch (error) {
-            console.error('Error mounting event:', error);
-        }
-    }
-
-    handleDayCellMount(arg) {
-        try {
-            if (isWeekend(arg.date)) {
-                arg.el.style.backgroundColor = CONFIG.COLORS.WEEKEND;
-            }
-        } catch (error) {
-            console.error('Error mounting day cell:', error);
-        }
-    }
-
     markBankHolidays() {
-        debugLog('Marking bank holidays for year', currentYear);
-        if (!BANK_HOLIDAYS[currentYear]) return;
+        debugLog('Marking bank holidays for year', GlobalState.getCurrentYear());
+        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
+        if (!currentYearHolidays) return;
 
-        BANK_HOLIDAYS[currentYear].forEach(holiday => {
+        currentYearHolidays.forEach(holiday => {
             const dateStr = holiday.date;
             const dayEl = document.querySelector(`td[data-date="${dateStr}"]`);
             if (dayEl) {
@@ -495,6 +342,8 @@ class CalendarManager {
             }, CONFIG.ANIMATION_DELAY);
         }
     }
+
+    // ... rest of your CalendarManager methods remain the same ...
 }
 
 
@@ -536,100 +385,12 @@ class SetupWizard {
         }
     }
 
-    setupEventListeners(modal) {
-        const closeBtn = document.getElementById('closeSetup');
-        const nextBtn = document.getElementById('nextStep');
-        const prevBtn = document.getElementById('prevStep');
-        const selectAllBtn = document.getElementById('selectAllHolidays');
-        const clearAllBtn = document.getElementById('clearHolidays');
-
-        if (closeBtn) closeBtn.addEventListener('click', () => this.handleModalClose());
-        if (nextBtn) nextBtn.addEventListener('click', () => this.handleNextStep());
-        if (prevBtn) prevBtn.addEventListener('click', () => this.handlePrevStep());
-        if (selectAllBtn) selectAllBtn.addEventListener('click', () => this.selectAllHolidays());
-        if (clearAllBtn) clearAllBtn.addEventListener('click', () => this.clearAllHolidays());
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && modal.style.display === 'flex') {
-                this.handleModalClose();
-            }
-        });
-    }
-
-    showStep(step) {
-        const steps = document.querySelectorAll('.wizard-step');
-        steps.forEach(s => s.style.display = 'none');
-
-        const currentStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
-        if (currentStepEl) {
-            currentStepEl.style.display = 'block';
-        }
-
-        const prevBtn = document.getElementById('prevStep');
-        const nextBtn = document.getElementById('nextStep');
-
-        if (prevBtn) prevBtn.style.display = step === 1 ? 'none' : 'block';
-        if (nextBtn) nextBtn.textContent = step === this.totalSteps ? 'Finish' : 'Next';
-    }
-
-    handleNextStep() {
-        if (this.currentStep === 1 && !this.validateStep1()) {
-            return;
-        }
-
-        if (this.currentStep < this.totalSteps) {
-            this.currentStep++;
-            this.showStep(this.currentStep);
-        } else {
-            this.saveWizardData();
-        }
-    }
-
-    handlePrevStep() {
-        if (this.currentStep > 1) {
-            this.currentStep--;
-            this.showStep(this.currentStep);
-        }
-    }
-
-    handleModalClose() {
-        const setupModal = document.getElementById('setupModal');
-        if (setupModal) {
-            setupModal.style.display = 'none';
-        }
-    }
-
-    validateStep1() {
-        const totalPTOInput = document.getElementById('totalPTOInput');
-        const plannedPTOInput = document.getElementById('plannedPTOInput');
-        
-        if (!totalPTOInput || !plannedPTOInput) {
-            this.ptoManager.uiManager.showError('Required input fields not found');
-            return false;
-        }
-
-        const totalPTO = parseInt(totalPTOInput.value);
-        const plannedPTO = parseInt(plannedPTOInput.value);
-        
-        if (!totalPTO || totalPTO <= 0 || totalPTO > CONFIG.MAX_PTO) {
-            this.ptoManager.uiManager.showError('Please enter a valid number of PTO days (1-50)');
-            return false;
-        }
-        
-        if (plannedPTO < 0 || plannedPTO > totalPTO) {
-            this.ptoManager.uiManager.showError('Planned PTO cannot exceed total PTO days');
-            return false;
-        }
-        
-        return true;
-    }
-
     populateBankHolidays() {
         debugLog('Populating bank holidays');
         const container = document.querySelector('.bank-holiday-list');
         if (!container) return;
 
-        const currentYearHolidays = BANK_HOLIDAYS[currentYear];
+        const currentYearHolidays = BANK_HOLIDAYS[GlobalState.getCurrentYear()];
         if (!currentYearHolidays) {
             container.innerHTML = '<p>No bank holidays available for selected year.</p>';
             return;
@@ -650,43 +411,7 @@ class SetupWizard {
         `).join('');
 
         container.innerHTML = holidaysHtml;
-        
-        // Add click handlers for selections
         this.setupHolidayListeners();
-    }
-
-    setupHolidayListeners() {
-        const holidayCheckboxes = document.querySelectorAll('.holiday-item input[type="checkbox"]');
-        holidayCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const select = e.target.closest('.holiday-item').querySelector('.extension-type');
-                select.disabled = !e.target.checked;
-            });
-        });
-    }
-
-    populateMonthSelector() {
-        const container = document.querySelector('.month-selector');
-        if (!container) return;
-
-        const months = [
-            ['January', 'February', 'March', 'April'],
-            ['May', 'June', 'July', 'August'],
-            ['September', 'October', 'November', 'December']
-        ];
-
-        const monthsHtml = months.map(row => `
-            <div class="month-row">
-                ${row.map(month => `
-                    <label class="month-item">
-                        <input type="checkbox" name="preferredMonth" value="${month}">
-                        <span>${month}</span>
-                    </label>
-                `).join('')}
-            </div>
-        `).join('');
-
-        container.innerHTML = monthsHtml;
     }
 
     saveWizardData() {
@@ -697,6 +422,11 @@ class SetupWizard {
             try {
                 this.ptoManager.state.userData.totalPTO = parseInt(totalPTOInput.value);
                 this.ptoManager.state.userData.plannedPTO = parseInt(plannedPTOInput.value);
+
+                // Initialize selectedDates for the current year if it doesn't exist
+                if (!this.ptoManager.state.userData.selectedDates[GlobalState.getCurrentYear()]) {
+                    this.ptoManager.state.userData.selectedDates[GlobalState.getCurrentYear()] = [];
+                }
 
                 this.ptoManager.state.userData.preferences = {
                     schoolHolidays: Array.from(
@@ -732,6 +462,8 @@ class SetupWizard {
             }
         }
     }
+
+    // ... rest of your SetupWizard methods remain the same ...
 }
 
 
@@ -741,11 +473,12 @@ class SetupWizard {
 class PTOManager {
     constructor() {
         this.state = {
-            currentYear: CONFIG.INITIAL_YEAR,
             userData: {
                 totalPTO: CONFIG.DEFAULT_PTO,
                 plannedPTO: 0,
-                selectedDates: {},
+                selectedDates: {
+                    [GlobalState.getCurrentYear()]: []
+                },
                 preferences: {
                     extendBankHolidays: [],
                     preferredMonths: []
@@ -764,73 +497,14 @@ class PTOManager {
         }
     }
 
-    async initialize() {
-        debugLog('Initializing PTO Manager');
-        this.uiManager.showLoading();
-        
-        try {
-            await this.loadSavedData();
-            this.setupEventListeners();
-            this.uiManager.addCalendarStyles();
-        } catch (error) {
-            console.error('Initialization error:', error);
-            this.uiManager.showError('Failed to initialize application');
-        } finally {
-            this.uiManager.hideLoading();
-        }
-    }
-
-    setupEventListeners() {
-        const getStartedBtn = document.getElementById('getStartedBtn');
-        const setupPTOBtn = document.getElementById('setupPTOBtn');
-        const exportBtn = document.getElementById('exportBtn');
-        const yearSelect = document.getElementById('yearSelect');
-
-        if (getStartedBtn) {
-            getStartedBtn.addEventListener('click', () => this.handleGetStarted());
-        }
-
-        if (setupPTOBtn) {
-            setupPTOBtn.addEventListener('click', () => this.setupWizard.initialize());
-        }
-
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportCalendar());
-        }
-
-        if (yearSelect) {
-            yearSelect.addEventListener('change', (e) => this.handleYearChange(e));
-        }
-    }
-
-    handleGetStarted() {
-        debugLog('Get Started button clicked');
-        try {
-            const welcomeScreen = document.getElementById('welcomeScreen');
-            const appContainer = document.getElementById('appContainer');
-            
-            if (welcomeScreen && appContainer) {
-                welcomeScreen.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                
-                // Initialize calendar after showing app container
-                this.calendarManager.initialize().then(() => {
-                    this.setupWizard.initialize();
-                }).catch(error => {
-                    console.error('Calendar initialization error:', error);
-                    this.uiManager.showError('Failed to initialize calendar');
-                });
-            }
-        } catch (error) {
-            console.error('Error in Get Started handler:', error);
-            this.uiManager.showError('Failed to start application setup');
-        }
-    }
-
     handleYearChange(e) {
         const newYear = parseInt(e.target.value);
-        if (newYear !== this.state.currentYear) {
-            this.state.currentYear = newYear;
+        if (newYear !== GlobalState.getCurrentYear()) {
+            GlobalState.setCurrentYear(newYear);
+            // Initialize selectedDates for the new year if it doesn't exist
+            if (!this.state.userData.selectedDates[newYear]) {
+                this.state.userData.selectedDates[newYear] = [];
+            }
             this.calendarManager.refreshCalendar();
         }
     }
@@ -856,7 +530,7 @@ class PTOManager {
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `pto_calendar_${this.state.currentYear}.csv`);
+            link.setAttribute("download", `pto_calendar_${GlobalState.getCurrentYear()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -868,18 +542,11 @@ class PTOManager {
         }
     }
 
-    async loadSavedData() {
-        const savedData = await this.storageManager.load();
-        if (savedData) {
-            this.state.userData = savedData;
-        }
-    }
-
     createDebugUtilities() {
         return {
             getCurrentState: () => ({
                 userData: this.state.userData,
-                currentYear: this.state.currentYear,
+                currentYear: GlobalState.getCurrentYear(),
                 calendarInitialized: !!this.calendarManager.calendar
             }),
             clearData: () => {
@@ -895,6 +562,8 @@ class PTOManager {
             }
         };
     }
+
+    // ... rest of your PTOManager methods remain the same ...
 }
 
 // Initialize application
