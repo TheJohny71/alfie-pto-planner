@@ -24,85 +24,80 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Welcome Screen -->
-    <div id="welcomeScreen" class="welcome-screen" data-state="visible">
+<!-- Welcome Screen -->
+<div id="welcomeScreen" class="welcome-screen" data-state="visible">
+    <div class="welcome-gradient-bg">
+        <div class="animated-circles">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+        </div>
+        
         <div class="welcome-content">
             <!-- Hero Section -->
             <div class="hero-section">
-                <div class="hero-content">
-                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo animate-float">
-                    <h1 class="hero-title">Welcome to Alfie PTO Planner Pro</h1>
-                    <p class="hero-subtitle">Smart PTO Management Made Simple</p>
+                <div class="logo-container">
+                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo floating">
+                    <div class="logo-rings">
+                        <div class="ring"></div>
+                        <div class="ring"></div>
+                        <div class="ring"></div>
+                    </div>
                 </div>
+                
+                <h1 class="hero-title">
+                    <span class="gradient-text">Alfie</span>
+                    <span class="thin-text">PTO Planner Pro</span>
+                </h1>
+                <p class="hero-subtitle">Reimagining Time Off Management</p>
             </div>
 
-            <!-- Features Grid -->
-            <div class="features-container">
-                <div class="features-grid">
-                    <div class="feature-card" data-aos="fade-up">
-                        <div class="feature-icon-wrapper">
-                            <span class="feature-icon">📅</span>
+            <!-- Feature Cards -->
+            <div class="feature-cards-container">
+                <div class="feature-scroll">
+                    <div class="feature-card glass-morphism">
+                        <div class="feature-icon calendar-icon">
+                            <svg viewBox="0 0 24 24" class="feature-svg">
+                                <path d="M19 4h-1V3c0-.6-.4-1-1-1s-1 .4-1 1v1H8V3c0-.6-.4-1-1-1s-1 .4-1 1v1H5C3.3 4 2 5.3 2 7v12c0 1.7 1.3 3 3 3h14c1.7 0 3-1.3 3-3V7c0-1.7-1.3-3-3-3z"/>
+                            </svg>
                         </div>
-                        <div class="feature-content">
-                            <h3>Calendar View</h3>
-                            <ul>
-                                <li>Interactive calendar interface</li>
-                                <li>Easy date selection</li>
-                                <li>Visual PTO tracking</li>
-                            </ul>
-                        </div>
+                        <h3>Smart Calendar</h3>
+                        <p>Interactive planning with intelligent date suggestions</p>
                     </div>
 
-                    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-                        <div class="feature-icon-wrapper">
-                            <span class="feature-icon">🎯</span>
+                    <div class="feature-card glass-morphism">
+                        <div class="feature-icon holiday-icon">
+                            <svg viewBox="0 0 24 24" class="feature-svg">
+                                <path d="M12 2L1 12h3v8h16v-8h3L12 2z"/>
+                            </svg>
                         </div>
-                        <div class="feature-content">
-                            <h3>Bank Holidays</h3>
-                            <ul>
-                                <li>Automatic holiday tracking</li>
-                                <li>Holiday extensions</li>
-                                <li>Regional customization</li>
-                            </ul>
-                        </div>
+                        <h3>Holiday Sync</h3>
+                        <p>Automatic bank holiday integration & tracking</p>
                     </div>
 
-                    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-                        <div class="feature-icon-wrapper">
-                            <span class="feature-icon">📊</span>
+                    <div class="feature-card glass-morphism">
+                        <div class="feature-icon analytics-icon">
+                            <svg viewBox="0 0 24 24" class="feature-svg">
+                                <path d="M3 13h6v8H3v-8zM9 3h6v18H9V3zm6 8h6v10h-6V11z"/>
+                            </svg>
                         </div>
-                        <div class="feature-content">
-                            <h3>PTO Summary</h3>
-                            <ul>
-                                <li>Real-time PTO balance</li>
-                                <li>Usage statistics</li>
-                                <li>Year-end projections</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-                        <div class="feature-icon-wrapper">
-                            <span class="feature-icon">📱</span>
-                        </div>
-                        <div class="feature-content">
-                            <h3>Accessibility</h3>
-                            <ul>
-                                <li>Mobile friendly design</li>
-                                <li>Easy data export</li>
-                                <li>Cross-device sync</li>
-                            </ul>
-                        </div>
+                        <h3>Smart Analytics</h3>
+                        <p>Real-time insights into your time off patterns</p>
                     </div>
                 </div>
             </div>
 
-            <button id="getStartedBtn" class="btn btn-primary animate-pulse">
-                Get Started
-                <span class="btn-arrow">→</span>
-            </button>
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <button id="getStartedBtn" class="cta-button">
+                    <span class="button-text">Get Started</span>
+                    <span class="button-icon">→</span>
+                </button>
+                <p class="cta-subtext">Experience the future of PTO management</p>
+            </div>
         </div>
     </div>
+</div>
 
     <!-- Main App Container -->
     <div id="appContainer" class="app-container hidden">
