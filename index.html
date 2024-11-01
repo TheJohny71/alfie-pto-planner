@@ -1,39 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Your existing meta tags and title remain the same -->
-    
-    <!-- Update FullCalendar to latest stable version -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Alfie PTO Planner Pro</title>
+
+    <!-- Libraries -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Add Inter font for consistent typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom styles and scripts -->
+    <link href="styles.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="alfie-icon.png">
     
-    <!-- Your existing styles and scripts -->
+    <!-- Ensure scripts are loaded -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('Resource loading error:', e.target.src || e.target.href);
+        });
+    </script>
 </head>
 <body>
-    <!-- Update loading indicator class -->
+    <!-- Loading Indicator -->
     <div id="loadingIndicator" class="loading-indicator hidden" aria-hidden="true">
         <div class="spinner" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     </div>
 
-    <!-- Add state management attributes to welcome screen -->
+    <!-- Welcome Screen -->
     <div id="welcomeScreen" class="welcome-screen" data-state="visible">
-        <!-- Your existing welcome content remains the same -->
+        <div class="welcome-content">
+            <!-- Logo and Title Section -->
+            <div class="welcome-header">
+                <div class="logo-container">
+                    <img src="alfie-icon.png" alt="Alfie PTO Planner Logo" class="welcome-logo animate-float">
+                </div>
+                <div class="welcome-title">
+                    <h1>Welcome to Alfie PTO Planner Pro</h1>
+                    <p class="subtitle">Smart PTO Management Made Simple</p>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">📅</span>
+                    <h3>Calendar View</h3>
+                    <ul>
+                        <li>Interactive calendar interface</li>
+                        <li>Easy date selection</li>
+                        <li>Visual PTO tracking</li>
+                    </ul>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🏖️</span>
+                    <h3>Bank Holidays</h3>
+                    <ul>
+                        <li>Automatic holiday tracking</li>
+                        <li>Holiday extensions</li>
+                        <li>Regional customization</li>
+                    </ul>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <h3>PTO Summary</h3>
+                    <ul>
+                        <li>Real-time PTO balance</li>
+                        <li>Usage statistics</li>
+                        <li>Year-end projections</li>
+                    </ul>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📱</span>
+                    <h3>Accessibility</h3>
+                    <ul>
+                        <li>Mobile friendly design</li>
+                        <li>Easy data export</li>
+                        <li>Cross-device sync</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button id="getStartedBtn" class="btn btn-primary pulse-effect">
+                Get Started
+                <span class="btn-icon">→</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Update app container with state management -->
+    <!-- Main Application Container -->
     <div id="appContainer" class="app-wrapper hidden" data-state="hidden">
-        <header class="header">
+        <header class="app-header">
+            <!-- Header Left Section -->
             <div class="header-left">
-                <!-- Your existing header left content -->
+                <img src="alfie-icon.png" alt="Alfie PTO Planner" class="logo">
+                <h1>Alfie PTO Planner Pro</h1>
             </div>
             
-            <!-- Update year selector with data attributes -->
-            <div class="header-right">
+            <!-- Header Right Section -->
+            <div class="header-controls">
                 <select id="yearSelect" class="year-select" data-current-year="2024">
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
@@ -41,73 +111,126 @@
                     <option value="2027">2027</option>
                     <option value="2028">2028</option>
                 </select>
-                <!-- Your existing buttons -->
+                <button id="setupPTOBtn" class="btn" data-tooltip="Set up your PTO preferences">
+                    <span class="btn-icon">⚙️</span> Setup PTO
+                </button>
+                <button id="exportBtn" class="btn" data-tooltip="Export your PTO schedule">
+                    <span class="btn-icon">📥</span> Export
+                </button>
             </div>
         </header>
 
+        <!-- Main Container -->
         <div class="main-container">
-            <!-- Update sidebar with state references -->
+            <!-- Left Sidebar -->
             <aside class="sidebar">
+                <!-- PTO Summary Card -->
                 <div class="summary-card">
                     <h2>PTO Summary</h2>
                     <div class="summary-stats">
                         <div class="stat-item" data-stat="total">
-                            <label for="totalPTO">Total PTO</label>
+                            <label>Total PTO</label>
                             <span id="totalPTO" class="stat-value">0</span>
                         </div>
                         <div class="stat-item" data-stat="used">
-                            <label for="plannedPTO">Used</label>
+                            <label>Used</label>
                             <span id="plannedPTO" class="stat-value">0</span>
                         </div>
                         <div class="stat-item highlight" data-stat="remaining">
-                            <label for="remainingPTO">Remaining</label>
+                            <label>Remaining</label>
                             <span id="remainingPTO" class="stat-value">0</span>
                         </div>
                         <div class="stat-item" data-stat="bankHolidays">
-                            <label for="bankHolidays">Bank Holidays</label>
+                            <label>Bank Holidays</label>
                             <span id="bankHolidays" class="stat-value">0</span>
                         </div>
                     </div>
-                    <!-- Your existing quick actions -->
                 </div>
-                <!-- Your existing sidebar content -->
+
+                <!-- Leave Types Legend -->
+                <div class="leave-legend">
+                    <h3>Leave Types</h3>
+                    <div class="legend-item">
+                        <span class="color-dot pto"></span>
+                        <span>PTO Day</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-dot holiday"></span>
+                        <span>Bank Holiday</span>
+                    </div>
+                </div>
+
+                <!-- Upcoming Holidays -->
+                <div class="upcoming-holidays">
+                    <h3>Upcoming Holidays</h3>
+                    <div id="holidaysList" class="holidays-list">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
             </aside>
 
-            <!-- Update calendar container with state attributes -->
+            <!-- Main Calendar Area -->
             <main class="calendar-container" data-view="month">
-                <div id="calendar" data-initialized="false"></div>
+                <div id="calendar"></div>
             </main>
         </div>
     </div>
 
-    <!-- Update setup modal with state management -->
+    <!-- Setup Modal -->
     <div id="setupModal" class="modal" data-state="hidden" aria-hidden="true">
         <div class="modal-content">
-            <!-- Your existing modal content structure -->
-            <div class="wizard-step" data-step="1" data-state="active">
-                <!-- Step 1 content -->
+            <div class="modal-header">
+                <h2>PTO Setup</h2>
+                <button id="closeSetup" class="close-modal" aria-label="Close modal">&times;</button>
             </div>
-            <div class="wizard-step" data-step="2" data-state="hidden">
-                <!-- Step 2 content -->
+            <div class="modal-body">
+                <!-- Step 1: Basic PTO Setup -->
+                <div class="wizard-step" data-step="1" data-state="active">
+                    <h3>Step 1: PTO Allocation</h3>
+                    <div class="form-group">
+                        <label for="totalPTOInput">Total PTO Days:</label>
+                        <input type="number" id="totalPTOInput" min="0" max="50" required>
+                        <small>Maximum 50 days per year</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="plannedPTOInput">Already Planned PTO Days:</label>
+                        <input type="number" id="plannedPTOInput" min="0" value="0" required>
+                        <small>Days already scheduled for this year</small>
+                    </div>
+                </div>
+
+                <!-- Step 2: Bank Holiday Extensions -->
+                <div class="wizard-step" data-step="2" data-state="hidden">
+                    <h3>Bank Holiday Extensions</h3>
+                    <p class="step-description">Customize your bank holiday preferences:</p>
+                    
+                    <div class="bank-holidays-container">
+                        <div class="bank-holiday-list">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Preferences -->
+                <div class="wizard-step" data-step="3" data-state="hidden">
+                    <h3>Step 3: Preferences</h3>
+                    <div class="preferences-section">
+                        <h4>Preferred Months</h4>
+                        <p class="section-description">Select months you typically take PTO:</p>
+                        <div class="month-selector">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="wizard-step" data-step="3" data-state="hidden">
-                <!-- Step 3 content -->
+            <div class="modal-footer">
+                <button id="prevStep" class="btn" data-action="prev">Previous</button>
+                <button id="nextStep" class="btn btn-primary" data-action="next">Next</button>
             </div>
         </div>
     </div>
 
-    <!-- Add state management script -->
-    <script>
-        // Initialize current year
-        document.addEventListener('DOMContentLoaded', function() {
-            const yearSelect = document.getElementById('yearSelect');
-            if (yearSelect) {
-                yearSelect.value = new Date().getFullYear().toString();
-            }
-        });
-    </script>
-    
-    <!-- Your main script -->
+    <!-- Script -->
     <script src="script.js"></script>
 </body>
 </html>
