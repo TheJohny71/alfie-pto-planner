@@ -1,5 +1,5 @@
 // Part 1 - Core Initialization and Setup
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() { // Opening of DOMContentLoaded function
     // Global Variables and State Management
     let calendar;
     let currentStep = 1;
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
     };
 
-    // Load Events Function (defined before calendar initialization)
-    function loadEvents(fetchInfo, successCallback, failureCallback) {
+    // Load Events Function
+    function loadEvents(fetchInfo, successCallback, failureCallback) { // Opening of loadEvents function
         try {
             const events = [];
             const year = new Date(fetchInfo.start).getFullYear();
@@ -119,10 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading events:', error);
             if (failureCallback) failureCallback(error);
         }
-    }
+    } // Closing of loadEvents function
 
-    // Initialize Calendar with Extended Configuration
-    function initializeCalendar() {
+    // Initialize Calendar
+    function initializeCalendar() { // Opening of initializeCalendar function
         const calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -162,15 +162,15 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.render();
         initializeEventListeners();
         loadUserPreferences();
-    }
+    } // Closing of initializeCalendar function
 
     // Initialize Event Listeners
-    function initializeEventListeners() {
+    function initializeEventListeners() { // Opening of initializeEventListeners function
         document.addEventListener('keydown', handleKeyboardShortcuts);
         window.addEventListener('resize', handleWindowResize);
         window.addEventListener('beforeunload', handleBeforeUnload);
-    }
-});
+    } // Closing of initializeEventListeners function
+}); // Closing of DOMContentLoaded event listener
             // Part 2 - Event Handling and PTO Management
     function handleDateSelect(selectInfo) {
         const startDate = new Date(selectInfo.start);
