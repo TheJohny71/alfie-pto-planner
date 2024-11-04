@@ -9,14 +9,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Add this line for write permissions
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for git push
     
     - name: Use Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: '16.x'
+        cache: 'npm'
     
     - name: Install dependencies
       run: |
@@ -25,12 +30,12 @@ jobs:
     
     - name: Compile TypeScript
       run: |
+        mkdir -p scripts
         npx tsc
     
-    - name: Commit compiled JS
+    - name: Commit and push if changed
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add scripts/main.js
-        git commit -m "Add compiled JavaScript" || echo "No changes to commit"
-        git push
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add -A
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Compile TypeScript to JavaScript" && git push)
