@@ -23,11 +23,9 @@
     
     <!-- Application Styles -->
     <link href="./styles/main.css" rel="stylesheet">
-    <link href="./styles/themes.css" rel="stylesheet">
 
     <!-- Early Error Detection -->
     <script>
-        // Early error detection for critical resources
         window.addEventListener('error', function(e) {
             if (e.target instanceof HTMLLinkElement || 
                 e.target instanceof HTMLScriptElement) {
@@ -156,82 +154,20 @@
 
     <!-- Resource Error Handler -->
     <script>
-        // Handle resource loading errors
         window.addEventListener('error', function(e) {
             if (e.target instanceof HTMLLinkElement || 
                 e.target instanceof HTMLScriptElement || 
                 e.target instanceof HTMLImageElement) {
-                
-                console.error(`Failed to load resource: ${e.target.src || e.target.href}`);
-                
-                // Handle CSS failures
-                if (e.target instanceof HTMLLinkElement) {
-                    const fallbackCSS = `
-                        body { font-family: system-ui, sans-serif; }
-                        .error-message { 
-                            color: #dc2626; 
-                            padding: 1rem; 
-                            margin: 1rem;
-                            border: 1px solid currentColor;
-                            border-radius: 0.375rem;
-                        }
-                    `;
-                    const style = document.createElement('style');
-                    style.textContent = fallbackCSS;
-                    document.head.appendChild(style);
-                }
-
-                // Handle missing images
-                if (e.target instanceof HTMLImageElement) {
-                    e.target.onerror = null;
-                    e.target.src = 'data:image/svg+xml,' + encodeURIComponent(`
-                        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="24" height="24" fill="#f3f4f6"/>
-                            <text x="50%" y="50%" font-family="system-ui" font-size="8" 
-                                fill="#6b7280" text-anchor="middle" dy=".3em">Error</text>
-                        </svg>
-                    `);
-                }
-
-                // Show user-friendly error message
-                const errorContainer = document.createElement('div');
-                errorContainer.className = 'error-message';
-                errorContainer.textContent = `Failed to load: ${e.target.src || e.target.href}`;
-                document.body.insertBefore(errorContainer, document.body.firstChild);
+                console.error(`Failed to load: ${e.target.src || e.target.href}`);
             }
         }, true);
 
-        // Check for critical dependencies
         window.addEventListener('load', function() {
-            // Check for FullCalendar
             if (typeof FullCalendar === 'undefined') {
                 console.error('FullCalendar failed to load');
-                showError('Calendar component failed to load. Some features may be limited.');
             }
-
-            // Check for SweetAlert2
             if (typeof Swal === 'undefined') {
                 console.error('SweetAlert2 failed to load');
-                showError('Notification system failed to load. Some features may be limited.');
-            }
-
-            function showError(message) {
-                const errorBanner = document.createElement('div');
-                errorBanner.className = 'error-banner';
-                errorBanner.style.cssText = `
-                    position: fixed;
-                    top: 1rem;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: #fee2e2;
-                    color: #dc2626;
-                    padding: 1rem;
-                    border-radius: 0.375rem;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    z-index: 9999;
-                `;
-                errorBanner.textContent = message;
-                document.body.appendChild(errorBanner);
             }
         });
     </script>
