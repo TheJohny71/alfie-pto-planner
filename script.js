@@ -1602,5 +1602,5 @@ getStartedBtn.addEventListener('click', function() {
     }
 
     // Start the application
-    initialize();
-});
+        initialize();
+}); // Close DOMContentLoaded event listener
