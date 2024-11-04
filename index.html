@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta Information -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -8,20 +9,24 @@
     <meta http-equiv="Expires" content="0">
     <title>Alfie PTO Planner Pro</title>
 
-    <!-- Libraries -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Custom styles and scripts -->
-    <link href="styles.css" rel="stylesheet">
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="alfie-icon.png">
+
+    <!-- External Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles and Scripts -->
+    <link href="styles.css" rel="stylesheet">
     <script src="script.js" defer></script>
 </head>
-<body>
+<body data-theme="light">
     <!-- Loading Indicator -->
     <div id="loadingIndicator" class="loading-indicator hidden">
         <div class="spinner"></div>
+        <p>Loading...</p>
     </div>
 
     <!-- Welcome Screen -->
@@ -34,16 +39,19 @@
             </div>
             
             <div class="welcome-content">
+                <!-- Hero Section -->
                 <div class="hero-section">
                     <h1 class="hero-title">Alfie PTO Planner Pro</h1>
                     <p class="hero-subtitle">Your companion to a seamless year of leave</p>
                 </div>
 
+                <!-- Feature Cards -->
                 <div class="feature-cards">
+                    <!-- Smart Calendar Card -->
                     <div class="feature-card">
                         <div class="feature-icon">
                             <svg viewBox="0 0 24 24" class="icon-calendar">
-                                <path d="M19 4h-1V3c0-.6-.4-1-1-1s-1 .4-1 1v1H8V3c0-.6-.4-1-1-1s-1 .4-1 1v1H5C3.3 4 2 5.3 2 7v12c0 1.7 1.3 3 3 3h14c1.7 0 3-1.3 3-3V7c0-1.7-1.3-3-3-3z"/>
+                                <path d="M19 4h-1V3c0-.6-.4-1-1-1s-1 .4-1 1v1H8V3c0-.6-.4-1-1-1s-1 .4-1 1v1H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                             </svg>
                         </div>
                         <h3>Smart Calendar</h3>
@@ -55,10 +63,11 @@
                         </ul>
                     </div>
 
+                    <!-- Holiday Sync Card -->
                     <div class="feature-card">
                         <div class="feature-icon">
                             <svg viewBox="0 0 24 24" class="icon-sync">
-                                <path d="M12 2L1 12h3v8h16v-8h3L12 2z"/>
+                                <path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.2 1.9-.7 2.7l1.5 1.5c.7-1.2 1.2-2.7 1.2-4.2 0-4.4-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6 0-1 .2-1.9.7-2.7L5.2 7.8C4.5 9 4 10.5 4 12c0 4.4 3.6 8 8 8v3l4-4-4-4v3z"/>
                             </svg>
                         </div>
                         <h3>Holiday Sync</h3>
@@ -70,10 +79,11 @@
                         </ul>
                     </div>
 
+                    <!-- Smart Analytics Card -->
                     <div class="feature-card">
                         <div class="feature-icon">
                             <svg viewBox="0 0 24 24" class="icon-analytics">
-                                <path d="M3 13h6v8H3v-8zM9 3h6v18H9V3zm6 8h6v10h-6V11z"/>
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                             </svg>
                         </div>
                         <h3>Smart Analytics</h3>
@@ -86,6 +96,7 @@
                     </div>
                 </div>
 
+                <!-- Get Started Button -->
                 <button id="getStartedBtn" class="cta-button">Get Started</button>
             </div>
         </div>
@@ -109,6 +120,9 @@
                 </select>
                 <button id="setupPTOBtn" class="modern-button">Setup PTO</button>
                 <button id="exportBtn" class="modern-button">Export</button>
+                <button id="themeToggle" class="icon-button">
+                    <svg viewBox="0 0 24 24" class="icon-theme"></svg>
+                </button>
             </div>
         </header>
 
@@ -120,49 +134,42 @@
                     <h2>PTO Summary</h2>
                     <div class="summary-content">
                         <div class="summary-item">
-                            <span>Total PTO</span>
-                            <span id="totalPTO">0</span>
+                            <span>Total PTO Days:</span>
+                            <span id="totalPTO">50</span>
                         </div>
                         <div class="summary-item">
-                            <span>Used</span>
+                            <span>Planned PTO:</span>
                             <span id="plannedPTO">0</span>
                         </div>
                         <div class="summary-item">
-                            <span>Remaining</span>
-                            <span id="remainingPTO">0</span>
+                            <span>Remaining PTO:</span>
+                            <span id="remainingPTO">50</span>
                         </div>
                         <div class="summary-item">
-                            <span>Bank Holidays</span>
-                            <span id="bankHolidays">0</span>
+                            <span>Bank Holidays:</span>
+                            <span id="holidayCount">0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="leave-types">
-                    <h3>Leave Types</h3>
-                    <div class="leave-type">
-                        <span class="leave-indicator pto"></span>
-                        <span>PTO Day</span>
-                    </div>
-                    <div class="leave-type">
-                        <span class="leave-indicator holiday"></span>
-                        <span>Bank Holiday</span>
-                    </div>
-                    <div class="leave-type">
-                        <span class="leave-indicator weekend-indicator"></span>
-                        <span>Weekend</span>
-                    </div>
+                <!-- Upcoming Holidays -->
+                <div class="upcoming-card">
+                    <h2>Upcoming Holidays</h2>
+                    <ul id="upcomingHolidays" class="upcoming-list">
+                        <!-- Dynamically populated -->
+                    </ul>
                 </div>
 
-                <div class="upcoming-holidays">
-                    <h3>Upcoming Holidays</h3>
-                    <div id="upcomingHolidaysList" class="holiday-list">
+                <!-- Analytics Section -->
+                <div class="analytics-card">
+                    <h2>Analytics</h2>
+                    <div id="analyticsContent" class="analytics-content">
                         <!-- Dynamically populated -->
                     </div>
                 </div>
             </aside>
 
-            <!-- Calendar -->
+            <!-- Calendar Container -->
             <main class="calendar-container">
                 <div id="calendar"></div>
             </main>
@@ -172,63 +179,27 @@
     <!-- Setup Modal -->
     <div id="setupModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>PTO Setup</h2>
-                <button id="closeSetup" class="close-btn">&times;</button>
+            <h2>Setup Your PTO</h2>
+            <div class="setup-steps">
+                <!-- Step content will be dynamically populated -->
             </div>
-            
-            <!-- Step 1: PTO Allocation -->
-            <div class="wizard-step" data-step="1" data-state="visible">
-                <h3>Step 1: PTO Allocation</h3>
-                <div class="form-group">
-                    <label for="totalPTOInput">Total PTO Days:</label>
-                    <input type="number" id="totalPTOInput" min="0" max="50" class="form-control">
-                    <small class="help-text">Maximum 50 days per year</small>
-                </div>
-                <div class="form-group">
-                    <label for="plannedPTOInput">Already Planned PTO Days:</label>
-                    <input type="number" id="plannedPTOInput" min="0" class="form-control" value="0">
-                    <small class="help-text">Days already scheduled for this year</small>
-                </div>
-            </div>
-
-            <!-- Step 2: Bank Holiday Extensions -->
-            <div class="wizard-step" data-step="2" data-state="hidden">
-                <h3>Bank Holiday Extensions</h3>
-                <p class="step-description">Customize your bank holiday preferences:</p>
-                <div class="bank-holidays-container">
-                    <!-- Template for bank holiday items -->
-                    <div class="bank-holiday-item" data-template>
-                        <div class="holiday-checkbox-group">
-                            <input type="checkbox" class="holiday-checkbox">
-                            <div class="holiday-details">
-                                <span class="holiday-date"></span>
-                                <span class="holiday-name"></span>
-                            </div>
-                        </div>
-                        <select class="holiday-extension modern-select">
-                            <option value="none">No Extension</option>
-                            <option value="before">Add Day Before</option>
-                            <option value="after">Add Day After</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Preferred Months -->
-            <div class="wizard-step" data-step="3" data-state="hidden">
-                <h3>Preferred Months</h3>
-                <p class="step-description">Select months you typically take PTO:</p>
-                <div class="month-selector">
-                    <!-- Dynamically populated -->
-                </div>
-            </div>
-
             <div class="modal-footer">
-                <button id="prevStep" class="modern-button" disabled>Previous</button>
-                <button id="nextStep" class="modern-button">Next</button>
+                <button id="prevStep" class="setup-nav-btn" data-direction="prev">Previous</button>
+                <button id="nextStep" class="setup-nav-btn" data-direction="next">Next</button>
+                <button id="closeSetup" class="setup-nav-btn">Finish</button>
             </div>
         </div>
     </div>
+
+    <!-- Templates (Hidden) -->
+    <template id="eventTemplate">
+        <div class="event-item">
+            <div class="event-type"></div>
+            <div class="event-details">
+                <span class="event-title"></span>
+                <span class="event-date"></span>
+            </div>
+        </div>
+    </template>
 </body>
 </html>
