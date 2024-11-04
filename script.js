@@ -129,27 +129,35 @@ class CalendarManager {
         this.events = [];
     }
 
-    initialize() {
-        const calendarEl = document.getElementById('calendar');
-        if (!calendarEl) return;
+    // In the CalendarManager class
+initialize() {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
 
-        this.calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            selectable: true,
-            editable: true,
-            events: this.loadEvents.bind(this),
-            select: this.handleDateSelect.bind(this),
-            eventClick: this.handleEventClick.bind(this),
-            eventChange: this.handleEventChange.bind(this)
-        });
+    this.calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: '100%',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        selectable: true,
+        editable: true,
+        dayMaxEvents: true,
+        weekNumbers: true,
+        events: this.loadEvents.bind(this),
+        select: this.handleDateSelect.bind(this),
+        eventClick: this.handleEventClick.bind(this),
+        eventChange: this.handleEventChange.bind(this),
+        viewDidMount: () => {
+            // Ensure proper sizing
+            this.calendar.updateSize();
+        }
+    });
 
-        this.calendar.render();
-    }
+    this.calendar.render();
+}
 
     loadEvents() {
         return dataManager.load('events') || [];
