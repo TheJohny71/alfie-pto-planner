@@ -674,3 +674,24 @@ function handleError(error) {
         context: error.context
     });
 }
+// ... your existing code ...
+
+// Error Handler
+function handleError(error) {
+    // ... error handling code ...
+}
+
+// Insert new initialization code here (at line 677)
+document.addEventListener('DOMContentLoaded', function() {
+    // Core initialization
+    const app = {
+        init: function() {
+            this.setupEventListeners();
+            this.initializeCalendar();
+        },
+        // ... rest of the new code ...
+    };
+
+    // Start the application
+    app.init();
+});
