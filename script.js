@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function() { // Opening of DOMCont
     const setupPTOBtn = document.getElementById('setupPTOBtn');
     const exportBtn = document.getElementById('exportBtn');
     
+    // Add event listener for Get Started button
+getStartedBtn.addEventListener('click', function() {
+    welcomeScreen.style.display = 'none';
+    appContainer.style.display = 'block';
+});
+    
     // Configuration Constants
     const CONFIG = {
         MAX_PTO_DAYS: 50,
