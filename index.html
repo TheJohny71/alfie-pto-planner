@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Information -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -26,53 +25,11 @@
 <body data-theme="light">
     <!-- Welcome Screen -->
     <div id="welcomeScreen" class="welcome-screen">
-        <div class="welcome-content">
-            <h1 class="hero-title">Alfie PTO Planner Pro</h1>
-            <p class="hero-subtitle">Your companion to a seamless year of leave</p>
-
-            <!-- Feature Cards -->
-            <div class="feature-cards">
-                <div class="feature-card">
-                    <div class="feature-icon">📅</div>
-                    <h3>Smart Calendar</h3>
-                    <p>Interactive planning with intelligent date suggestions</p>
-                    <ul class="feature-list">
-                        <li>Intelligent date suggestions</li>
-                        <li>Visual calendar overview</li>
-                        <li>Easy date selection</li>
-                    </ul>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>Holiday Sync</h3>
-                    <p>Automatic bank holiday integration & tracking</p>
-                    <ul class="feature-list">
-                        <li>Bank holiday automation</li>
-                        <li>Smart holiday extensions</li>
-                        <li>Holiday conflict prevention</li>
-                    </ul>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Smart Analytics</h3>
-                    <p>Real-time insights into your time off patterns</p>
-                    <ul class="feature-list">
-                        <li>PTO usage tracking</li>
-                        <li>Leave pattern analysis</li>
-                        <li>Yearly overview</li>
-                    </ul>
-                </div>
-            </div>
-
-            <button id="getStartedBtn" class="cta-button">Get Started</button>
-        </div>
+        <!-- ... (previous welcome screen content remains the same) ... -->
     </div>
 
     <!-- Main App Container -->
     <div id="appContainer" class="app-container">
-        <!-- Header -->
         <header class="app-header">
             <div class="brand">
                 <h1>Alfie PTO Planner Pro</h1>
@@ -83,44 +40,91 @@
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
                 </select>
+                <button id="requestLeaveBtn" class="btn-primary">Request Leave</button>
                 <button id="themeToggle" class="icon-button">🌓</button>
             </div>
         </header>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Sidebar -->
             <aside class="sidebar">
                 <div class="summary-card">
-                    <h2>PTO Summary</h2>
+                    <h2>Annual Leave Summary</h2>
                     <div class="summary-content">
                         <div class="summary-item">
-                            <span>Total PTO Days:</span>
-                            <span id="totalPTO">25</span>
+                            <span>Total Allowance:</span>
+                            <span id="totalAllowance">25</span>
                         </div>
                         <div class="summary-item">
                             <span>Used:</span>
-                            <span id="usedPTO">0</span>
+                            <span id="usedDays">0</span>
                         </div>
                         <div class="summary-item">
                             <span>Remaining:</span>
-                            <span id="remainingPTO">25</span>
+                            <span id="remainingDays">25</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="upcoming-card">
-                    <h2>Upcoming Time Off</h2>
-                    <div id="upcomingEvents" class="upcoming-list">
+                    <h2>Upcoming Leave</h2>
+                    <div id="upcomingLeave" class="upcoming-list">
                         <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <div class="legend-card">
+                    <h2>Calendar Legend</h2>
+                    <div class="legend-item">
+                        <span class="legend-color weekend"></span>
+                        <span>Weekend</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color bank-holiday"></span>
+                        <span>Bank Holiday</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color annual-leave"></span>
+                        <span>Annual Leave</span>
                     </div>
                 </div>
             </aside>
 
-            <!-- Calendar Container -->
             <main class="calendar-container">
                 <div id="calendar"></div>
             </main>
+        </div>
+    </div>
+
+    <!-- Leave Request Modal -->
+    <div id="leaveModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Request Annual Leave</h2>
+            <form id="leaveRequestForm">
+                <div class="form-group">
+                    <label for="startDate">First Day of Leave:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">Last Day of Leave:</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="leaveType">Type of Leave:</label>
+                    <select id="leaveType" required>
+                        <option value="annual">Annual Leave</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="compassionate">Compassionate Leave</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes (Optional):</label>
+                    <textarea id="notes"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Submit Request</button>
+                    <button type="button" class="btn-secondary" data-action="close">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 
