@@ -4,13 +4,8 @@
     <!-- Meta Information -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Alfie PTO Planner Pro</title>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="alfie-icon.png">
 
     <!-- External Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
@@ -23,82 +18,52 @@
     <script src="script.js" defer></script>
 </head>
 <body data-theme="light">
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-indicator hidden">
-        <div class="spinner"></div>
-        <p>Loading...</p>
-    </div>
-
     <!-- Welcome Screen -->
-    <div id="welcomeScreen" class="welcome-screen" data-state="visible">
-        <div class="welcome-gradient-bg">
-            <div class="animated-circles">
-                <div class="circle"></div>
-                <div class="circle"></div>
-                <div class="circle"></div>
-            </div>
-            
-            <div class="welcome-content">
-                <!-- Hero Section -->
-                <div class="hero-section">
-                    <h1 class="hero-title">Alfie PTO Planner Pro</h1>
-                    <p class="hero-subtitle">Your companion to a seamless year of leave</p>
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-content">
+            <h1 class="hero-title">Alfie PTO Planner Pro</h1>
+            <p class="hero-subtitle">Your companion to a seamless year of leave</p>
+
+            <!-- Feature Cards -->
+            <div class="feature-cards">
+                <!-- Smart Calendar Card -->
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Smart Calendar</h3>
+                    <p>Interactive planning with intelligent date suggestions</p>
+                    <ul class="feature-list">
+                        <li>Intelligent date suggestions</li>
+                        <li>Visual calendar overview</li>
+                        <li>Easy date selection</li>
+                    </ul>
                 </div>
 
-                <!-- Feature Cards -->
-                <div class="feature-cards">
-                    <!-- Smart Calendar Card -->
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24" class="icon-calendar">
-                                <path d="M19 4h-1V3c0-.6-.4-1-1-1s-1 .4-1 1v1H8V3c0-.6-.4-1-1-1s-1 .4-1 1v1H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-                            </svg>
-                        </div>
-                        <h3>Smart Calendar</h3>
-                        <p>Interactive planning with intelligent date suggestions</p>
-                        <ul class="feature-list">
-                            <li>Intelligent date suggestions</li>
-                            <li>Visual calendar overview</li>
-                            <li>Easy date selection</li>
-                        </ul>
-                    </div>
-
-                    <!-- Holiday Sync Card -->
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24" class="icon-sync">
-                                <path d="M12 4V1L8 5l4 4V6c3.3 0 6 2.7 6 6 0 1-.2 1.9-.7 2.7l1.5 1.5c.7-1.2 1.2-2.7 1.2-4.2 0-4.4-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6 0-1 .2-1.9.7-2.7L5.2 7.8C4.5 9 4 10.5 4 12c0 4.4 3.6 8 8 8v3l4-4-4-4v3z"/>
-                            </svg>
-                        </div>
-                        <h3>Holiday Sync</h3>
-                        <p>Automatic bank holiday integration & tracking</p>
-                        <ul class="feature-list">
-                            <li>Bank holiday automation</li>
-                            <li>Smart holiday extensions</li>
-                            <li>Holiday conflict prevention</li>
-                        </ul>
-                    </div>
-
-                    <!-- Smart Analytics Card -->
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg viewBox="0 0 24 24" class="icon-analytics">
-                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-                            </svg>
-                        </div>
-                        <h3>Smart Analytics</h3>
-                        <p>Real-time insights into your time off patterns</p>
-                        <ul class="feature-list">
-                            <li>PTO usage tracking</li>
-                            <li>Leave pattern analysis</li>
-                            <li>Yearly overview</li>
-                        </ul>
-                    </div>
+                <!-- Holiday Sync Card -->
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Holiday Sync</h3>
+                    <p>Automatic bank holiday integration & tracking</p>
+                    <ul class="feature-list">
+                        <li>Bank holiday automation</li>
+                        <li>Smart holiday extensions</li>
+                        <li>Holiday conflict prevention</li>
+                    </ul>
                 </div>
 
-                <!-- Get Started Button -->
-                <button id="getStartedBtn" class="cta-button">Get Started</button>
+                <!-- Smart Analytics Card -->
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Smart Analytics</h3>
+                    <p>Real-time insights into your time off patterns</p>
+                    <ul class="feature-list">
+                        <li>PTO usage tracking</li>
+                        <li>Leave pattern analysis</li>
+                        <li>Yearly overview</li>
+                    </ul>
+                </div>
             </div>
+
+            <button id="getStartedBtn" class="cta-button">Get Started</button>
         </div>
     </div>
 
@@ -107,7 +72,6 @@
         <!-- Header -->
         <header class="app-header">
             <div class="brand">
-                <img src="alfie-icon.png" alt="Alfie Icon" class="app-logo">
                 <h1>Alfie PTO Planner Pro</h1>
             </div>
             <div class="header-controls">
@@ -115,14 +79,8 @@
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
                 </select>
-                <button id="setupPTOBtn" class="modern-button">Setup PTO</button>
-                <button id="exportBtn" class="modern-button">Export</button>
-                <button id="themeToggle" class="icon-button">
-                    <svg viewBox="0 0 24 24" class="icon-theme"></svg>
-                </button>
+                <button id="themeToggle" class="icon-button">🌓</button>
             </div>
         </header>
 
@@ -135,35 +93,22 @@
                     <div class="summary-content">
                         <div class="summary-item">
                             <span>Total PTO Days:</span>
-                            <span id="totalPTO">50</span>
+                            <span id="totalPTO">25</span>
                         </div>
                         <div class="summary-item">
-                            <span>Planned PTO:</span>
-                            <span id="plannedPTO">0</span>
+                            <span>Used:</span>
+                            <span id="usedPTO">0</span>
                         </div>
                         <div class="summary-item">
-                            <span>Remaining PTO:</span>
-                            <span id="remainingPTO">50</span>
-                        </div>
-                        <div class="summary-item">
-                            <span>Bank Holidays:</span>
-                            <span id="holidayCount">0</span>
+                            <span>Remaining:</span>
+                            <span id="remainingPTO">25</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Upcoming Holidays -->
                 <div class="upcoming-card">
-                    <h2>Upcoming Holidays</h2>
-                    <ul id="upcomingHolidays" class="upcoming-list">
-                        <!-- Dynamically populated -->
-                    </ul>
-                </div>
-
-                <!-- Analytics Section -->
-                <div class="analytics-card">
-                    <h2>Analytics</h2>
-                    <div id="analyticsContent" class="analytics-content">
+                    <h2>Upcoming Time Off</h2>
+                    <div id="upcomingEvents" class="upcoming-list">
                         <!-- Dynamically populated -->
                     </div>
                 </div>
@@ -176,30 +121,10 @@
         </div>
     </div>
 
-    <!-- Setup Modal -->
-    <div id="setupModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h2>Setup Your PTO</h2>
-            <div class="setup-steps">
-                <!-- Step content will be dynamically populated -->
-            </div>
-            <div class="modal-footer">
-                <button id="prevStep" class="setup-nav-btn" data-direction="prev">Previous</button>
-                <button id="nextStep" class="setup-nav-btn" data-direction="next">Next</button>
-                <button id="closeSetup" class="setup-nav-btn">Finish</button>
-            </div>
-        </div>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
     </div>
-
-    <!-- Templates (Hidden) -->
-    <template id="eventTemplate">
-        <div class="event-item">
-            <div class="event-type"></div>
-            <div class="event-details">
-                <span class="event-title"></span>
-                <span class="event-date"></span>
-            </div>
-        </div>
-    </template>
 </body>
 </html>
