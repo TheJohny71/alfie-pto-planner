@@ -14,6 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
+        fetch-depth: 0
     
     - name: Use Node.js
       uses: actions/setup-node@v3
@@ -25,20 +28,27 @@ jobs:
         npm init -y
         npm install typescript
     
-    - name: Create scripts directory and compile
+    - name: Debug TypeScript files
+      run: |
+        echo "TypeScript files in src:"
+        ls -R src/
+        echo "Current tsconfig.json:"
+        cat tsconfig.json
+    
+    - name: Compile TypeScript
       run: |
         mkdir -p scripts
         npx tsc --project tsconfig.json
     
-    - name: Debug output
+    - name: Debug compilation output
       run: |
-        echo "Contents of scripts directory:"
+        echo "Compiled files in scripts:"
         ls -la scripts/
     
-    - name: Commit and push
+    - name: Commit and push if changed
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        git add scripts/main.js
+        git add scripts/
         git commit -m "Add compiled JavaScript" || echo "No changes to commit"
-        git push origin main || echo "No changes to push"
+        git push || echo "No changes to push"
