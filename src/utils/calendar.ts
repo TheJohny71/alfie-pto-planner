@@ -1,49 +1,49 @@
-import { CalendarEvent, LeaveRequest } from '../types';
-import { StorageManager } from './storage';
+import { Calendar } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import type { LeaveRequest, CalendarEvent } from '../types';
+import { CONFIG } from './config';
 
-export class CalendarManager {
-    private calendar: any;
-
-    constructor(element: HTMLElement) {
-        this.initializeCalendar(element);
-    }
-
-    private initializeCalendar(element: HTMLElement): void {
-        this.calendar = new FullCalendar.Calendar(element, {
+export class CalendarService {
+    static initializeCalendar(
+        element: HTMLElement,
+        events: LeaveRequest[],
+        onSelect: (start: Date, end: Date) => void
+    ): Calendar {
+        return new Calendar(element, {
+            plugins: [dayGridPlugin],
             initialView: 'dayGridMonth',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek'
             },
-            events: this.getEvents(),
-            eventClick: this.handleEventClick.bind(this),
             selectable: true,
-            select: this.handleDateSelect.bind(this)
+            editable: true,
+            events: this.convertRequestsToEvents(events),
+            select: (info) => {
+                onSelect(info.start, info.end);
+            }
         });
-
-        this.calendar.render();
     }
 
-    private getEvents(): CalendarEvent[] {
-        const requests = StorageManager.getLeaveRequests();
-        return requests.map(request => this.convertToCalendarEvent(request));
-    }
-
-    private convertToCalendarEvent(request: LeaveRequest): CalendarEvent {
-        const colors = {
-            annual: '#4CAF50',
-            sick: '#F44336',
-            compassionate: '#2196F3'
-        };
-
-        return {
-            id: request.id,
-            title: `${request.type.charAt(0).toUpperCase() + request.type.slice(1)} Leave`,
+    static convertRequestsToEvents(requests: LeaveRequest[]): CalendarEvent[] {
+        return requests.map(request => ({
+            title: `${request.type} Leave (${request.status})`,
             start: request.startDate,
             end: request.endDate,
-            color: colors[request.type],
-            type: request.type
-        };
+            backgroundColor: CONFIG.COLORS[request.type]
+        }));
+    }
+
+    static calculateBusinessDays(start: Date, end: Date): number {
+        let count = 0;
+        const current = new Date(start);
+        while (current <= end) {
+            if (current.getDay() !== 0 && current.getDay() !== 6) {
+                count++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return count;
     }
 }
