@@ -3,187 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#ffffff">
-    <title>Alfie PTO Planner Pro - Enterprise Edition</title>
-
-    <!-- PWA Support -->
-    <link rel="manifest" href="./manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="PTO Planner">
-
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
-
-    <!-- External Libraries -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Application Styles -->
-    <link href="./styles/main.css" rel="stylesheet">
-
-    <!-- Early Error Detection -->
-    <script>
-        window.addEventListener('error', function(e) {
-            if (e.target instanceof HTMLLinkElement || 
-                e.target instanceof HTMLScriptElement) {
-                console.error(`Failed to load: ${e.target.src || e.target.href}`);
-            }
-        }, true);
-    </script>
+    <title>Alfie PTO Planner Pro</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
 </head>
-<body data-theme="light" data-status="online">
-    <!-- Application Shell -->
-    <div id="appShell" class="app-shell">
-        <!-- Header -->
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="overlay">
+        <div class="welcome-content">
+            <h1>Welcome to Alfie PTO Planner Pro</h1>
+            <p>Let's get you set up with your leave management system.</p>
+            <button id="start-setup" class="btn primary">Get Started</button>
+        </div>
+    </div>
+
+    <!-- Main App Interface -->
+    <div id="app" class="hidden">
         <header class="app-header">
-            <div class="header-brand">
+            <div class="header-left">
                 <h1>Alfie PTO Planner Pro</h1>
-                <span class="version-badge">Enterprise</span>
+                <span class="enterprise-badge">Enterprise</span>
             </div>
-            <div class="header-controls">
-                <select id="yearSelect" class="control-select" aria-label="Select Year">
+            <div class="header-right">
+                <select id="year-select">
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
-                    <option value="2026">2026</option>
                 </select>
-                <button id="themeToggle" class="control-button" aria-label="Toggle Theme">
-                    <span class="icon-theme-light">☀️</span>
-                    <span class="icon-theme-dark">🌙</span>
-                </button>
-                <button id="requestLeaveBtn" class="primary-button">
-                    Request Leave
-                </button>
+                <button id="theme-toggle" class="btn icon">🌙</button>
+                <button id="request-leave" class="btn primary">Request Leave</button>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="app-main">
-            <!-- Leave Summary -->
-            <section class="leave-summary">
-                <div class="summary-card">
-                    <h3>Leave Allowance</h3>
-                    <div class="summary-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Total</span>
-                            <span id="totalAllowance" class="stat-value">25</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Used</span>
-                            <span id="usedDays" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Remaining</span>
-                            <span id="remainingDays" class="stat-value">25</span>
-                        </div>
-                    </div>
+        <div class="leave-summary">
+            <h2>Leave Allowance</h2>
+            <div class="allowance-cards">
+                <div class="card">
+                    <h3>Total</h3>
+                    <p class="number">25</p>
                 </div>
-            </section>
-
-            <!-- Calendar Container -->
-            <section class="calendar-container">
-                <div id="calendar"></div>
-            </section>
-
-            <!-- Upcoming Leave -->
-            <section class="upcoming-leave">
-                <h3>Upcoming Leave</h3>
-                <div id="upcomingLeaveList" class="leave-list">
-                    <!-- Dynamically populated -->
+                <div class="card">
+                    <h3>Used</h3>
+                    <p class="number">0</p>
                 </div>
-            </section>
-        </main>
+                <div class="card">
+                    <h3>Remaining</h3>
+                    <p class="number">25</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <h2>Upcoming Leave</h2>
+            <div id="calendar"></div>
+        </div>
     </div>
 
     <!-- Leave Request Modal -->
-    <div id="leaveModal" class="modal" aria-hidden="true">
-        <div class="modal-overlay" data-action="close"></div>
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2>Request Leave</h2>
-                <button class="modal-close" data-action="close" aria-label="Close">×</button>
-            </div>
-            <div class="modal-content">
-                <form id="leaveRequestForm" class="leave-form">
-                    <div class="form-group">
-                        <label for="startDate">First Day of Leave</label>
-                        <input type="date" id="startDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="endDate">Last Day of Leave</label>
-                        <input type="date" id="endDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="leaveType">Type of Leave</label>
-                        <select id="leaveType" required>
-                            <option value="annual">Annual Leave</option>
-                            <option value="sick">Sick Leave</option>
-                            <option value="compassionate">Compassionate Leave</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="notes">Notes (Optional)</label>
-                        <textarea id="notes" maxlength="500"></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="secondary-button" data-action="close">
-                            Cancel
-                        </button>
-                        <button type="submit" class="primary-button">
-                            Submit Request
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <div id="leave-request-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <h2>Request Leave</h2>
+            <form id="leave-request-form">
+                <div class="form-group">
+                    <label>Leave Type:</label>
+                    <select name="leaveType" required>
+                        <option value="annual">Annual Leave</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="compassionate">Compassionate Leave</option>
+                        <option value="bank">Bank Holiday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date:</label>
+                    <input type="date" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label>End Date:</label>
+                    <input type="date" name="endDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Notes:</label>
+                    <textarea name="notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary cancel-request">Cancel</button>
+                    <button type="submit" class="btn primary">Submit Request</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-overlay" aria-hidden="true">
-        <div class="loading-spinner">
-            <img src="./assets/loading-spinner.svg" alt="Loading">
-        </div>
-    </div>
-
-    <!-- Offline Banner -->
-    <div id="offlineBanner" class="offline-banner" aria-hidden="true">
-        You are currently offline. Some features may be limited.
-    </div>
-
-    <!-- Resource Error Handler -->
-    <script>
-        window.addEventListener('error', function(e) {
-            if (e.target instanceof HTMLLinkElement || 
-                e.target instanceof HTMLScriptElement || 
-                e.target instanceof HTMLImageElement) {
-                console.error(`Failed to load: ${e.target.src || e.target.href}`);
-            }
-        }, true);
-
-        window.addEventListener('load', function() {
-            if (typeof FullCalendar === 'undefined') {
-                console.error('FullCalendar failed to load');
-            }
-            if (typeof Swal === 'undefined') {
-                console.error('SweetAlert2 failed to load');
-            }
-        });
-    </script>
-
-    <!-- External Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Application Script -->
-    <script src="./scripts/main.js" type="module"></script>
-
-    <!-- Fallback for JavaScript disabled -->
-    <noscript>
-        <div class="noscript-message">
-            This application requires JavaScript to function. Please enable JavaScript to continue.
-        </div>
-    </noscript>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
     <script src="scripts/main.js"></script>
 </body>
 </html>
