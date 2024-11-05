@@ -1,33 +1,29 @@
-import { LeaveRequest, UserSettings } from '../types';
+import type { LeaveData, PTOSettings } from '../types';
 
-export class StorageManager {
-    private static readonly LEAVE_KEY = 'leave_requests';
-    private static readonly SETTINGS_KEY = 'user_settings';
-
-    static getLeaveRequests(): LeaveRequest[] {
-        const data = localStorage.getItem(this.LEAVE_KEY);
-        return data ? JSON.parse(data) : [];
+export class StorageService {
+    static getLeaveData(): LeaveData | null {
+        const data = localStorage.getItem('leaveData');
+        return data ? JSON.parse(data) : null;
     }
 
-    static saveLeaveRequest(request: LeaveRequest): void {
-        const requests = this.getLeaveRequests();
-        requests.push(request);
-        localStorage.setItem(this.LEAVE_KEY, JSON.stringify(requests));
+    static setLeaveData(data: LeaveData): void {
+        localStorage.setItem('leaveData', JSON.stringify(data));
     }
 
-    static getUserSettings(): UserSettings {
-        const defaultSettings: UserSettings = {
-            theme: 'light',
-            totalAllowance: 25,
-            year: new Date().getFullYear()
-        };
-        const data = localStorage.getItem(this.SETTINGS_KEY);
-        return data ? { ...defaultSettings, ...JSON.parse(data) } : defaultSettings;
+    static getSettings(): PTOSettings | null {
+        const settings = localStorage.getItem('settings');
+        return settings ? JSON.parse(settings) : null;
     }
 
-    static saveUserSettings(settings: Partial<UserSettings>): void {
-        const currentSettings = this.getUserSettings();
-        const newSettings = { ...currentSettings, ...settings };
-        localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(newSettings));
+    static setSettings(settings: PTOSettings): void {
+        localStorage.setItem('settings', JSON.stringify(settings));
+    }
+
+    static setHasVisited(): void {
+        localStorage.setItem('hasVisited', 'true');
+    }
+
+    static hasVisited(): boolean {
+        return localStorage.getItem('hasVisited') === 'true';
     }
 }
