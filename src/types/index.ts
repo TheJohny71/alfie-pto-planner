@@ -1,33 +1,36 @@
-// src/types/index.ts
-export interface LeaveState {
-    leaves: LeaveRequest[];
-    allowance: number;
-    loading: boolean;
-    error: Error | null;
-    currentYear: number;
-}
-
 export interface LeaveRequest {
-    id?: string;
-    startDate: Date;
-    endDate: Date;
+    id: string;
     type: LeaveType;
+    startDate: string;
+    endDate: string;
     notes?: string;
+    category: LeaveCategory;
+    department: string;
     status: LeaveStatus;
-    workingDays: number;
 }
 
-export type LeaveType = 'annual' | 'sick' | 'compassionate' | 'bank';
-export type LeaveStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+export type LeaveType = 'annual' | 'sick' | 'compassionate' | 'bank-holiday';
+export type LeaveCategory = 'vacation' | 'medical' | 'personal';
+export type LeaveStatus = 'pending' | 'approved' | 'rejected';
 
-export interface ValidationResult {
-    valid: boolean;
-    errors?: string[];
+export interface LeaveData {
+    total: number;
+    used: number;
+    remaining: number;
+    requests: LeaveRequest[];
 }
 
-export type LeaveAction =
-    | { type: 'REQUEST_STARTED' }
-    | { type: 'REQUEST_SUCCEEDED'; payload: LeaveRequest }
-    | { type: 'REQUEST_FAILED'; payload: string[] }
-    | { type: 'LEAVE_CANCELLED'; payload: string }
-    | { type: 'ERROR_OCCURRED'; payload: Error };
+export interface PTOSettings {
+    darkMode: boolean;
+    department: string;
+    yearlyAllowance: number;
+    bankHolidays: boolean;
+}
+
+export interface CalendarEvent {
+    title: string;
+    start: string;
+    end: string;
+    backgroundColor: string;
+    display?: string;
+}
