@@ -1,301 +1,352 @@
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
-import { Memoize } from 'typescript-memoize';
-import { EventInput, DateClickInfo, EventClickInfo, EventApi } from '@fullcalendar/core';
+import { Calendar } from '@fullcalendar/core';
+import type { LeaveRequest, LeaveData, PTOSettings, CalendarEvent } from './types';
+import { CalendarService } from './utils/calendar';
+import { StorageService } from './utils/storage';
+import { CONFIG } from './utils/config';
 
-// Types
-interface LeaveState {
-    leaves: LeaveRequest[];
-    allowance: number;
-    loading: boolean;
-    error: Error | null;
-    currentYear: number;
-}
-
-interface LeaveRequest {
-    id?: string;
-    startDate: Date;
-    endDate: Date;
-    type: LeaveType;
-    notes?: string;
-    status: LeaveStatus;
-    workingDays: number;
-}
-
-type LeaveType = 'annual' | 'sick' | 'compassionate' | 'bank';
-type LeaveStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
-
-// Configuration
-const CONFIG = {
-    LEAVE_YEAR: {
-        START_MONTH: 3, // April (0-based)
-        START_DAY: 1,
-        DEFAULT_ALLOWANCE: 25
-    },
-    VALIDATION: {
-        MIN_NOTICE_DAYS: 14,
-        MAX_CONSECUTIVE_DAYS: 15,
-        MAX_ADVANCE_BOOK_MONTHS: 12
-    },
-    CACHE: {
-        WORKING_DAYS: 5 * 60 * 1000, // 5 minutes
-        CALENDAR_EVENTS: 60 * 1000 // 1 minute
-    }
-};
-
-// Store
-class LeaveStore {
-    private state: BehaviorSubject<LeaveState>;
+class PTOPlanner {
+    private calendar: Calendar | null = null;
+    private leaveData: LeaveData = {
+        total: CONFIG.DEFAULT_LEAVE_DAYS,
+        used: 0,
+        remaining: CONFIG.DEFAULT_LEAVE_DAYS,
+        requests: []
+    };
+    private settings: PTOSettings = {
+        darkMode: false,
+        department: 'General',
+        yearlyAllowance: CONFIG.DEFAULT_LEAVE_DAYS,
+        bankHolidays: true
+    };
 
     constructor() {
-        this.state = new BehaviorSubject<LeaveState>({
-            leaves: [],
-            allowance: CONFIG.LEAVE_YEAR.DEFAULT_ALLOWANCE,
-            loading: false,
-            error: null,
-            currentYear: new Date().getFullYear()
-        });
+        this.initializeApp();
     }
 
-    select<T>(selector: (state: LeaveState) => T): Observable<T> {
-        return this.state.pipe(
-            map(selector),
-            distinctUntilChanged()
-        );
-    }
-
-    setState(newState: Partial<LeaveState>): void {
-        this.state.next({
-            ...this.state.value,
-            ...newState
-        });
-    }
-
-    getState(): LeaveState {
-        return this.state.value;
-    }
-}
-
-// Services
-class StorageService {
-    private static readonly STORAGE_KEY = 'leave_requests';
-
-    static saveLeaves(leaves: LeaveRequest[]): void {
-        try {
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(leaves));
-        } catch (error) {
-            console.error('Failed to save leaves:', error);
-            throw error;
+    private initializeApp(): void {
+        this.loadSavedData();
+        this.initializeUI();
+        this.setupEventListeners();
+        this.initializeCalendar();
+        this.initializeCharts();
+        
+        if (this.settings.bankHolidays) {
+            this.fetchBankHolidays();
         }
     }
 
-    static getLeaves(): LeaveRequest[] {
-        try {
-            const data = localStorage.getItem(this.STORAGE_KEY);
-            return data ? JSON.parse(data) : [];
-        } catch (error) {
-            console.error('Failed to retrieve leaves:', error);
-            return [];
+    private loadSavedData(): void {
+        const savedLeaveData = StorageService.getLeaveData();
+        const savedSettings = StorageService.getSettings();
+
+        if (savedLeaveData) {
+            this.leaveData = savedLeaveData;
+        }
+        if (savedSettings) {
+            this.settings = savedSettings;
         }
     }
-}
 
-class DateService {
-    @Memoize({ maxAge: CONFIG.CACHE.WORKING_DAYS })
-    static isWorkingDay(date: Date): boolean {
-        const day = date.getDay();
-        return day !== 0 && day !== 6; // Not Sunday(0) or Saturday(6)
-    }
-
-    static calculateWorkingDays(start: Date, end: Date): number {
-        let count = 0;
-        const current = new Date(start);
-        while (current <= end) {
-            if (this.isWorkingDay(current)) {
-                count++;
-            }
-            current.setDate(current.getDate() + 1);
-        }
-        return count;
-    }
-}
-
-class LeaveValidator {
-    static validateRequest(request: Partial<LeaveRequest>): string[] {
-        const errors: string[] = [];
-
-        if (!request.startDate || !request.endDate) {
-            errors.push('Start and end dates are required');
-            return errors;
+    private initializeUI(): void {
+        this.updateLeaveStats();
+        
+        const isFirstVisit = !StorageService.hasVisited();
+        if (isFirstVisit) {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            welcomeScreen?.classList.remove('hidden');
+            StorageService.setHasVisited();
+        } else {
+            const appContainer = document.getElementById('app');
+            appContainer?.classList.remove('hidden');
         }
 
-        const start = new Date(request.startDate);
-        const end = new Date(request.endDate);
-
-        if (start > end) {
-            errors.push('Start date must be before end date');
+        const departmentDisplay = document.getElementById('department-display');
+        if (departmentDisplay) {
+            departmentDisplay.textContent = this.settings.department;
         }
 
-        const workingDays = DateService.calculateWorkingDays(start, end);
-        if (workingDays > CONFIG.VALIDATION.MAX_CONSECUTIVE_DAYS) {
-            errors.push(`Maximum consecutive working days is ${CONFIG.VALIDATION.MAX_CONSECUTIVE_DAYS}`);
-        }
-
-        const today = new Date();
-        const noticeDays = Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        if (noticeDays < CONFIG.VALIDATION.MIN_NOTICE_DAYS) {
-            errors.push(`Minimum notice period is ${CONFIG.VALIDATION.MIN_NOTICE_DAYS} days`);
-        }
-
-        return errors;
-    }
-}
-
-// Main Application
-class LeaveManager {
-    private store: LeaveStore;
-    private readonly eventCache: WeakMap<HTMLElement, EventListener>;
-
-    constructor() {
-        this.store = new LeaveStore();
-        this.eventCache = new WeakMap();
-        this.initialize();
-    }
-
-    private async initialize(): Promise<void> {
-        try {
-            const leaves = StorageService.getLeaves();
-            this.store.setState({ leaves });
-            this.setupEventListeners();
-            await this.initializeCalendar();
-        } catch (error) {
-            console.error('Initialization failed:', error);
-            this.store.setState({ error: error as Error });
+        if (this.settings.darkMode) {
+            document.documentElement.setAttribute('data-theme', 'dark');
         }
     }
 
     private setupEventListeners(): void {
-        const form = document.getElementById('leaveRequestForm');
-        if (form) {
-            this.addEventListenerWithCleanup(form, 'submit', this.handleLeaveRequest.bind(this));
-        }
+        // Welcome screen
+        document.getElementById('start-setup')?.addEventListener('click', () => {
+            document.getElementById('welcome-screen')?.classList.add('hidden');
+            document.getElementById('app')?.classList.remove('hidden');
+        });
+
+        // Leave request modal
+        document.getElementById('request-leave')?.addEventListener('click', () => {
+            const modal = document.getElementById('leave-request-modal');
+            if (modal) modal.style.display = 'block';
+        });
+
+        // Settings modal
+        document.getElementById('settings-btn')?.addEventListener('click', () => {
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.style.display = 'block';
+        });
+
+        // Dark mode toggle
+        document.getElementById('dark-mode-toggle')?.addEventListener('click', () => {
+            this.settings.darkMode = !this.settings.darkMode;
+            document.documentElement.setAttribute('data-theme', 
+                this.settings.darkMode ? 'dark' : 'light'
+            );
+            this.saveSettings();
+        });
+
+        // Close modals
+        document.querySelectorAll('.close-modal, .cancel-request, .cancel-settings').forEach(element => {
+            element.addEventListener('click', () => {
+                const leaveModal = document.getElementById('leave-request-modal');
+                const settingsModal = document.getElementById('settings-modal');
+                if (leaveModal) leaveModal.style.display = 'none';
+                if (settingsModal) settingsModal.style.display = 'none';
+            });
+        });
+
+        // Form submissions
+        document.getElementById('leave-request-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLeaveRequest();
+        });
+
+        document.getElementById('settings-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSettingsUpdate();
+        });
     }
 
-    private addEventListenerWithCleanup(
-        element: HTMLElement,
-        event: string,
-        handler: EventListener
-    ): void {
-        const existingHandler = this.eventCache.get(element);
-        if (existingHandler) {
-            element.removeEventListener(event, existingHandler);
-        }
-        this.eventCache.set(element, handler);
-        element.addEventListener(event, handler);
-    }
-
-    private async initializeCalendar(): Promise<void> {
+    private initializeCalendar(): void {
         const calendarEl = document.getElementById('calendar');
         if (!calendarEl) return;
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: this.getCalendarEvents.bind(this),
-            eventClick: this.handleEventClick.bind(this),
-            dateClick: this.handleDateClick.bind(this)
-        });
+        this.calendar = CalendarService.initializeCalendar(
+            calendarEl,
+            this.leaveData.requests,
+            (start: Date, end: Date) => {
+                this.openLeaveRequestModal(start, end);
+            }
+        );
 
-        calendar.render();
+        this.calendar.render();
     }
 
-    @Memoize({ maxAge: CONFIG.CACHE.CALENDAR_EVENTS })
-    private async getCalendarEvents(fetchInfo: any): Promise<EventInput[]> {
-        const leaves = this.store.getState().leaves;
-        return leaves.map(leave => ({
-            id: leave.id,
-            title: `${leave.type} Leave`,
-            start: leave.startDate,
-            end: leave.endDate,
-            backgroundColor: this.getEventColor(leave.status)
-        }));
+    private async fetchBankHolidays(): Promise<void> {
+        try {
+            const response = await fetch(CONFIG.API_ENDPOINTS.BANK_HOLIDAYS);
+            const data = await response.json();
+            const holidays: CalendarEvent[] = data['england-and-wales'].events.map((holiday: any) => ({
+                title: `Bank Holiday - ${holiday.title}`,
+                start: holiday.date,
+                end: holiday.date,
+                display: 'background',
+                backgroundColor: CONFIG.COLORS['bank-holiday']
+            }));
+
+            this.calendar?.addEventSource(holidays);
+        } catch (error) {
+            this.showNotification('Failed to fetch bank holidays', 'error');
+        }
     }
 
-    private getEventColor(status: LeaveStatus): string {
-        const colors = {
-            pending: '#FFA500',
-            approved: '#4CAF50',
-            rejected: '#F44336',
-            cancelled: '#9E9E9E'
-        };
-        return colors[status];
-    }
-
-    private async handleLeaveRequest(event: Event): Promise<void> {
-        event.preventDefault();
-        const form = event.target as HTMLFormElement;
+    private handleLeaveRequest(): void {
+        const form = document.getElementById('leave-request-form') as HTMLFormElement;
         const formData = new FormData(form);
 
-        const request: Partial<LeaveRequest> = {
-            startDate: new Date(formData.get('startDate') as string),
-            endDate: new Date(formData.get('endDate') as string),
-            type: formData.get('type') as LeaveType,
-            notes: formData.get('notes') as string
+        const request: LeaveRequest = {
+            id: crypto.randomUUID(),
+            type: formData.get('leave-type') as LeaveRequest['type'],
+            startDate: formData.get('start-date') as string,
+            endDate: formData.get('end-date') as string,
+            notes: formData.get('notes') as string,
+            category: formData.get('category') as LeaveRequest['category'],
+            department: this.settings.department,
+            status: 'pending'
         };
 
-        const errors = LeaveValidator.validateRequest(request);
-        if (errors.length > 0) {
-            this.showErrors(errors);
-            return;
-        }
+        if (this.validateLeaveRequest(request)) {
+            this.leaveData.requests.push(request);
+            this.updateLeaveStats();
+            StorageService.setLeaveData(this.leaveData);
 
-        try {
-            this.store.setState({ loading: true });
-            const workingDays = DateService.calculateWorkingDays(
-                request.startDate!,
-                request.endDate!
-            );
+            this.calendar?.addEvent({
+                title: `${request.type} Leave (${request.status})`,
+                start: request.startDate,
+                end: request.endDate,
+                backgroundColor: CONFIG.COLORS[request.type]
+            });
 
-            const newLeave: LeaveRequest = {
-                ...request as Required<typeof request>,
-                id: crypto.randomUUID(),
-                status: 'pending',
-                workingDays
-            };
-
-            const leaves = [...this.store.getState().leaves, newLeave];
-            StorageService.saveLeaves(leaves);
-            this.store.setState({ leaves, loading: false });
-            this.showSuccess('Leave request submitted successfully');
+            this.showNotification('Leave request submitted successfully', 'success');
             form.reset();
-        } catch (error) {
-            console.error('Failed to submit leave request:', error);
-            this.store.setState({ loading: false, error: error as Error });
-            this.showErrors(['Failed to submit leave request']);
+            const modal = document.getElementById('leave-request-modal');
+            if (modal) modal.style.display = 'none';
         }
     }
 
-    private showErrors(errors: string[]): void {
-        // Implement error display logic
-        console.error(errors);
+    private handleSettingsUpdate(): void {
+        const form = document.getElementById('settings-form') as HTMLFormElement;
+        const formData = new FormData(form);
+
+        this.settings = {
+            ...this.settings,
+            department: formData.get('department') as string,
+            yearlyAllowance: parseInt(formData.get('yearlyAllowance') as string),
+            bankHolidays: formData.get('bankHolidays') === 'on'
+        };
+
+        this.saveSettings();
+        const departmentDisplay = document.getElementById('department-display');
+        if (departmentDisplay) {
+            departmentDisplay.textContent = this.settings.department;
+        }
+
+        const modal = document.getElementById('settings-modal');
+        if (modal) modal.style.display = 'none';
+        
+        this.showNotification('Settings updated successfully', 'success');
     }
 
-    private showSuccess(message: string): void {
-        // Implement success message display logic
-        console.log(message);
+    private validateLeaveRequest(request: LeaveRequest): boolean {
+        const startDate = new Date(request.startDate);
+        const endDate = new Date(request.endDate);
+
+        if (endDate < startDate) {
+            this.showNotification('End date cannot be before start date', 'error');
+            return false;
+        }
+
+        const daysRequested = CalendarService.calculateBusinessDays(startDate, endDate);
+        if (daysRequested > this.leaveData.remaining) {
+            this.showNotification('Insufficient leave days remaining', 'error');
+            return false;
+        }
+
+        return true;
     }
 
-    private handleEventClick(info: EventClickInfo): void {
-        // Implement event click handling
-        console.log('Event clicked:', info.event);
+    private updateLeaveStats(): void {
+        const totalEl = document.getElementById('total-leave');
+        const usedEl = document.getElementById('used-leave');
+        const remainingEl = document.getElementById('remaining-leave');
+
+        if (totalEl) totalEl.textContent = this.leaveData.total.toString();
+        if (usedEl) usedEl.textContent = this.leaveData.used.toString();
+        if (remainingEl) remainingEl.textContent = this.leaveData.remaining.toString();
     }
 
-    private handleDateClick(info: DateClickInfo): void {
-        // Implement date click handling
-        console.log('Date clicked:', info.date);
+    private showNotification(message: string, type: 'success' | 'error' | 'info'): void {
+        Swal.fire({
+            text: message,
+            icon: type,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    }
+
+    private saveSettings(): void {
+        StorageService.setSettings(this.settings);
+    }
+
+    private openLeaveRequestModal(start: Date, end: Date): void {
+        const modal = document.getElementById('leave-request-modal');
+        if (!modal) return;
+
+        const startInput = document.getElementById('start-date') as HTMLInputElement;
+        const endInput = document.getElementById('end-date') as HTMLInputElement;
+
+        if (startInput && endInput) {
+            startInput.value = start.toISOString().split('T')[0];
+            endInput.value = end.toISOString().split('T')[0];
+        }
+
+        modal.style.display = 'block';
+    }
+
+    private initializeCharts(): void {
+        this.initializeLeaveDistributionChart();
+        this.initializeLeaveTypeChart();
+    }
+
+    private initializeLeaveDistributionChart(): void {
+        const ctx = document.getElementById('leaveDistributionChart') as HTMLCanvasElement;
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Used', 'Remaining'],
+                datasets: [{
+                    data: [this.leaveData.used, this.leaveData.remaining],
+                    backgroundColor: [CONFIG.COLORS.annual, CONFIG.COLORS.sick]
+                }]
+            }
+        });
+    }
+
+    private initializeLeaveTypeChart(): void {
+        const ctx = document.getElementById('departmentStatsChart') as HTMLCanvasElement;
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Annual', 'Sick', 'Compassionate', 'Bank Holiday'],
+                datasets: [{
+                    label: 'Leave Days by Type',
+                    data: this.calculateLeaveTypeStats(),
+                    backgroundColor: Object.values(CONFIG.COLORS)
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    private calculateLeaveTypeStats(): number[] {
+        const stats = {
+            annual: 0,
+            sick: 0,
+            compassionate: 0,
+            'bank-holiday': 0
+        };
+
+        this.leaveData.requests.forEach(request => {
+            const days = CalendarService.calculateBusinessDays(
+                new Date(request.startDate),
+                new Date(request.endDate)
+            );
+            stats[request.type] += days;
+        });
+
+        return Object.values(stats);
+    }
+
+    // Public methods for external access
+    public exportData(format: 'csv' | 'excel' | 'pdf'): void {
+        // Implementation for data export
+        console.log(`Exporting data in ${format} format`);
     }
 }
 
-// Initialize application
+// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new LeaveManager();
+    window.ptoPlanner = new PTOPlanner();
 });
+
+// Add this to make TypeScript happy about the global ptoPlanner variable
+declare global {
+    interface Window {
+        ptoPlanner: PTOPlanner;
+    }
+}
