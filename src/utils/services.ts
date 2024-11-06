@@ -1,5 +1,5 @@
 // src/utils/services.ts
-import { LeaveRequest, LeaveState } from '../types';
+import { LeaveRequest, LeaveStatus } from '../types';
 import { CONFIG } from './config';
 import { LeaveError, ErrorCodes } from './errors';
 

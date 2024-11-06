@@ -1,3 +1,6 @@
+// Add at the top of the file
+import Swal from 'sweetalert2';
+import Chart from 'chart.js/auto';
 import { Calendar } from '@fullcalendar/core';
 import type { LeaveRequest, LeaveData, PTOSettings, CalendarEvent } from './types';
 import { CalendarService } from './utils/calendar';

@@ -17,10 +17,10 @@ const LeaveRequestForm = () => {
       return;
     }
     
-    const newRequest: LeaveRequest = {
-      id: Date.now().toString(),
-      ...request as LeaveRequest
-    };
+    const newRequest = {
+        ...request as LeaveRequest,
+        id: Date.now().toString()  // Put id after spread to ensure it's not overwritten
+      };
     
     console.log('Submitting request:', newRequest);
     // TODO: Add actual submission logic
