@@ -1,3 +1,4 @@
+   // Version 2.0 - Updated Calendar Service
 import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import type { LeaveRequest, CalendarEvent } from '../types';
