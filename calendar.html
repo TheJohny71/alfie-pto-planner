@@ -11,81 +11,94 @@
     <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
     
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <!-- Third-party CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css" rel="stylesheet">
     
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- FullCalendar JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <!-- Third-party JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js"></script>
     
     <!-- Your CSS -->
     <link rel="stylesheet" href="./styles/main.css">
     
-    <!-- Your JS -->
-    <script type="module" src="./scripts/main.js" defer></script>
-
     <style>
-        /* Inline styles for critical UI elements */
+        /* Critical UI styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #F3F4F6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
         .calendar-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 20px;
+            margin-top: 20px;
             min-height: 600px;
         }
-        
+
         .navbar {
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .logo img {
-            width: 32px;
             height: 32px;
+            width: auto;
         }
-        
+
         .logo-text {
             font-size: 1.5rem;
             font-weight: bold;
             color: #6366F1;
+            text-decoration: none;
         }
-        
+
         .nav-links {
             display: flex;
             gap: 1rem;
         }
-        
+
         .button {
             padding: 0.5rem 1rem;
             border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
             font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            display: inline-block;
         }
-        
+
         .button.primary {
             background-color: #6366F1;
             color: white;
         }
-        
+
         .button.secondary {
             background-color: #F3F4F6;
             color: #1F2937;
         }
-        
+
         .modal {
             display: none;
             position: fixed;
@@ -96,13 +109,47 @@
             background: rgba(0,0,0,0.5);
             z-index: 1000;
         }
-        
+
         .modal-content {
             background: white;
             padding: 2rem;
             border-radius: 8px;
             max-width: 500px;
             margin: 2rem auto;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            color: #6B7280;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -167,5 +214,94 @@
     <footer class="footer">
         <p>&copy; 2024 Alfie PTO Planner. All rights reserved.</p>
     </footer>
+
+    <!-- Your JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize calendar
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
+                },
+                editable: false,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true,
+                weekends: true,
+                select: function(info) {
+                    const modal = document.getElementById('leaveRequestModal');
+                    const startDateInput = document.getElementById('startDate');
+                    const endDateInput = document.getElementById('endDate');
+                    
+                    startDateInput.value = info.startStr;
+                    endDateInput.value = info.endStr;
+                    
+                    modal.style.display = 'block';
+                }
+            });
+            calendar.render();
+
+            // Form handling
+            const openFormBtn = document.getElementById('openFormBtn');
+            const modal = document.getElementById('leaveRequestModal');
+            const form = document.getElementById('leaveRequestForm');
+
+            openFormBtn.addEventListener('click', () => {
+                modal.style.display = 'block';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                
+                const formData = new FormData(form);
+                const request = {
+                    startDate: formData.get('startDate'),
+                    endDate: formData.get('endDate'),
+                    type: formData.get('leaveType'),
+                    description: formData.get('description')
+                };
+
+                // Add event to calendar
+                calendar.addEvent({
+                    title: request.type,
+                    start: request.startDate,
+                    end: request.endDate,
+                    backgroundColor: getEventColor(request.type)
+                });
+
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Leave request has been submitted.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                // Reset form and close modal
+                form.reset();
+                modal.style.display = 'none';
+            });
+
+            function getEventColor(type) {
+                const colors = {
+                    vacation: '#4CAF50',
+                    sick: '#F44336',
+                    personal: '#2196F3'
+                };
+                return colors[type] || '#9E9E9E';
+            }
+        });
+    </script>
 </body>
 </html>
