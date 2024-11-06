@@ -1,22 +1,22 @@
-// Storage utilities
-function saveEvents(events) {
-    localStorage.setItem('events', JSON.stringify(events));
+export class StorageService {
+    static getLeaveData() {
+        const data = localStorage.getItem('leaveData');
+        return data ? JSON.parse(data) : null;
+    }
+    static setLeaveData(data) {
+        localStorage.setItem('leaveData', JSON.stringify(data));
+    }
+    static getSettings() {
+        const settings = localStorage.getItem('settings');
+        return settings ? JSON.parse(settings) : null;
+    }
+    static setSettings(settings) {
+        localStorage.setItem('settings', JSON.stringify(settings));
+    }
+    static setHasVisited() {
+        localStorage.setItem('hasVisited', 'true');
+    }
+    static hasVisited() {
+        return localStorage.getItem('hasVisited') === 'true';
+    }
 }
-
-function getEvents() {
-    return JSON.parse(localStorage.getItem('events')) || [];
-}
-
-function addEvent(event) {
-    const events = getEvents();
-    events.push(event);
-    saveEvents(events);
-}
-
-function removeEvent(eventId) {
-    const events = getEvents();
-    const updatedEvents = events.filter(event => event.id !== eventId);
-    saveEvents(updatedEvents);
-}
-
-export { saveEvents, getEvents, addEvent, removeEvent };
