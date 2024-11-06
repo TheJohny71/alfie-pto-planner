@@ -1,9 +1,15 @@
-// Debug: Proper ES6 module
-const CONFIG = {
-    MIN_LEAVE_DAYS: 1,
-    MAX_LEAVE_DAYS: 14,
-    MAX_CONCURRENT_REQUESTS: 3,
-    ALLOWED_MONTHS_AHEAD: 3
+export const CONFIG = {
+    DEFAULT_LEAVE_DAYS: 25,
+    API_ENDPOINTS: {
+        BANK_HOLIDAYS: 'https://www.gov.uk/bank-holidays.json'
+    },
+    COLORS: {
+        'annual': '#4CAF50',
+        'sick': '#F44336',
+        'compassionate': '#2196F3',
+        'bank-holiday': '#9C27B0'
+    },
+    VALIDATION: {
+        MAX_CONSECUTIVE_DAYS: 14
+    }
 };
-
-export { CONFIG };
