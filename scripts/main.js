@@ -1,338 +1,268 @@
-// Import from CDN URLs
-// Change these lines at the top of main.js
-import { Calendar } from 'https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/+esm';
-import dayGridPlugin from 'https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/+esm';
-
-// Update the calendar initialization to use dayGridPlugin
-this.calendar = new Calendar(calendarEl, {
-    plugins: [dayGridPlugin],  // Change this line
-    initialView: 'dayGridMonth',
-    // ... rest of the options
-});
-
-// Global library references
-const Swal = window.Swal;
-const Chart = window.Chart;
-
+// Add at the top of the file
+import Swal from 'sweetalert2';
+import Chart from 'chart.js/auto';
+import { CalendarService } from './utils/calendar';
+import { StorageService } from './utils/storage';
+import { CONFIG } from './utils/config';
 class PTOPlanner {
     constructor() {
         this.calendar = null;
         this.leaveData = {
-            total: 25, // Default value
+            total: CONFIG.DEFAULT_LEAVE_DAYS,
             used: 0,
-            remaining: 25,
+            remaining: CONFIG.DEFAULT_LEAVE_DAYS,
             requests: []
         };
         this.settings = {
             darkMode: false,
             department: 'General',
-            yearlyAllowance: 25,
+            yearlyAllowance: CONFIG.DEFAULT_LEAVE_DAYS,
             bankHolidays: true
         };
         this.initializeApp();
     }
-
     initializeApp() {
         this.loadSavedData();
         this.initializeUI();
         this.setupEventListeners();
         this.initializeCalendar();
         this.initializeCharts();
-        
         if (this.settings.bankHolidays) {
             this.fetchBankHolidays();
         }
     }
-
     loadSavedData() {
-        const savedLeaveData = localStorage.getItem('leaveData');
-        const savedSettings = localStorage.getItem('settings');
-
+        const savedLeaveData = StorageService.getLeaveData();
+        const savedSettings = StorageService.getSettings();
         if (savedLeaveData) {
-            this.leaveData = JSON.parse(savedLeaveData);
+            this.leaveData = savedLeaveData;
         }
         if (savedSettings) {
-            this.settings = JSON.parse(savedSettings);
+            this.settings = savedSettings;
         }
     }
-
     initializeUI() {
         this.updateLeaveStats();
-        
-        const isFirstVisit = !localStorage.getItem('hasVisited');
+        const isFirstVisit = !StorageService.hasVisited();
         if (isFirstVisit) {
             const welcomeScreen = document.getElementById('welcome-screen');
             welcomeScreen?.classList.remove('hidden');
-            localStorage.setItem('hasVisited', 'true');
-        } else {
-            document.getElementById('app')?.classList.remove('hidden');
+            StorageService.setHasVisited();
         }
-
-        // Set initial dark mode
+        else {
+            const appContainer = document.getElementById('app');
+            appContainer?.classList.remove('hidden');
+        }
+        const departmentDisplay = document.getElementById('department-display');
+        if (departmentDisplay) {
+            departmentDisplay.textContent = this.settings.department;
+        }
         if (this.settings.darkMode) {
-            document.body.setAttribute('data-theme', 'dark');
-            document.getElementById('dark-mode-toggle').textContent = '☀️';
+            document.documentElement.setAttribute('data-theme', 'dark');
         }
-
-        // Update department display
-        document.getElementById('department-display').textContent = this.settings.department;
     }
-
     setupEventListeners() {
         // Welcome screen
         document.getElementById('start-setup')?.addEventListener('click', () => {
             document.getElementById('welcome-screen')?.classList.add('hidden');
             document.getElementById('app')?.classList.remove('hidden');
         });
-
+        // Leave request modal
+        document.getElementById('request-leave')?.addEventListener('click', () => {
+            const modal = document.getElementById('leave-request-modal');
+            if (modal)
+                modal.style.display = 'block';
+        });
+        // Settings modal
+        document.getElementById('settings-btn')?.addEventListener('click', () => {
+            const modal = document.getElementById('settings-modal');
+            if (modal)
+                modal.style.display = 'block';
+        });
         // Dark mode toggle
         document.getElementById('dark-mode-toggle')?.addEventListener('click', () => {
-            this.toggleDarkMode();
+            this.settings.darkMode = !this.settings.darkMode;
+            document.documentElement.setAttribute('data-theme', this.settings.darkMode ? 'dark' : 'light');
+            this.saveSettings();
         });
-
-        // Leave request button
-        document.getElementById('request-leave')?.addEventListener('click', () => {
-            this.openLeaveRequestModal();
-        });
-
-        // Settings button
-        document.getElementById('settings-btn')?.addEventListener('click', () => {
-            this.openSettingsModal();
-        });
-
-        // Modal close buttons
-        document.querySelectorAll('.close-modal').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const modal = e.target.closest('.modal');
-                if (modal) modal.style.display = 'none';
+        // Close modals
+        document.querySelectorAll('.close-modal, .cancel-request, .cancel-settings').forEach(element => {
+            element.addEventListener('click', () => {
+                const leaveModal = document.getElementById('leave-request-modal');
+                const settingsModal = document.getElementById('settings-modal');
+                if (leaveModal)
+                    leaveModal.style.display = 'none';
+                if (settingsModal)
+                    settingsModal.style.display = 'none';
             });
         });
-
-        // Leave request form
+        // Form submissions
         document.getElementById('leave-request-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLeaveRequest();
         });
-
-        // Settings form
         document.getElementById('settings-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
-            this.saveSettings();
-        });
-
-        // Cancel buttons
-        document.querySelector('.cancel-request')?.addEventListener('click', () => {
-            document.getElementById('leave-request-modal').style.display = 'none';
-        });
-
-        document.querySelector('.cancel-settings')?.addEventListener('click', () => {
-            document.getElementById('settings-modal').style.display = 'none';
+            this.handleSettingsUpdate();
         });
     }
-
     initializeCalendar() {
         const calendarEl = document.getElementById('calendar');
-        if (!calendarEl) return;
-
-        this.calendar = new Calendar(calendarEl, {
-            plugins: [DayGrid],
-            initialView: 'dayGridMonth',
-            events: this.getCalendarEvents(),
-            selectable: true,
-            select: (info) => {
-                this.openLeaveRequestModal(info.start, info.end);
-            }
+        if (!calendarEl)
+            return;
+        this.calendar = CalendarService.initializeCalendar(calendarEl, this.leaveData.requests, (start, end) => {
+            this.openLeaveRequestModal(start, end);
         });
-
         this.calendar.render();
     }
-
-    getCalendarEvents() {
-        return this.leaveData.requests.map(request => ({
-            title: request.type,
-            start: request.startDate,
-            end: request.endDate,
-            backgroundColor: this.getEventColor(request.type)
-        }));
-    }
-
-    getEventColor(type) {
-        const colors = {
-            annual: '#4CAF50',
-            sick: '#F44336',
-            compassionate: '#2196F3',
-            'bank-holiday': '#9C27B0'
-        };
-        return colors[type] || '#757575';
-    }
-
-    toggleDarkMode() {
-        this.settings.darkMode = !this.settings.darkMode;
-        document.body.setAttribute('data-theme', this.settings.darkMode ? 'dark' : 'light');
-        document.getElementById('dark-mode-toggle').textContent = this.settings.darkMode ? '☀️' : '🌙';
-        this.saveSettings();
-    }
-
-    openLeaveRequestModal(start = null, end = null) {
-        const modal = document.getElementById('leave-request-modal');
-        if (!modal) return;
-
-        if (start && end) {
-            document.getElementById('start-date').value = start.toISOString().split('T')[0];
-            document.getElementById('end-date').value = end.toISOString().split('T')[0];
+    async fetchBankHolidays() {
+        try {
+            const response = await fetch(CONFIG.API_ENDPOINTS.BANK_HOLIDAYS);
+            const data = await response.json();
+            const holidays = data['england-and-wales'].events.map((holiday) => ({
+                title: `Bank Holiday - ${holiday.title}`,
+                start: holiday.date,
+                end: holiday.date,
+                display: 'background',
+                backgroundColor: CONFIG.COLORS['bank-holiday']
+            }));
+            this.calendar?.addEventSource(holidays);
         }
-
-        modal.style.display = 'block';
+        catch (error) {
+            this.showNotification('Failed to fetch bank holidays', 'error');
+        }
     }
-
     handleLeaveRequest() {
         const form = document.getElementById('leave-request-form');
         const formData = new FormData(form);
-
         const request = {
+            id: crypto.randomUUID(),
             type: formData.get('leave-type'),
             startDate: formData.get('start-date'),
             endDate: formData.get('end-date'),
-            category: formData.get('category'),
             notes: formData.get('notes'),
+            category: formData.get('category'),
+            department: this.settings.department,
             status: 'pending'
         };
-
-        if (this.validateRequest(request)) {
+        if (this.validateLeaveRequest(request)) {
             this.leaveData.requests.push(request);
             this.updateLeaveStats();
-            this.saveLeaveData();
-            this.updateCalendar();
-            
-            document.getElementById('leave-request-modal').style.display = 'none';
+            StorageService.setLeaveData(this.leaveData);
+            this.calendar?.addEvent({
+                title: `${request.type} Leave (${request.status})`,
+                start: request.startDate,
+                end: request.endDate,
+                backgroundColor: CONFIG.COLORS[request.type]
+            });
+            this.showNotification('Leave request submitted successfully', 'success');
             form.reset();
-
-            Swal.fire({
-                title: 'Success!',
-                text: 'Leave request submitted successfully',
-                icon: 'success'
-            });
+            const modal = document.getElementById('leave-request-modal');
+            if (modal)
+                modal.style.display = 'none';
         }
     }
-
-    validateRequest(request) {
-        const start = new Date(request.startDate);
-        const end = new Date(request.endDate);
-
-        if (end < start) {
-            Swal.fire({
-                title: 'Error!',
-                text: 'End date cannot be before start date',
-                icon: 'error'
-            });
-            return false;
-        }
-
-        // Add more validation as needed
-
-        return true;
-    }
-
-    updateLeaveStats() {
-        document.getElementById('total-leave').textContent = this.leaveData.total;
-        document.getElementById('used-leave').textContent = this.leaveData.used;
-        document.getElementById('remaining-leave').textContent = this.leaveData.remaining;
-    }
-
-    saveLeaveData() {
-        localStorage.setItem('leaveData', JSON.stringify(this.leaveData));
-    }
-
-    updateCalendar() {
-        if (this.calendar) {
-            this.calendar.removeAllEvents();
-            this.calendar.addEventSource(this.getCalendarEvents());
-        }
-    }
-
-    openSettingsModal() {
-        const modal = document.getElementById('settings-modal');
-        if (!modal) return;
-
-        // Populate current settings
-        document.getElementById('department-select').value = this.settings.department;
-        document.getElementById('yearly-allowance').value = this.settings.yearlyAllowance;
-        document.getElementById('bank-holidays').checked = this.settings.bankHolidays;
-
-        modal.style.display = 'block';
-    }
-
-    saveSettings() {
+    handleSettingsUpdate() {
         const form = document.getElementById('settings-form');
         const formData = new FormData(form);
-
         this.settings = {
             ...this.settings,
             department: formData.get('department'),
             yearlyAllowance: parseInt(formData.get('yearlyAllowance')),
             bankHolidays: formData.get('bankHolidays') === 'on'
         };
-
-        this.saveSettingsToStorage();
-        document.getElementById('settings-modal').style.display = 'none';
-        this.updateUI();
-    }
-
-    saveSettingsToStorage() {
-        localStorage.setItem('settings', JSON.stringify(this.settings));
-    }
-
-    updateUI() {
-        document.getElementById('department-display').textContent = this.settings.department;
-        this.leaveData.total = this.settings.yearlyAllowance;
-        this.updateLeaveStats();
-        this.saveLeaveData();
-    }
-
-    async fetchBankHolidays() {
-        try {
-            const response = await fetch('https://www.gov.uk/bank-holidays.json');
-            const data = await response.json();
-            // Process bank holidays data
-        } catch (error) {
-            console.error('Failed to fetch bank holidays:', error);
+        this.saveSettings();
+        const departmentDisplay = document.getElementById('department-display');
+        if (departmentDisplay) {
+            departmentDisplay.textContent = this.settings.department;
         }
+        const modal = document.getElementById('settings-modal');
+        if (modal)
+            modal.style.display = 'none';
+        this.showNotification('Settings updated successfully', 'success');
     }
-
+    validateLeaveRequest(request) {
+        const startDate = new Date(request.startDate);
+        const endDate = new Date(request.endDate);
+        if (endDate < startDate) {
+            this.showNotification('End date cannot be before start date', 'error');
+            return false;
+        }
+        const daysRequested = CalendarService.calculateBusinessDays(startDate, endDate);
+        if (daysRequested > this.leaveData.remaining) {
+            this.showNotification('Insufficient leave days remaining', 'error');
+            return false;
+        }
+        return true;
+    }
+    updateLeaveStats() {
+        const totalEl = document.getElementById('total-leave');
+        const usedEl = document.getElementById('used-leave');
+        const remainingEl = document.getElementById('remaining-leave');
+        if (totalEl)
+            totalEl.textContent = this.leaveData.total.toString();
+        if (usedEl)
+            usedEl.textContent = this.leaveData.used.toString();
+        if (remainingEl)
+            remainingEl.textContent = this.leaveData.remaining.toString();
+    }
+    showNotification(message, type) {
+        Swal.fire({
+            text: message,
+            icon: type,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
+    }
+    saveSettings() {
+        StorageService.setSettings(this.settings);
+    }
+    openLeaveRequestModal(start, end) {
+        const modal = document.getElementById('leave-request-modal');
+        if (!modal)
+            return;
+        const startInput = document.getElementById('start-date');
+        const endInput = document.getElementById('end-date');
+        if (startInput && endInput) {
+            startInput.value = start.toISOString().split('T')[0];
+            endInput.value = end.toISOString().split('T')[0];
+        }
+        modal.style.display = 'block';
+    }
     initializeCharts() {
         this.initializeLeaveDistributionChart();
         this.initializeLeaveTypeChart();
     }
-
     initializeLeaveDistributionChart() {
         const ctx = document.getElementById('leaveDistributionChart');
-        if (!ctx) return;
-
+        if (!ctx)
+            return;
         new Chart(ctx, {
-            type: 'doughnut',
+            type: 'pie',
             data: {
                 labels: ['Used', 'Remaining'],
                 datasets: [{
-                    data: [this.leaveData.used, this.leaveData.remaining],
-                    backgroundColor: ['#F44336', '#4CAF50']
-                }]
+                        data: [this.leaveData.used, this.leaveData.remaining],
+                        backgroundColor: [CONFIG.COLORS.annual, CONFIG.COLORS.sick]
+                    }]
             }
         });
     }
-
     initializeLeaveTypeChart() {
         const ctx = document.getElementById('departmentStatsChart');
-        if (!ctx) return;
-
+        if (!ctx)
+            return;
         new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Annual', 'Sick', 'Compassionate', 'Bank Holiday'],
                 datasets: [{
-                    label: 'Leave Days by Type',
-                    data: this.calculateLeaveTypeStats(),
-                    backgroundColor: ['#4CAF50', '#F44336', '#2196F3', '#9C27B0']
-                }]
+                        label: 'Leave Days by Type',
+                        data: this.calculateLeaveTypeStats(),
+                        backgroundColor: Object.values(CONFIG.COLORS)
+                    }]
             },
             options: {
                 scales: {
@@ -343,7 +273,6 @@ class PTOPlanner {
             }
         });
     }
-
     calculateLeaveTypeStats() {
         const stats = {
             annual: 0,
@@ -351,41 +280,19 @@ class PTOPlanner {
             compassionate: 0,
             'bank-holiday': 0
         };
-
         this.leaveData.requests.forEach(request => {
-            const start = new Date(request.startDate);
-            const end = new Date(request.endDate);
-            const days = this.calculateBusinessDays(start, end);
+            const days = CalendarService.calculateBusinessDays(new Date(request.startDate), new Date(request.endDate));
             stats[request.type] += days;
         });
-
         return Object.values(stats);
     }
-
-    calculateBusinessDays(start, end) {
-        let count = 0;
-        const current = new Date(start);
-        while (current <= end) {
-            if (current.getDay() !== 0 && current.getDay() !== 6) {
-                count++;
-            }
-            current.setDate(current.getDate() + 1);
-        }
-        return count;
-    }
-
+    // Public methods for external access
     exportData(format) {
+        // Implementation for data export
         console.log(`Exporting data in ${format} format`);
-        // Implement export functionality
     }
 }
-
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     window.ptoPlanner = new PTOPlanner();
 });
-
-// Add this to make TypeScript happy about the global ptoPlanner variable
-if (typeof window !== 'undefined') {
-    window.ptoPlanner = window.ptoPlanner || {};
-}
