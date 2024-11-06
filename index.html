@@ -3,165 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfie PTO Planner Pro</title>
+    <title>Alfie - Time Off Planner</title>
     
-    <!-- Stylesheets -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="src/styles/components/LeaveRequestForm.css">
     
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
-    
-    <!-- SweetAlert2 CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css' rel='stylesheet' />
-    
-    <!-- Scripts -->
+    <!-- Load SweetAlert2 from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/index.global.min.js"></script>
 </head>
 <body>
-    <div id="welcome-screen" class="welcome-container">
-        <h1>Welcome to Alfie PTO Planner Pro</h1>
-        <p class="welcome-text">Your Enterprise Leave Management Solution</p>
-        <button id="start-setup" class="btn btn-primary">Get Started</button>
-    </div>
-
-    <div id="app" class="app-container hidden">
-        <header class="app-header">
-            <h1>Alfie PTO Planner Pro</h1>
-            <div class="header-controls">
-                <button id="request-leave" class="btn btn-primary">Request Leave</button>
-                <button id="settings-btn" class="btn btn-secondary">Settings</button>
-                <button id="dark-mode-toggle" class="btn btn-icon">🌙</button>
-            </div>
+    <div class="container">
+        <header class="header">
+            <h1>Welcome to Alfie</h1>
+            <p class="subtitle">Plan Your Time Off with Ease</p>
+            <button class="btn">Get Started</button>
         </header>
 
-        <div class="dashboard-grid">
-            <div class="leave-stats">
-                <h2>Leave Allowance</h2>
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>Total</h3>
-                        <p id="total-leave">25</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Used</h3>
-                        <p id="used-leave">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Remaining</h3>
-                        <p id="remaining-leave">25</p>
-                    </div>
-                </div>
-                <div class="department-info">
-                    <h3>Department: <span id="department-display">General</span></h3>
-                </div>
-            </div>
-
-            <div id="calendar"></div>
-
-            <div class="analytics-panel">
-                <h2>Analytics Dashboard</h2>
-                <div class="analytics-grid">
-                    <div class="chart-container">
-                        <canvas id="leaveDistributionChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="departmentStatsChart"></canvas>
-                    </div>
-                </div>
-                <div class="export-controls">
-                    <button class="btn" onclick="ptoPlanner.exportData('csv')">Export CSV</button>
-                    <button class="btn" onclick="ptoPlanner.exportData('excel')">Export Excel</button>
-                    <button class="btn" onclick="ptoPlanner.exportData('pdf')">Export PDF</button>
-                </div>
-            </div>
+        <!-- Loading Spinner (initially hidden) -->
+        <div class="loading">
+            <img src="assets/loading-spinner.svg" alt="Loading...">
         </div>
     </div>
 
-    <!-- Leave Request Modal -->
-    <div id="leave-request-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Request Leave</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="leave-request-form">
-                <div class="form-group">
-                    <label for="leave-type">Leave Type:</label>
-                    <select id="leave-type" name="leave-type" required>
-                        <option value="annual">Annual Leave</option>
-                        <option value="sick">Sick Leave</option>
-                        <option value="compassionate">Compassionate Leave</option>
-                        <option value="bank-holiday">Bank Holiday</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="start-date">Start Date:</label>
-                    <input type="date" id="start-date" name="start-date" required>
-                </div>
-                <div class="form-group">
-                    <label for="end-date">End Date:</label>
-                    <input type="date" id="end-date" name="end-date" required>
-                </div>
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <select id="category" name="category">
-                        <option value="vacation">Vacation</option>
-                        <option value="medical">Medical</option>
-                        <option value="personal">Personal</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notes:</label>
-                    <textarea id="notes" name="notes"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary cancel-request">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit Request</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Settings</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="settings-form">
-                <div class="form-group">
-                    <label for="department-select">Department:</label>
-                    <select id="department-select" name="department">
-                        <option value="General">General</option>
-                        <option value="IT">IT</option>
-                        <option value="HR">HR</option>
-                        <option value="Finance">Finance</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="yearly-allowance">Yearly Leave Allowance:</label>
-                    <input type="number" id="yearly-allowance" name="yearlyAllowance" min="0" max="50" value="25">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="bank-holidays" name="bankHolidays" checked>
-                        Include Bank Holidays
-                    </label>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary cancel-settings">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Settings</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Main Script -->
-    <script src="scripts/main.js" type="module"></script>
+    <!-- Load our JavaScript last -->
+    <script src="scripts/main.js"></script>
 </body>
 </html>
