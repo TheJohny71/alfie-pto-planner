@@ -1,38 +1,43 @@
-import { CONFIG } from './config.js';
-import { getEvents } from './storage.js';
-
-function validateLeaveRequest(startDate, endDate) {
-    const events = getEvents();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    // Calculate days difference
-    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-    
-    // Check if days are within limits
-    if (days < CONFIG.MIN_LEAVE_DAYS || days > CONFIG.MAX_LEAVE_DAYS) {
-        throw new Error(`Leave days must be between ${CONFIG.MIN_LEAVE_DAYS} and ${CONFIG.MAX_LEAVE_DAYS}`);
+import { CONFIG } from './config';
+import { LeaveError, ErrorCodes } from './errors';
+export class DateService {
+    static isWorkingDay(date) {
+        const day = date.getDay();
+        return day !== 0 && day !== 6; // Not Sunday(0) or Saturday(6)
     }
-    
-    // Check if request is within allowed months ahead
-    const maxDate = new Date();
-    maxDate.setMonth(maxDate.getMonth() + CONFIG.ALLOWED_MONTHS_AHEAD);
-    if (end > maxDate) {
-        throw new Error(`Cannot request leave more than ${CONFIG.ALLOWED_MONTHS_AHEAD} months ahead`);
+    static calculateWorkingDays(start, end) {
+        let count = 0;
+        const current = new Date(start);
+        while (current <= end) {
+            if (this.isWorkingDay(current)) {
+                count++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return count;
     }
-    
-    // Check for concurrent requests
-    const overlappingEvents = events.filter(event => {
-        const eventStart = new Date(event.start);
-        const eventEnd = new Date(event.end);
-        return start <= eventEnd && end >= eventStart;
-    });
-    
-    if (overlappingEvents.length >= CONFIG.MAX_CONCURRENT_REQUESTS) {
-        throw new Error(`Cannot have more than ${CONFIG.MAX_CONCURRENT_REQUESTS} concurrent leave requests`);
+    static validateDateRange(start, end) {
+        return start <= end &&
+            this.calculateWorkingDays(start, end) <= CONFIG.VALIDATION.MAX_CONSECUTIVE_DAYS;
     }
-    
-    return days;
 }
-
-export { validateLeaveRequest };
+export class StorageService {
+    static saveLeaves(leaves) {
+        try {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(leaves));
+        }
+        catch (error) {
+            throw new LeaveError(ErrorCodes.STORAGE_ERROR, 'Failed to save leave requests', { error });
+        }
+    }
+    static getLeaves() {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+        catch (error) {
+            throw new LeaveError(ErrorCodes.STORAGE_ERROR, 'Failed to retrieve leave requests', { error });
+        }
+    }
+}
+StorageService.STORAGE_KEY = 'leave_requests';
