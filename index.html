@@ -3,29 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfie - Time Off Planner</title>
+    <meta name="description" content="Alfie PTO Planner - Simplify team leave management">
+    <title>Alfie PTO Planner</title>
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles/main.css">
-    
-    <!-- Load SweetAlert2 from CDN -->
+    <!-- Add this line for SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Styles -->
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --text-color: #1F2937;
+            --background-color: #F3F4F6;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .cta-button:hover {
+            background-color: #4F46E5;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>Welcome to Alfie</h1>
-            <p class="subtitle">Plan Your Time Off with Ease</p>
-            <button class="btn">Get Started</button>
-        </header>
-
-        <!-- Loading Spinner (initially hidden) -->
-        <div class="loading">
-            <img src="assets/loading-spinner.svg" alt="Loading...">
-        </div>
-    </div>
-
-    <!-- Load our JavaScript last -->
-    <script src="scripts/main.js" type="module"></script>
+    <h1>Welcome to Alfie</h1>
+    <p>Plan Your Time Off with Ease</p>
+    <a href="calendar.html" class="cta-button">Get Started</a>
 </body>
 </html>
