@@ -8,15 +8,46 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     
-    <!-- FullCalendar from jsDelivr -->
-    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/main.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/main.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     
     <!-- SweetAlert2 -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Local styles -->
-    <link rel="stylesheet" href="styles/main.css">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        nav {
+            margin-bottom: 20px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #333;
+            margin-right: 20px;
+        }
+        
+        nav a.active {
+            font-weight: bold;
+        }
+        
+        #calendar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -30,24 +61,102 @@
         </main>
     </div>
 
-    <!-- Library Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.8/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.8/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.8/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Constants
+        const CONFIG = {
+            MIN_LEAVE_DAYS: 1,
+            MAX_LEAVE_DAYS: 14,
+            MAX_CONCURRENT_REQUESTS: 3,
+            ALLOWED_MONTHS_AHEAD: 3
+        };
 
-    <!-- App Scripts -->
-    <script type="module">
-        import { CONFIG } from './scripts/utils/config.js';
-        import { handleDateSelect, handleEventClick, loadEvents } from './scripts/utils/calendar.js';
-        
+        // Storage functions
+        function saveEvents(events) {
+            localStorage.setItem('events', JSON.stringify(events));
+        }
+
+        function getEvents() {
+            return JSON.parse(localStorage.getItem('events')) || [];
+        }
+
+        function addEvent(event) {
+            const events = getEvents();
+            events.push(event);
+            saveEvents(events);
+        }
+
+        function removeEvent(eventId) {
+            const events = getEvents();
+            const updatedEvents = events.filter(event => event.id !== eventId);
+            saveEvents(updatedEvents);
+        }
+
+        // Calendar event handlers
+        function handleDateSelect(selectInfo) {
+            Swal.fire({
+                title: 'Request Leave',
+                html: `
+                    <input type="text" id="title" class="swal2-input" placeholder="Leave description">
+                    <input type="number" id="days" class="swal2-input" placeholder="Number of days" min="1" max="14">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Submit Request',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    const title = document.getElementById('title').value;
+                    const days = parseInt(document.getElementById('days').value);
+                    
+                    if (!title || !days) {
+                        Swal.showValidationMessage('Please fill in all fields');
+                        return false;
+                    }
+                    
+                    if (days < CONFIG.MIN_LEAVE_DAYS || days > CONFIG.MAX_LEAVE_DAYS) {
+                        Swal.showValidationMessage(`Leave days must be between ${CONFIG.MIN_LEAVE_DAYS} and ${CONFIG.MAX_LEAVE_DAYS}`);
+                        return false;
+                    }
+                    
+                    return { title, days };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const event = {
+                        id: Date.now().toString(),
+                        title: result.value.title,
+                        start: selectInfo.startStr,
+                        end: selectInfo.endStr,
+                        days: result.value.days
+                    };
+                    
+                    addEvent(event);
+                    selectInfo.view.calendar.addEvent(event);
+                }
+            });
+        }
+
+        function handleEventClick(clickInfo) {
+            Swal.fire({
+                title: 'Leave Request Details',
+                html: `
+                    <p><strong>Description:</strong> ${clickInfo.event.title}</p>
+                    <p><strong>Start:</strong> ${clickInfo.event.startStr}</p>
+                    <p><strong>End:</strong> ${clickInfo.event.endStr}</p>
+                    <p><strong>Days:</strong> ${clickInfo.event.extendedProps.days}</p>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Delete Request'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    removeEvent(clickInfo.event.id);
+                    clickInfo.event.remove();
+                }
+            });
+        }
+
+        // Initialize calendar
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
-            if (!calendarEl) {
-                console.error('Calendar element not found');
-                return;
-            }
-            
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 headerToolbar: {
@@ -57,7 +166,7 @@
                 },
                 selectable: true,
                 select: handleDateSelect,
-                events: loadEvents,
+                events: getEvents,
                 eventClick: handleEventClick,
                 height: 'auto'
             });
