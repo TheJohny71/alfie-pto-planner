@@ -1,16 +1,11 @@
-// src/utils/errors.ts
-export class LeaveError extends Error {
-    constructor(code, message, details) {
-        super(message);
-        this.code = code;
-        this.details = details;
-        this.name = 'LeaveError';
-        Object.setPrototypeOf(this, LeaveError.prototype);
-    }
+// Error handling functions
+function handleError(error) {
+    console.error('An error occurred:', error);
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'An unexpected error occurred'
+    });
 }
-export const ErrorCodes = {
-    VALIDATION_FAILED: 'VALIDATION_FAILED',
-    STORAGE_ERROR: 'STORAGE_ERROR',
-    DATE_ERROR: 'DATE_ERROR',
-    NETWORK_ERROR: 'NETWORK_ERROR'
-};
+
+export { handleError };
