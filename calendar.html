@@ -5,23 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar - PTO Planner</title>
     
+    <!-- Debug: Add content security policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' cdn.jsdelivr.net 'unsafe-inline' 'unsafe-eval'">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+    <!-- Debug: Use specific versions and integrity hashes -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" 
+          integrity="sha384-needed-hash" crossorigin="anonymous">
     
-    <!-- SweetAlert2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.min.css" rel="stylesheet"
+          crossorigin="anonymous">
     
-    <!-- Custom Styles -->
+    <!-- Local styles -->
     <link rel="stylesheet" href="styles/main.css">
-    
-    <!-- FullCalendar Script -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.all.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -35,12 +33,26 @@
         </main>
     </div>
 
-    <!-- Utils Scripts (non-module versions) -->
-    <script src="scripts/utils/config.js"></script>
-    <script src="scripts/utils/storage.js"></script>
-    <script src="scripts/utils/services.js"></script>
-    <script src="scripts/utils/errors.js"></script>
-    <script src="scripts/utils/calendar.js"></script>
-    <script src="scripts/main.js"></script>
+    <!-- Debug: Load libraries first -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" 
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.all.min.js"
+            crossorigin="anonymous"></script>
+
+    <!-- Debug: Add type="module" to enable ES modules -->
+    <script type="module" src="scripts/utils/config.js"></script>
+    <script type="module" src="scripts/utils/storage.js"></script>
+    <script type="module" src="scripts/utils/services.js"></script>
+    <script type="module" src="scripts/utils/errors.js"></script>
+    <script type="module" src="scripts/utils/calendar.js"></script>
+    <script type="module" src="scripts/main.js"></script>
+
+    <!-- Debug: Add error tracking -->
+    <script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error: ', msg, '\nURL: ', url, '\nLine: ', lineNo, '\nColumn: ', columnNo, '\nError object: ', error);
+            return false;
+        };
+    </script>
 </body>
 </html>
