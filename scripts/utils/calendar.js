@@ -1,4 +1,4 @@
-// Calendar.js
+// scripts/components/Calendar.js
 class Calendar {
     constructor(container) {
         this.container = container;
@@ -7,92 +7,95 @@ class Calendar {
         this.region = 'US';
     }
 
-    generateCalendarHTML() {
+    init() {
+        this.render();
+        this.attachEventListeners();
+    }
+
+    render() {
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        this.container.innerHTML = `
+            <div class="calendar">
+                <div class="calendar-header">
+                    <button id="prevMonth">&lt;</button>
+                    <h2>${monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}</h2>
+                    <button id="nextMonth">&gt;</button>
+                </div>
+                ${this.generateCalendarGrid()}
+            </div>
+        `;
+    }
+
+    generateCalendarGrid() {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
 
-        let html = `
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <button class="calendar-nav" onclick="calendar.prevMonth()">&lt;</button>
-                    <h2>${monthNames[month]} ${year}</h2>
-                    <button class="calendar-nav" onclick="calendar.nextMonth()">&gt;</button>
-                </div>
-                <div class="calendar-grid">
-                    <div class="calendar-day-header">Sun</div>
-                    <div class="calendar-day-header">Mon</div>
-                    <div class="calendar-day-header">Tue</div>
-                    <div class="calendar-day-header">Wed</div>
-                    <div class="calendar-day-header">Thu</div>
-                    <div class="calendar-day-header">Fri</div>
-                    <div class="calendar-day-header">Sat</div>
-        `;
+        let html = '<div class="calendar-grid">';
 
-        // Add empty cells for days before the first of the month
+        // Add day headers
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        days.forEach(day => {
+            html += `<div class="calendar-day-header">${day}</div>`;
+        });
+
+        // Add padding for first week
         for (let i = 0; i < firstDay.getDay(); i++) {
             html += '<div class="calendar-day empty"></div>';
         }
 
-        // Add cells for each day of the month
+        // Add days
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const date = new Date(year, month, day);
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-            const isSelected = this.selectedDates.some(d => 
-                d.getDate() === day && 
-                d.getMonth() === month && 
-                d.getFullYear() === year
-            );
-
             html += `
-                <div class="calendar-day ${isWeekend ? 'weekend' : ''} ${isSelected ? 'selected' : ''}"
-                     onclick="calendar.toggleDate(${year}, ${month}, ${day})">
+                <div class="calendar-day${isWeekend ? ' weekend' : ''}" data-date="${date.toISOString()}">
                     ${day}
                 </div>
             `;
         }
 
-        html += `
-                </div>
-            </div>
-        `;
-
+        html += '</div>';
         return html;
     }
 
-    render() {
-        this.container.innerHTML = this.generateCalendarHTML();
+    attachEventListeners() {
+        const prevButton = this.container.querySelector('#prevMonth');
+        const nextButton = this.container.querySelector('#nextMonth');
+
+        prevButton?.addEventListener('click', () => this.previousMonth());
+        nextButton?.addEventListener('click', () => this.nextMonth());
+
+        this.container.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
+            day.addEventListener('click', (e) => this.handleDateClick(e));
+        });
     }
 
-    toggleDate(year, month, day) {
-        const date = new Date(year, month, day);
-        const index = this.selectedDates.findIndex(d => 
-            d.getDate() === day && 
-            d.getMonth() === month && 
-            d.getFullYear() === year
-        );
-
-        if (index === -1) {
-            this.selectedDates.push(date);
-        } else {
-            this.selectedDates.splice(index, 1);
-        }
-
-        this.render();
-    }
-
-    prevMonth() {
+    previousMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() - 1);
         this.render();
+        this.attachEventListeners();
     }
 
     nextMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() + 1);
         this.render();
+        this.attachEventListeners();
+    }
+
+    handleDateClick(event) {
+        const dateStr = event.target.dataset.date;
+        if (dateStr) {
+            event.target.classList.toggle('selected');
+            // Additional date selection logic can be added here
+        }
     }
 }
 
-export default Calendar;
+// Make Calendar available globally
+window.Calendar = Calendar;
