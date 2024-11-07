@@ -34,3 +34,11 @@ export interface CalendarEvent {
     backgroundColor: string;
     display?: string;
 }
+
+// Add this to src/types/index.ts
+export interface Holiday {
+    date: Date;
+    name: string;
+    type: 'regular' | 'observed' | 'weekend';
+    region: 'US' | 'UK' | 'both';
+}
