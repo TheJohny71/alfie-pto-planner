@@ -3,112 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfie PTO Planner - Smart Calendar</title>
-    <link rel="stylesheet" href="styles/modern-theme.css">
+    <title>PTO Calendar</title>
+    <style>
+        /* Apple-style CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Apple-style Font and Colors */
+        :root {
+            --apple-blue: #007AFF;
+            --apple-red: #FF3B30;
+            --apple-green: #34C759;
+            --apple-gray: #8E8E93;
+            --apple-light-gray: #F2F2F7;
+            --apple-border: #C6C6C8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #FFFFFF;
+            color: #1C1C1E;
+            line-height: 1.5;
+        }
+
+        /* Header Styles */
+        .header {
+            padding: 1.5rem;
+            background-color: var(--apple-light-gray);
+            border-bottom: 1px solid var(--apple-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        /* Controls Container */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--apple-border);
+        }
+
+        /* Apple-style Buttons */
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--apple-border);
+            background-color: #FFFFFF;
+            color: var(--apple-blue);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--apple-light-gray);
+        }
+
+        button.active {
+            background-color: var(--apple-blue);
+            color: #FFFFFF;
+            border-color: var(--apple-blue);
+        }
+
+        /* Calendar Grid */
+        .calendar {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: var(--apple-gray);
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            border: 1px solid var(--apple-border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .day:hover {
+            background-color: var(--apple-light-gray);
+        }
+
+        .day.selected {
+            background-color: var(--apple-blue);
+            color: #FFFFFF;
+            border-color: var(--apple-blue);
+        }
+
+        .day.holiday {
+            background-color: var(--apple-light-gray);
+            border-color: var(--apple-green);
+        }
+
+        .day .date {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .day .indicator {
+            font-size: 0.75rem;
+            color: var(--apple-gray);
+        }
+
+        /* Region Selector */
+        .region-select {
+            padding: 0.5rem;
+            border: 1px solid var(--apple-border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--apple-blue);
+            background-color: #FFFFFF;
+            cursor: pointer;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .calendar {
+                padding: 1rem;
+                gap: 0.25rem;
+            }
+
+            .day {
+                padding: 0.25rem;
+            }
+
+            .day .date {
+                font-size: 0.9rem;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 </head>
-<body class="modern-theme">
-    <div class="app-container">
-        <!-- Team Overview Section -->
-        <div class="team-overview">
-            <div class="overview-header">
-                <h2>Team Availability</h2>
-                <span class="available-count">12 team members available</span>
-            </div>
-            <div class="quick-stats">
-                <div class="stat-card">
-                    <span class="stat-value">3</span>
-                    <span class="stat-label">Out Today</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value">2</span>
-                    <span class="stat-label">Pending Requests</span>
-                </div>
-            </div>
-        </div>
+<body>
+    <header class="header">
+        <h1 class="title">PTO Calendar</h1>
+        <select class="region-select" id="regionSelect">
+            <option value="US">United States</option>
+            <option value="UK">United Kingdom</option>
+        </select>
+    </header>
 
-        <!-- Main Calendar Container -->
-        <div class="calendar-container">
-            <!-- Region Selector -->
-            <div class="region-control">
-                <label for="region-select">Region:</label>
-                <select id="region-select" class="modern-select">
-                    <option value="US">United States</option>
-                    <option value="UK">United Kingdom</option>
-                </select>
-            </div>
-
-            <!-- Calendar Navigation -->
-            <div class="calendar-header">
-                <button class="nav-btn prev-month">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 18l-6-6 6-6"/>
-                    </svg>
-                </button>
-                <h2 class="current-month"></h2>
-                <button class="nav-btn next-month">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 18l6-6-6-6"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Calendar Grid -->
-            <div class="calendar-grid">
-                <!-- Days will be inserted by JavaScript -->
-            </div>
-
-            <!-- Holiday Legend -->
-            <div class="holiday-legend">
-                <div class="legend-item">
-                    <span class="legend-dot federal-holiday"></span>
-                    <span class="legend-text">Federal Holiday</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot observance"></span>
-                    <span class="legend-text">Observance</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot pto"></span>
-                    <span class="legend-text">PTO</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- PTO Request Form -->
-        <div class="pto-request-panel">
-            <h3 class="panel-title">Request Time Off</h3>
-            <form id="pto-request-form" class="modern-form">
-                <div class="form-group">
-                    <label for="pto-start">Start Date</label>
-                    <input type="date" id="pto-start" required class="modern-input">
-                </div>
-                <div class="form-group">
-                    <label for="pto-end">End Date</label>
-                    <input type="date" id="pto-end" required class="modern-input">
-                </div>
-                <div class="form-group">
-                    <label for="pto-type">Type</label>
-                    <select id="pto-type" required class="modern-select">
-                        <option value="vacation">Vacation</option>
-                        <option value="sick">Sick Leave</option>
-                        <option value="personal">Personal</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="pto-reason">Reason</label>
-                    <textarea id="pto-reason" required class="modern-input"></textarea>
-                </div>
-                <button type="submit" class="submit-btn">Submit Request</button>
-            </form>
-        </div>
+    <div class="controls">
+        <button id="prevMonth">&larr; Previous</button>
+        <h2 id="currentMonth">January 2024</h2>
+        <button id="nextMonth">Next &rarr;</button>
     </div>
 
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- Calendar Script -->
-    <script type="module">
-        import Calendar from './scripts/components/calendar.js';
+    <div class="calendar" id="calendar">
+        <!-- Calendar grid will be populated by JavaScript -->
+    </div>
+
+    <script>
+        class Calendar {
+            constructor() {
+                this.currentDate = new Date();
+                this.selectedDate = null;
+                this.region = 'US';
+                this.holidays = {
+                    US: {
+                        '2024-01-01': 'New Year\'s Day',
+                        '2024-01-15': 'Martin Luther King Jr. Day',
+                        '2024-02-19': 'Presidents Day',
+                        '2024-05-27': 'Memorial Day',
+                        '2024-07-04': 'Independence Day',
+                        '2024-09-02': 'Labor Day',
+                        '2024-11-28': 'Thanksgiving Day',
+                        '2024-12-25': 'Christmas Day'
+                    },
+                    UK: {
+                        '2024-01-01': 'New Year\'s Day',
+                        '2024-03-29': 'Good Friday',
+                        '2024-04-01': 'Easter Monday',
+                        '2024-05-06': 'Early May Bank Holiday',
+                        '2024-05-27': 'Spring Bank Holiday',
+                        '2024-08-26': 'Summer Bank Holiday',
+                        '2024-12-25': 'Christmas Day',
+                        '2024-12-26': 'Boxing Day'
+                    }
+                };
+
+                this.initializeElements();
+                this.addEventListeners();
+                this.render();
+            }
+
+            initializeElements() {
+                this.calendarElement = document.getElementById('calendar');
+                this.regionSelect = document.getElementById('regionSelect');
+                this.currentMonthElement = document.getElementById('currentMonth');
+                this.prevMonthButton = document.getElementById('prevMonth');
+                this.nextMonthButton = document.getElementById('nextMonth');
+            }
+
+            addEventListeners() {
+                this.prevMonthButton.addEventListener('click', () => this.previousMonth());
+                this.nextMonthButton.addEventListener('click', () => this.nextMonth());
+                this.regionSelect.addEventListener('change', (e) => {
+                    this.region = e.target.value;
+                    this.render();
+                });
+            }
+
+            formatDate(date) {
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            }
+
+            isHoliday(date) {
+                const formattedDate = this.formatDate(date);
+                return this.holidays[this.region][formattedDate];
+            }
+
+            previousMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.render();
+            }
+
+            nextMonth() {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.render();
+            }
+
+            render() {
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                
+                // Update month display
+                const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
+                this.currentMonthElement.textContent = `${monthName} ${year}`;
+
+                // Clear calendar
+                this.calendarElement.innerHTML = '';
+
+                // Add weekday headers
+                const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                weekdays.forEach(day => {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'weekday';
+                    dayElement.textContent = day;
+                    this.calendarElement.appendChild(dayElement);
+                });
+
+                // Get first day of month and number of days
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                // Add empty cells for days before start of month
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day';
+                    this.calendarElement.appendChild(emptyDay);
+                }
+
+                // Add days of month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, month, day);
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'day';
+                    
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'date';
+                    dateSpan.textContent = day;
+                    dayElement.appendChild(dateSpan);
+
+                    const holidayName = this.isHoliday(date);
+                    if (holidayName) {
+                        dayElement.classList.add('holiday');
+                        const indicator = document.createElement('span');
+                        indicator.className = 'indicator';
+                        indicator.textContent = holidayName;
+                        dayElement.appendChild(indicator);
+                    }
+
+                    dayElement.addEventListener('click', () => {
+                        const selected = this.calendarElement.querySelector('.selected');
+                        if (selected) selected.classList.remove('selected');
+                        dayElement.classList.add('selected');
+                        this.selectedDate = date;
+                    });
+
+                    this.calendarElement.appendChild(dayElement);
+                }
+            }
+        }
+
+        // Initialize calendar when page loads
         document.addEventListener('DOMContentLoaded', () => {
             new Calendar();
         });
