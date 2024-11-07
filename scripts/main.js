@@ -1,6 +1,3 @@
-// Import components and utilities
-import { Calendar } from './components/Calendar.js';
-
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
     try {
@@ -9,17 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const appElement = document.getElementById('app');
         
         if (loadingElement && appElement) {
+            // For now, just hide loading and show a basic message
             loadingElement.style.display = 'none';
             appElement.classList.remove('hidden');
+            appElement.innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <h1>PTO Calendar</h1>
+                    <p>Calendar component is being initialized...</p>
+                </div>
+            `;
         }
-
-        // Initialize calendar
-        const calendar = new Calendar({
-            container: appElement,
-            initialRegion: 'US'
-        });
-
-        calendar.init();
     } catch (error) {
         console.error('Failed to initialize calendar:', error);
         // Show error message to user
