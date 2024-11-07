@@ -28,11 +28,61 @@
             overflow: hidden;
         }
 
-        /* Region Switcher */
+       /* Region Switcher and Legend */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
         .region-switcher {
-            text-align: right;
-            padding: 10px;
-            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .region-switcher-label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .calendar-legend {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #495057;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-color.holiday-federal,
+        .legend-color.holiday-bank {
+            background: #e03131;
+        }
+
+        .legend-color.holiday-observance {
+            background: #868e96;
+        }
+
+        .legend-color.weekend {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
         }
 
         .switch {
