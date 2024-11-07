@@ -3,24 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTO Calendar</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/calendar.css">
-    <link rel="icon" href="data:,">
+    <title>Alfie PTO Planner - Calendar</title>
+    <style>
+        /* Basic styles to get started */
+        .calendar-container {
+            max-width: 800px;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f0f0f0;
+        }
+        .weekday-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #e0e0e0;
+        }
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .weekend { background: #f5f5f5; }
+        .prev-month, .next-month { color: #999; }
+        .today { background: #e6f3ff; }
+        .selected { background: #007bff; color: white; }
+    </style>
 </head>
 <body>
-    <div id="loading" class="loading-container">
-        <img src="assets/loading-spinner.svg" alt="Loading..." class="loading-spinner">
-        <p>Loading calendar...</p>
-    </div>
-    
-    <div id="app" class="hidden">
-        <!-- Calendar will be rendered here -->
-    </div>
+    <div id="calendar"></div>
 
-    <!-- Load Calendar component first -->
-    <script src="scripts/components/Calendar.js"></script>
-    <!-- Then load main.js -->
-    <script src="scripts/main.js"></script>
+    <script type="module">
+        import Calendar from './scripts/components/Calendar.js';
+        
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Initialize the calendar
+                const calendar = new Calendar('calendar');
+                console.log('Calendar initialized successfully');
+            } catch (error) {
+                console.error('Calendar initialization error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
