@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfie PTO Planner - Calendar</title>
     
-    <!-- Favicons with absolute paths -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/alfie-pto-planner/assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/alfie-pto-planner/assets/favicon-16x16.png">
-    <link rel="shortcut icon" href="/alfie-pto-planner/assets/favicon.ico">
-    
     <style>
         /* Basic styles to get started */
         .calendar-container {
@@ -48,8 +43,8 @@
     <div id="calendar"></div>
 
     <script type="module">
-        // Use absolute path for import
-        import Calendar from '/alfie-pto-planner/scripts/components/Calendar.js';
+        // Fixed import path with correct case
+        import Calendar from '/alfie-pto-planner/scripts/components/calendar.js';
         
         // Wait for DOM to load
         document.addEventListener('DOMContentLoaded', () => {
