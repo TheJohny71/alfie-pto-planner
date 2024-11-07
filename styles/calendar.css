@@ -45,7 +45,49 @@
     border: 1px solid #e2e8f0;
     background-color: white;
 }
+.calendar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
+.calendar-header {
+  margin-bottom: 1rem;
+}
+
+.calendar-body {
+  border: 1px solid #e2e8f0;
+}
+
+.calendar-day {
+  transition: all 0.2s ease-in-out;
+}
+
+.calendar-day:hover {
+  transform: scale(1.02);
+  z-index: 1;
+}
+
+.calendar-day.weekend {
+  background-color: #f7fafc;
+}
+
+.calendar-day.selected {
+  background-color: #ebf8ff;
+}
+
+.calendar-day.holiday {
+  position: relative;
+}
+
+.calendar-day.holiday::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 12px 12px 0;
+  border-color: transparent #f56565 transparent transparent;
+}
 /* Weekend Styling */
 .calendar-day.weekend {
     background-color: #F3E8FF;
