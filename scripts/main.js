@@ -1,4 +1,6 @@
-// Basic initialization
+import Calendar from './components/Calendar.js';
+
+// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     try {
         // Get DOM elements
@@ -6,22 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const appElement = document.getElementById('app');
         const errorContainer = document.getElementById('error-container');
 
-        // Hide loading, show app
-        if (loadingElement && appElement) {
-            loadingElement.style.display = 'none';
-            appElement.classList.remove('hidden');
-            
-            // Display initial content
-            appElement.innerHTML = `
-                <div style="padding: 20px; text-align: center;">
-                    <h1>PTO Calendar</h1>
-                    <p>Calendar component is being initialized...</p>
-                    <div>
-                        <small>Version: 1.0.0</small>
-                    </div>
-                </div>
-            `;
+        if (!loadingElement || !appElement) {
+            throw new Error('Required DOM elements not found');
         }
+
+        // Hide loading spinner
+        loadingElement.style.display = 'none';
+        appElement.classList.remove('hidden');
+
+        // Initialize calendar
+        window.calendar = new Calendar(appElement);
+        window.calendar.render();
+
     } catch (error) {
         console.error('Failed to initialize:', error);
         const errorContainer = document.getElementById('error-container');
