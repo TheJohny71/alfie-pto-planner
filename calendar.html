@@ -11,15 +11,15 @@
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
-    
-    <!-- SweetAlert2 from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
         <div id="calendar-container"></div>
     </div>
     
+    <!-- Load SweetAlert2 from CDN before your main script -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <!-- Your main script -->
     <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
