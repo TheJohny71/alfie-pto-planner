@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alfie PTO Planner - Calendar</title>
     
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
     <style>
+        /* Base styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f7fa;
             margin: 0;
             padding: 20px;
+            color: #333;
         }
 
         .calendar-container {
@@ -22,128 +27,82 @@
             overflow: hidden;
         }
 
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+        /* Region Switcher */
+        .region-switcher {
+            text-align: right;
+            padding: 10px;
+            margin-bottom: 10px;
         }
 
-        .calendar-header h2 {
-            margin: 0;
-            color: #343a40;
-            font-size: 1.5rem;
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
         }
 
-        .nav-btn {
-            background: white;
-            border: 1px solid #dee2e6;
-            padding: 8px 16px;
-            border-radius: 4px;
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
             cursor: pointer;
-            color: #495057;
-            font-size: 1rem;
-            transition: all 0.2s;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2196F3;
+            transition: .4s;
+            border-radius: 30px;
         }
 
-        .nav-btn:hover {
-            background: #e9ecef;
-            border-color: #ced4da;
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
         }
 
-        .weekday-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+        input:checked + .slider {
+            background-color: #4CAF50;
         }
 
-        .weekday {
-            padding: 12px;
-            text-align: center;
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .region-label {
+            position: absolute;
+            color: white;
+            font-size: 12px;
             font-weight: bold;
-            color: #495057;
-            font-size: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
-        .days-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            grid-gap: 1px;
-            background: #e9ecef;
-            padding: 1px;
+        .region-label:first-of-type {
+            left: 8px;
         }
 
-        .calendar-day {
-            padding: 12px;
-            text-align: center;
-            background: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .calendar-day:hover {
-            background: #f8f9fa;
-        }
-
-        .weekend {
-            background: #f8f9fa;
-            color: #868e96;
-        }
-
-        .prev-month, .next-month {
-            color: #adb5bd;
-            background: #f8f9fa;
-        }
-
-        .today {
-            background: #e7f5ff;
-            font-weight: bold;
-            color: #228be6;
-        }
-
-        .selected {
-            background: #228be6 !important;
-            color: white !important;
-            font-weight: bold;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 576px) {
-            body {
-                padding: 10px;
-            }
-
-            .calendar-container {
-                margin: 10px auto;
-            }
-
-            .calendar-header h2 {
-                font-size: 1.25rem;
-            }
-
-            .calendar-day {
-                padding: 8px;
-                min-height: 35px;
-                font-size: 0.9rem;
-            }
-
-            .weekday {
-                padding: 8px;
-                font-size: 0.8rem;
-            }
+        .region-label:last-of-type {
+            right: 8px;
         }
     </style>
 </head>
 <body>
     <div id="calendar"></div>
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script type="module">
         import Calendar from '/alfie-pto-planner/scripts/components/calendar.js';
         
