@@ -42,3 +42,13 @@ export interface Holiday {
     type: 'regular' | 'observed' | 'weekend';
     region: 'US' | 'UK' | 'both';
 }
+// Add this to src/types/index.ts
+
+// Existing types...
+
+// SweetAlert2 type definition
+declare global {
+    const Swal: any;
+}
+
+export {};
