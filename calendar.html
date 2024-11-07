@@ -3,50 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfie PTO Planner - Calendar</title>
-    
-    <!-- Critical CSS -->
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: #F8F9FA;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-        #calendar-container {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        #loading {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-    </style>
-
-    <!-- External CSS -->
+    <title>PTO Calendar</title>
     <link rel="stylesheet" href="styles/main.css">
-    
-    <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="stylesheet" href="styles/calendar.css">
+    <!-- Add SweetAlert2 CSS from CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
-    <div class="container">
-        <div id="calendar-container">
-            <div id="loading">Loading calendar...</div>
-        </div>
+    <div id="loading" class="loading-container">
+        <img src="assets/loading-spinner.svg" alt="Loading..." class="loading-spinner">
+        <p>Loading calendar...</p>
+    </div>
+    <div id="app" class="hidden">
+        <!-- Calendar will be rendered here -->
     </div>
     
-    <!-- Your application scripts -->
-    <script type="module" src="scripts/main.js"></script>
+    <!-- Add SweetAlert2 JS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="src/main.ts"></script>
 </body>
 </html>
