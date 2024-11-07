@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <style>
+        <style>
         /* Base styles */
         body {
             font-family: Arial, sans-serif;
@@ -95,6 +96,251 @@
         .region-label:last-of-type {
             right: 8px;
         }
+
+        /* Calendar Grid */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .calendar-header h2 {
+            margin: 0;
+            color: #343a40;
+            font-size: 1.5rem;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #495057;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        .weekday-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .weekday {
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 1px;
+            background: #e9ecef;
+            padding: 1px;
+        }
+
+        .calendar-day {
+            position: relative;
+            padding: 12px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Day States */
+        .calendar-day:hover {
+            background: #f8f9fa;
+        }
+
+        .weekend {
+            background: #f8f9fa;
+            color: #868e96;
+        }
+
+        .prev-month, .next-month {
+            color: #adb5bd;
+            background: #f8f9fa;
+        }
+
+        .today {
+            background: #e7f5ff;
+            font-weight: bold;
+            color: #228be6;
+        }
+
+        .selected {
+            background: #228be6 !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        /* Holiday Styles */
+        .holiday {
+            position: relative;
+        }
+
+        .holiday-federal, .holiday-bank {
+            background-color: #fff3bf;
+        }
+
+        .holiday-observance {
+            background-color: #f8f9fa;
+        }
+
+        .holiday:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .holiday-indicator {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .holiday-indicator.federal, .holiday-indicator.bank {
+            background: #e03131;
+        }
+
+        .holiday-indicator.observance {
+            background: #868e96;
+        }
+
+        /* PTO Form Styles */
+        .pto-form-container {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .pto-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .pto-form h3 {
+            color: #343a40;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .submit-btn {
+            background: #228be6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #1c7ed6;
+        }
+
+        .holiday-note,
+        .weekend-note {
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .holiday-note {
+            background: #fff3bf;
+            color: #694d00;
+        }
+
+        .weekend-note {
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+
+            .calendar-container {
+                margin: 10px auto;
+            }
+
+            .calendar-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .calendar-day {
+                padding: 8px;
+                min-height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .weekday {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+
+            .pto-form-container {
+                padding: 10px;
+            }
+        }
+    </style>
     </style>
 </head>
 <body>
