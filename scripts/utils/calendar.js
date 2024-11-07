@@ -1,42 +1,98 @@
-// Version 2.0 - Updated Calendar Service
-import { Calendar } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import { CONFIG } from './config';
-export class CalendarService {
-    static initializeCalendar(element, events, onSelect) {
-        return new Calendar(element, {
-            plugins: [dayGridPlugin],
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            selectable: true,
-            editable: true,
-            events: this.convertRequestsToEvents(events),
-            select: (info) => {
-                onSelect(info.start, info.end);
-            }
-        });
+// Calendar.js
+class Calendar {
+    constructor(container) {
+        this.container = container;
+        this.currentDate = new Date();
+        this.selectedDates = [];
+        this.region = 'US';
     }
-    static convertRequestsToEvents(requests) {
-        return requests.map(request => ({
-            title: `${request.type} Leave (${request.status})`,
-            start: request.startDate,
-            end: request.endDate,
-            backgroundColor: CONFIG.COLORS[request.type]
-        }));
-    }
-    static calculateBusinessDays(start, end) {
-        let count = 0;
-        const current = new Date(start);
-        while (current <= end) {
-            if (current.getDay() !== 0 && current.getDay() !== 6) {
-                count++;
-            }
-            current.setDate(current.getDate() + 1);
+
+    generateCalendarHTML() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+
+        let html = `
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="calendar.prevMonth()">&lt;</button>
+                    <h2>${monthNames[month]} ${year}</h2>
+                    <button class="calendar-nav" onclick="calendar.nextMonth()">&gt;</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+        `;
+
+        // Add empty cells for days before the first of the month
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            html += '<div class="calendar-day empty"></div>';
         }
-        return count;
+
+        // Add cells for each day of the month
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(year, month, day);
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            const isSelected = this.selectedDates.some(d => 
+                d.getDate() === day && 
+                d.getMonth() === month && 
+                d.getFullYear() === year
+            );
+
+            html += `
+                <div class="calendar-day ${isWeekend ? 'weekend' : ''} ${isSelected ? 'selected' : ''}"
+                     onclick="calendar.toggleDate(${year}, ${month}, ${day})">
+                    ${day}
+                </div>
+            `;
+        }
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    render() {
+        this.container.innerHTML = this.generateCalendarHTML();
+    }
+
+    toggleDate(year, month, day) {
+        const date = new Date(year, month, day);
+        const index = this.selectedDates.findIndex(d => 
+            d.getDate() === day && 
+            d.getMonth() === month && 
+            d.getFullYear() === year
+        );
+
+        if (index === -1) {
+            this.selectedDates.push(date);
+        } else {
+            this.selectedDates.splice(index, 1);
+        }
+
+        this.render();
+    }
+
+    prevMonth() {
+        this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+        this.render();
+    }
+
+    nextMonth() {
+        this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+        this.render();
     }
 }
+
+export default Calendar;
