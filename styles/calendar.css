@@ -1,87 +1,29 @@
 /* styles/calendar.css */
-.calendar-day {
-    position: relative;
-    min-height: 100px;
-    padding: 8px;
-    border: 1px solid #e2e8f0;
-    background-color: white;
-    transition: background-color 0.2s ease;
-}
 
-.calendar-day:hover {
-    background-color: #f7fafc;
-}
-
-.calendar-day.weekend {
-    background-color: #f8fafc;
-}
-
-.calendar-day.today {
-    border: 2px solid #3b82f6;
-}
-
-.holiday-indicator {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.holiday-regular {
-    background-color: #ef4444;
-}
-
-.holiday-observed {
-    background-color: #f97316;
-}
-
-.holiday-weekend {
-    background-color: #8b5cf6;
-}
-
-.holiday-name {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-top: 4px;
-}
-/* styles/calendar.css */
-
-:root {
-    /* Color palette */
-    --weekend-color: #F3E8FF;  /* Light purple for weekends */
-    --holiday-regular: #FF6B6B; /* Red for regular holidays */
-    --holiday-weekend: #845EF7; /* Purple for weekend holidays */
-    --holiday-observed: #FF922B; /* Orange for observed holidays */
-    --hover-color: #F8F9FA;
-}
-
+/* Calendar Container */
 .calendar-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
 }
 
-/* Region Toggle Styling */
+/* Region Toggle */
 .region-toggle {
     display: flex;
     gap: 1rem;
-    padding: 1rem;
-    background-color: #F8F9FA;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
     justify-content: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
 }
 
 .region-toggle button {
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
-    font-weight: 500;
-    border: 1px solid #E9ECEF;
     background-color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .region-toggle button.active {
@@ -90,13 +32,44 @@
     border-color: #845EF7;
 }
 
-/* Calendar Legend */
+/* Calendar Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.calendar-day {
+    min-height: 100px;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+}
+
+/* Weekend Styling */
+.calendar-day.weekend {
+    background-color: #F3E8FF;
+}
+
+/* Holiday Indicators */
+.holiday-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: auto;
+}
+
+.holiday-regular { background-color: #FF6B6B; }
+.holiday-weekend { background-color: #845EF7; }
+.holiday-observed { background-color: #FF922B; }
+
+/* Legend */
 .calendar-legend {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     padding: 1rem;
-    background-color: #F8F9FA;
+    background-color: #f8fafc;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
 }
@@ -105,160 +78,21 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.875rem;
-    color: #495057;
 }
 
 .legend-indicator {
-    width: 1rem;
-    height: 1rem;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
 }
 
-.legend-weekend { background-color: var(--weekend-color); }
-.legend-holiday { background-color: var(--holiday-regular); }
-.legend-weekend-holiday { background-color: var(--holiday-weekend); }
-.legend-observed { background-color: var(--holiday-observed); }
-
-/* Calendar Grid */
-.calendar-day {
-    position: relative;
-    min-height: 100px;
-    padding: 8px;
-    border: 1px solid #E9ECEF;
-    background-color: white;
-    transition: background-color 0.2s ease;
-}
-
-.calendar-day.weekend {
-    background-color: var(--weekend-color);
-}
-
-.calendar-day:hover {
-    background-color: var(--hover-color);
-}
-
-.holiday-indicator {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.holiday-regular { background-color: var(--holiday-regular); }
-.holiday-weekend { background-color: var(--holiday-weekend); }
-.holiday-observed { background-color: var(--holiday-observed); }
-
-.holiday-name {
-    font-size: 0.75rem;
-    color: #495057;
-    margin-top: 4px;
-}
-
-/* Responsive Design */
+/* Mobile Responsive */
 @media (max-width: 768px) {
     .region-toggle {
         flex-direction: column;
     }
     
-    .calendar-legend {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-/* Add these to your styles/calendar.css */
-
-.calendar-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background-color: #f8fafc;
-    border-radius: 0.5rem;
-}
-
-.calendar-navigation button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.375rem;
-    background-color: white;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.calendar-navigation button:hover {
-    background-color: #f1f5f9;
-    color: #1e293b;
-}
-
-.current-month {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1e293b;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.calendar-header {
-    display: contents;
-}
-
-.calendar-header-cell {
-    text-align: center;
-    font-weight: 600;
-    color: #64748b;
-    padding: 0.5rem;
-}
-
-.date-number {
-    font-size: 1.125rem;
-    font-weight: 500;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
-}
-
-/* Add responsive styles */
-@media (max-width: 640px) {
-    .calendar-navigation {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
     .calendar-day {
         min-height: 80px;
     }
-    
-    .holiday-name {
-        font-size: 0.675rem;
-    }
-}
-
-.region-toggle {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background-color: #f8fafc;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.region-toggle button {
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.region-toggle button.active {
-    background-color: #3b82f6;
-    color: white;
 }
