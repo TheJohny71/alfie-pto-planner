@@ -3,23 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PTO Calendar Application">
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;">
+    
     <title>PTO Calendar</title>
-    <!-- Stylesheets -->
+    
+    <!-- Performance: Preload critical assets -->
+    <link rel="preload" href="scripts/main.js" as="script">
+    <link rel="preload" href="styles/main.css" as="style">
+    
+    <!-- Stylesheets with integrity checks -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/calendar.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" 
+          integrity="sha384-[Get-Actual-Hash]" 
+          crossorigin="anonymous">
+    
+    <!-- Favicon handling -->
+    <link rel="icon" href="data:,">  <!-- Temporary blank favicon to prevent 404 -->
 </head>
 <body>
+    <!-- Error Boundary -->
+    <div id="error-container" style="display: none;">
+        <div class="error-message">
+            <h2>Something went wrong</h2>
+            <p id="error-details"></p>
+            <button onclick="location.reload()">Retry</button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
     <div id="loading" class="loading-container">
         <img src="assets/loading-spinner.svg" alt="Loading..." class="loading-spinner">
         <p>Loading calendar...</p>
+        <noscript>
+            <p class="error-message">JavaScript is required to use this application.</p>
+        </noscript>
     </div>
-    <div id="app" class="hidden">
-        <!-- Calendar will be rendered here -->
+
+    <!-- Main App Container -->
+    <div id="app" class="hidden" aria-live="polite">
+        <!-- Dynamic content will be injected here -->
     </div>
     
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Scripts with error handling -->
+    <script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const errorContainer = document.getElementById('error-container');
+            const errorDetails = document.getElementById('error-details');
+            const loadingElement = document.getElementById('loading');
+            const appElement = document.getElementById('app');
+            
+            if (errorContainer && errorDetails) {
+                errorDetails.textContent = `Error: ${msg}`;
+                errorContainer.style.display = 'block';
+                if (loadingElement) loadingElement.style.display = 'none';
+                if (appElement) appElement.style.display = 'none';
+            }
+            
+            // Log to console for debugging
+            console.error('Application Error:', {
+                message: msg,
+                url: url,
+                lineNo: lineNo,
+                columnNo: columnNo,
+                error: error
+            });
+            
+            return false;
+        };
+    </script>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" 
+            integrity="sha384-[Get-Actual-Hash]" 
+            crossorigin="anonymous"></script>
+    
+    <!-- Application Code -->
     <script src="scripts/main.js" type="module"></script>
 </body>
 </html>
