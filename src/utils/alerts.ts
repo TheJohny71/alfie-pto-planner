@@ -1,35 +1,50 @@
+// Try this simpler import first
 import Swal from 'sweetalert2';
 import { Holiday } from '../types/holidays';
 
-export const showHolidayConfirmation = async (holiday: Holiday, leaveType: string): Promise<boolean> => {
-  const result = await Swal.fire({
-    title: 'Holiday Notice',
-    text: `${holiday.date} is ${holiday.name}. Do you still want to request ${leaveType}?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes',
-    cancelButtonText: 'No',
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33'
-  });
+// If the above doesn't work, try this alternative:
+// const Swal = require('sweetalert2');
 
-  return result.isConfirmed;
+export const showHolidayConfirmation = async (holiday: Holiday, leaveType: string): Promise<boolean> => {
+  try {
+    const result = await Swal.fire({
+      title: 'Holiday Notice',
+      text: `${holiday.date} is ${holiday.name}. Do you still want to request ${leaveType}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No'
+    });
+
+    return result.isConfirmed;
+  } catch (error) {
+    console.error('SweetAlert error:', error);
+    return false;
+  }
 };
 
 export const showError = (message: string): void => {
-  Swal.fire({
-    title: 'Error',
-    text: message,
-    icon: 'error',
-    confirmButtonText: 'OK'
-  });
+  try {
+    Swal.fire({
+      title: 'Error',
+      text: message,
+      icon: 'error'
+    });
+  } catch (error) {
+    console.error('SweetAlert error:', error);
+    alert(message); // Fallback to regular alert
+  }
 };
 
 export const showSuccess = (message: string): void => {
-  Swal.fire({
-    title: 'Success',
-    text: message,
-    icon: 'success',
-    confirmButtonText: 'OK'
-  });
+  try {
+    Swal.fire({
+      title: 'Success',
+      text: message,
+      icon: 'success'
+    });
+  } catch (error) {
+    console.error('SweetAlert error:', error);
+    alert(message); // Fallback to regular alert
+  }
 };
