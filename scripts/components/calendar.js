@@ -251,7 +251,5 @@ class Calendar {
     }
 }
 
-// Initialize the calendar when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new Calendar();
-});
+// Export the Calendar class
+export default Calendar;
