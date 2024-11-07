@@ -1,4 +1,13 @@
    // Version 2.0 - Updated Calendar Service
+// File: src/utils/calendar.ts
+
+import { HolidayCalculator } from './holidayCalculator';
+import { Holiday } from '../types/holidays';
+
+export class Calendar {
+    // [Previous Calendar code goes here]
+    // Copy the entire Calendar class from the earlier code
+}
 import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import type { LeaveRequest, CalendarEvent } from '../types';
