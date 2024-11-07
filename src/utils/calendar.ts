@@ -1,59 +1,98 @@
-   // Version 2.0 - Updated Calendar Service
-// File: src/utils/calendar.ts
+import { Holiday } from '../types';
 
-import { HolidayCalculator } from './holidayCalculator';
-import { Holiday } from '../types/holidays';
+export class HolidayCalculator {
+    private readonly year: number;
+    private readonly region: 'US' | 'UK' | 'both';
 
-export class Calendar {
-    // [Previous Calendar code goes here]
-    // Copy the entire Calendar class from the earlier code
-}
-import { Calendar } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import type { LeaveRequest, CalendarEvent } from '../types';
-import { CONFIG } from './config';
+    constructor(year: number, region: 'US' | 'UK' | 'both' = 'both') {
+        this.year = year;
+        this.region = region;
+    }
 
-export class CalendarService {
-    static initializeCalendar(
-        element: HTMLElement,
-        events: LeaveRequest[],
-        onSelect: (start: Date, end: Date) => void
-    ): Calendar {
-        return new Calendar(element, {
-            plugins: [dayGridPlugin],
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            selectable: true,
-            editable: true,
-            events: this.convertRequestsToEvents(events),
-            select: (info) => {
-                onSelect(info.start, info.end);
-            }
+    private calculateEasterSunday(): Date {
+        const a = this.year % 19;
+        const b = Math.floor(this.year / 100);
+        const c = this.year % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const month = Math.floor((h + l - 7 * m + 114) / 31);
+        const day = ((h + l - 7 * m + 114) % 31) + 1;
+        
+        return new Date(this.year, month - 1, day);
+    }
+
+    private getUSHolidays(): Holiday[] {
+        const holidays: Holiday[] = [];
+        
+        // New Year's Day
+        const newYearsDay = new Date(this.year, 0, 1);
+        holidays.push({
+            date: newYearsDay,
+            name: "New Year's Day",
+            type: 'regular',
+            region: 'US'
         });
-    }
 
-    static convertRequestsToEvents(requests: LeaveRequest[]): CalendarEvent[] {
-        return requests.map(request => ({
-            title: `${request.type} Leave (${request.status})`,
-            start: request.startDate,
-            end: request.endDate,
-            backgroundColor: CONFIG.COLORS[request.type]
-        }));
-    }
-
-    static calculateBusinessDays(start: Date, end: Date): number {
-        let count = 0;
-        const current = new Date(start);
-        while (current <= end) {
-            if (current.getDay() !== 0 && current.getDay() !== 6) {
-                count++;
-            }
-            current.setDate(current.getDate() + 1);
+        // Martin Luther King Jr. Day
+        const mlkDay = new Date(this.year, 0, 1);
+        while (mlkDay.getDay() !== 1) {
+            mlkDay.setDate(mlkDay.getDate() + 1);
         }
-        return count;
+        mlkDay.setDate(mlkDay.getDate() + 14);
+        holidays.push({
+            date: mlkDay,
+            name: "Martin Luther King Jr. Day",
+            type: 'regular',
+            region: 'US'
+        });
+
+        return holidays;
     }
-}
+
+    private getUKHolidays(): Holiday[] {
+        const holidays: Holiday[] = [];
+        
+        // New Year's Day
+        const newYearsDay = new Date(this.year, 0, 1);
+        holidays.push({
+            date: newYearsDay,
+            name: "New Year's Day",
+            type: 'regular',
+            region: 'UK'
+        });
+
+        // Good Friday
+        const easterSunday = this.calculateEasterSunday();
+        const goodFriday = new Date(easterSunday);
+        goodFriday.setDate(easterSunday.getDate() - 2);
+        holidays.push({
+            date: goodFriday,
+            name: "Good Friday",
+            type: 'regular',
+            region: 'UK'
+        });
+
+        return holidays;
+    }
+
+    public getHolidays(): Holiday[] {
+        let holidays: Holiday[] = [];
+        
+        if (this.region === 'US' || this.region === 'both') {
+            holidays = holidays.concat(this.getUSHolidays());
+        }
+        
+        if (this.region === 'UK' || this.region === 'both') {
+            holidays = holidays.concat(this.getUKHolidays());
+        }
+        
+        return holidays.sort((a, b) => a.date.getTime() - b.date.getTime());
+    }
+} 
