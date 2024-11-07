@@ -1,3 +1,107 @@
+// src/components/Calendar.tsx
+
+import { Holiday } from '../types';
+
+interface RegionConfig {
+    name: string;
+    leaveText: string;
+    holidayText: string;
+}
+
+const REGION_CONFIG: Record<string, RegionConfig> = {
+    'US': {
+        name: 'United States',
+        leaveText: 'PTO',
+        holidayText: 'Holiday'
+    },
+    'UK': {
+        name: 'United Kingdom',
+        leaveText: 'Annual Leave',
+        holidayText: 'Bank Holiday'
+    }
+};
+
+export class Calendar {
+    private readonly container: HTMLElement;
+    private currentDate: Date;
+    private region: 'US' | 'UK' | 'both';
+    private holidays: Holiday[];
+
+    constructor(containerId: string) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            throw new Error(`Container element with id '${containerId}' not found`);
+        }
+        
+        this.container = container;
+        this.currentDate = new Date();
+        this.region = 'both';
+        this.holidays = [];
+        
+        this.initialize();
+    }
+
+    private createLegend(): void {
+        const legend = document.createElement('div');
+        legend.className = 'calendar-legend';
+
+        const legendItems = [
+            { class: 'legend-weekend', text: 'Weekend' },
+            { class: 'legend-holiday', text: `${this.getRegionConfig().holidayText}` },
+            { class: 'legend-weekend-holiday', text: `Weekend ${this.getRegionConfig().holidayText}` },
+            { class: 'legend-observed', text: `Observed ${this.getRegionConfig().holidayText}` }
+        ];
+
+        legendItems.forEach(item => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+
+            const indicator = document.createElement('div');
+            indicator.className = `legend-indicator ${item.class}`;
+
+            const text = document.createElement('span');
+            text.textContent = item.text;
+
+            legendItem.appendChild(indicator);
+            legendItem.appendChild(text);
+            legend.appendChild(legendItem);
+        });
+
+        this.container.appendChild(legend);
+    }
+
+    private getRegionConfig(): RegionConfig {
+        if (this.region === 'both') {
+            return REGION_CONFIG['US']; // Default to US terms when both selected
+        }
+        return REGION_CONFIG[this.region];
+    }
+
+    private createRegionToggle(): void {
+        const toggleContainer = document.createElement('div');
+        toggleContainer.className = 'region-toggle';
+
+        Object.entries(REGION_CONFIG).forEach(([key, config]) => {
+            const button = document.createElement('button');
+            button.textContent = config.name;
+            button.className = key === this.region ? 'active' : '';
+            button.onclick = () => this.setRegion(key as 'US' | 'UK');
+            toggleContainer.appendChild(button);
+        });
+
+        if (this.region === 'both') {
+            const bothButton = document.createElement('button');
+            bothButton.textContent = 'All Regions';
+            bothButton.className = 'active';
+            bothButton.onclick = () => this.setRegion('both');
+            toggleContainer.appendChild(bothButton);
+        }
+
+        this.container.appendChild(toggleContainer);
+    }
+
+    // ... [rest of the Calendar class implementation remains the same]
+}
 import { Holiday } from '../types';
 import { HolidayCalculator } from '../utils/calendar';
 
