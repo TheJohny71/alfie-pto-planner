@@ -1,301 +1,257 @@
-// Calendar.js
+// Calendar.js - Enhanced version with region switching, holidays, and PTO requests
 class Calendar {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
+    constructor() {
         this.currentDate = new Date();
-        this.selectedDate = new Date();
-        this.region = localStorage.getItem('preferredRegion') || 'US';
+        this.selectedRegion = localStorage.getItem('selectedRegion') || 'US';
         this.holidays = {
-            'US': {
-                // 2024 US Federal Holidays
-                '2024-01-01': { name: 'New Year\'s Day', type: 'federal' },
-                '2024-01-15': { name: 'Martin Luther King Jr. Day', type: 'federal' },
-                '2024-02-19': { name: 'Presidents Day', type: 'federal' },
-                '2024-05-27': { name: 'Memorial Day', type: 'federal' },
-                '2024-06-19': { name: 'Juneteenth', type: 'federal' },
-                '2024-07-04': { name: 'Independence Day', type: 'federal' },
-                '2024-09-02': { name: 'Labor Day', type: 'federal' },
-                '2024-10-14': { name: 'Columbus Day', type: 'federal' },
-                '2024-11-11': { name: 'Veterans Day', type: 'federal' },
-                '2024-11-28': { name: 'Thanksgiving Day', type: 'federal' },
-                '2024-12-25': { name: 'Christmas Day', type: 'federal' },
-                // Common US Observances
-                '2024-02-14': { name: 'Valentine\'s Day', type: 'observance' },
-                '2024-03-17': { name: 'St. Patrick\'s Day', type: 'observance' },
-                '2024-05-12': { name: 'Mother\'s Day', type: 'observance' },
-                '2024-06-16': { name: 'Father\'s Day', type: 'observance' },
-                '2024-10-31': { name: 'Halloween', type: 'observance' }
+            US: {
+                federal: {
+                    '2024-01-01': 'New Year\'s Day',
+                    '2024-01-15': 'Martin Luther King Jr. Day',
+                    '2024-02-19': 'Presidents\' Day',
+                    '2024-05-27': 'Memorial Day',
+                    '2024-06-19': 'Juneteenth',
+                    '2024-07-04': 'Independence Day',
+                    '2024-09-02': 'Labor Day',
+                    '2024-10-14': 'Columbus Day',
+                    '2024-11-11': 'Veterans Day',
+                    '2024-11-28': 'Thanksgiving Day',
+                    '2024-12-25': 'Christmas Day'
+                },
+                observance: {
+                    '2024-02-14': 'Valentine\'s Day',
+                    '2024-03-17': 'St. Patrick\'s Day',
+                    '2024-10-31': 'Halloween',
+                }
             },
-            'UK': {
-                // 2024 UK Bank Holidays
-                '2024-01-01': { name: 'New Year\'s Day', type: 'bank' },
-                '2024-03-29': { name: 'Good Friday', type: 'bank' },
-                '2024-04-01': { name: 'Easter Monday', type: 'bank' },
-                '2024-05-06': { name: 'Early May Bank Holiday', type: 'bank' },
-                '2024-05-27': { name: 'Spring Bank Holiday', type: 'bank' },
-                '2024-08-26': { name: 'Summer Bank Holiday', type: 'bank' },
-                '2024-12-25': { name: 'Christmas Day', type: 'bank' },
-                '2024-12-26': { name: 'Boxing Day', type: 'bank' },
-                // Common UK Observances
-                '2024-02-14': { name: 'Valentine\'s Day', type: 'observance' },
-                '2024-03-17': { name: 'St. Patrick\'s Day', type: 'observance' },
-                '2024-03-10': { name: 'Mother\'s Day', type: 'observance' },
-                '2024-06-16': { name: 'Father\'s Day', type: 'observance' },
-                '2024-10-31': { name: 'Halloween', type: 'observance' }
+            UK: {
+                bank: {
+                    '2024-01-01': 'New Year\'s Day',
+                    '2024-03-29': 'Good Friday',
+                    '2024-04-01': 'Easter Monday',
+                    '2024-05-06': 'Early May Bank Holiday',
+                    '2024-05-27': 'Spring Bank Holiday',
+                    '2024-08-26': 'Summer Bank Holiday',
+                    '2024-12-25': 'Christmas Day',
+                    '2024-12-26': 'Boxing Day'
+                },
+                observance: {
+                    '2024-02-14': 'Valentine\'s Day',
+                    '2024-03-17': 'St. Patrick\'s Day',
+                    '2024-10-31': 'Halloween',
+                }
             }
         };
-        this.init();
-    }
-    init() {
-        this.createRegionSwitcher();
-        this.render();
-        this.attachEventListeners();
+        
+        this.initializeCalendar();
     }
 
-    createRegionSwitcher() {
-        const switcherContainer = document.createElement('div');
-        switcherContainer.className = 'region-switcher';
-        switcherContainer.innerHTML = `
-            <label class="switch">
-                <input type="checkbox" ${this.region === 'UK' ? 'checked' : ''}>
-                <span class="slider"></span>
-                <span class="region-label">US</span>
-                <span class="region-label">UK</span>
-            </label>
+    initializeCalendar() {
+        this.setupRegionSwitcher();
+        this.setupHolidayLegend();
+        this.setupPTOForm();
+        this.renderCalendar();
+        this.setupEventListeners();
+    }
+
+    setupRegionSwitcher() {
+        const regionContainer = document.createElement('div');
+        regionContainer.className = 'region-switcher';
+        regionContainer.innerHTML = `
+            <label for="region-select">Select Region:</label>
+            <select id="region-select" class="region-select">
+                <option value="US" ${this.selectedRegion === 'US' ? 'selected' : ''}>United States</option>
+                <option value="UK" ${this.selectedRegion === 'UK' ? 'selected' : ''}>United Kingdom</option>
+            </select>
         `;
-        this.container.appendChild(switcherContainer);
+        document.querySelector('.calendar-container').prepend(regionContainer);
     }
 
-    setRegion(region) {
-        this.region = region;
-        localStorage.setItem('preferredRegion', region);
-        this.render();
+    setupHolidayLegend() {
+        const legendContainer = document.createElement('div');
+        legendContainer.className = 'holiday-legend';
+        legendContainer.innerHTML = `
+            <div class="legend-item">
+                <span class="legend-color federal-holiday"></span>
+                <span>${this.selectedRegion === 'US' ? 'Federal Holiday' : 'Bank Holiday'}</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color observance-holiday"></span>
+                <span>Observance</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color pto-day"></span>
+                <span>${this.selectedRegion === 'US' ? 'PTO' : 'Annual Leave'}</span>
+            </div>
+        `;
+        document.querySelector('.calendar-container').appendChild(legendContainer);
     }
 
-    getHolidayForDate(date) {
-        const dateString = date.toISOString().split('T')[0];
-        return this.holidays[this.region][dateString];
+    setupPTOForm() {
+        const formContainer = document.createElement('div');
+        formContainer.className = 'pto-form';
+        formContainer.innerHTML = `
+            <h3>${this.selectedRegion === 'US' ? 'Request PTO' : 'Request Annual Leave'}</h3>
+            <form id="pto-request-form">
+                <div class="form-group">
+                    <label for="pto-start">Start Date:</label>
+                    <input type="date" id="pto-start" required>
+                </div>
+                <div class="form-group">
+                    <label for="pto-end">End Date:</label>
+                    <input type="date" id="pto-end" required>
+                </div>
+                <div class="form-group">
+                    <label for="pto-reason">Reason:</label>
+                    <textarea id="pto-reason" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Submit Request</button>
+            </form>
+        `;
+        document.querySelector('.calendar-container').appendChild(formContainer);
     }
 
-    render() {
+    renderCalendar() {
         const year = this.currentDate.getFullYear();
         const month = this.currentDate.getMonth();
-        
-        const calendar = document.createElement('div');
-        calendar.className = 'calendar-container';
-        
-        calendar.innerHTML = `
-            <div class="calendar-header">
-                <button class="nav-btn" id="prevMonth">&lt;</button>
-                <h2>${this.getMonthName(month)} ${year}</h2>
-                <button class="nav-btn" id="nextMonth">&gt;</button>
-            </div>
-            <div class="calendar-grid">
-                ${this.generateWeekdayHeader()}
-                ${this.generateDaysGrid(year, month)}
-            </div>
-            <div class="pto-form-container" id="ptoForm"></div>
-        `;
-        
-        // Keep the region switcher, clear the rest
-        const regionSwitcher = this.container.querySelector('.region-switcher');
-        this.container.innerHTML = '';
-        this.container.appendChild(regionSwitcher);
-        this.container.appendChild(calendar);
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"];
+
+        const calendarGrid = document.querySelector('.calendar-grid');
+        calendarGrid.innerHTML = '';
+
+        // Render month and year
+        document.querySelector('.current-month').textContent = `${monthNames[month]} ${year}`;
+
+        // Render day headers
+        const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        dayHeaders.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'calendar-header';
+            dayHeader.textContent = day;
+            calendarGrid.appendChild(dayHeader);
+        });
+
+        // Add empty cells for days before the first of the month
+        for (let i = 0; i < startingDay; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'calendar-day empty';
+            calendarGrid.appendChild(emptyDay);
+        }
+
+        // Render days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateCell = document.createElement('div');
+            dateCell.className = 'calendar-day';
+            
+            const currentDateString = this.formatDate(year, month + 1, day);
+            const holidayType = this.getHolidayType(currentDateString);
+            
+            if (holidayType) {
+                dateCell.classList.add(`${holidayType}-holiday`);
+                dateCell.setAttribute('title', this.getHolidayName(currentDateString));
+            }
+
+            dateCell.textContent = day;
+            calendarGrid.appendChild(dateCell);
+        }
     }
 
-    generateWeekdayHeader() {
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        return `
-            <div class="weekday-header">
-                ${weekdays.map(day => `<div class="weekday">${day}</div>`).join('')}
-            </div>
-        `;
-    }
-    generateDaysGrid(year, month) {
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const prevMonthDays = new Date(year, month, 0).getDate();
-        
-        let days = [];
-        
-        // Previous month's days
-        for (let i = firstDay - 1; i >= 0; i--) {
-            days.push(`<div class="calendar-day prev-month">${prevMonthDays - i}</div>`);
-        }
-        
-        // Current month's days
-        for (let i = 1; i <= daysInMonth; i++) {
-            const currentDate = new Date(year, month, i);
-            const isToday = this.isToday(year, month, i);
-            const isSelected = this.isSelected(year, month, i);
-            const isWeekend = this.isWeekend(year, month, i);
-            const holiday = this.getHolidayForDate(currentDate);
-            
-            const classes = [
-                'calendar-day',
-                'current-month',
-                isToday ? 'today' : '',
-                isSelected ? 'selected' : '',
-                isWeekend ? 'weekend' : '',
-                holiday ? `holiday holiday-${holiday.type}` : ''
-            ].filter(Boolean).join(' ');
-            
-            const holidayTitle = holiday ? `title="${holiday.name}"` : '';
-            
-            days.push(`
-                <div class="${classes}"
-                    data-date="${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}"
-                    ${holidayTitle}>
-                    ${i}
-                    ${holiday ? `<div class="holiday-indicator ${holiday.type}"></div>` : ''}
-                </div>
-            `);
-        }
-        
-        // Next month's days
-        const remainingDays = 42 - days.length; // Always show 6 weeks
-        for (let i = 1; i <= remainingDays; i++) {
-            days.push(`<div class="calendar-day next-month">${i}</div>`);
-        }
-        
-        return `<div class="days-grid">${days.join('')}</div>`;
+    formatDate(year, month, day) {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
 
-    attachEventListeners() {
+    getHolidayType(dateString) {
+        const regionHolidays = this.holidays[this.selectedRegion];
+        if (regionHolidays.federal && dateString in regionHolidays.federal) return 'federal';
+        if (regionHolidays.bank && dateString in regionHolidays.bank) return 'federal';
+        if (regionHolidays.observance && dateString in regionHolidays.observance) return 'observance';
+        return null;
+    }
+
+    getHolidayName(dateString) {
+        const regionHolidays = this.holidays[this.selectedRegion];
+        return regionHolidays.federal?.[dateString] || 
+               regionHolidays.bank?.[dateString] || 
+               regionHolidays.observance?.[dateString];
+    }
+
+    setupEventListeners() {
         // Region switcher
-        const switcher = this.container.querySelector('.switch input');
-        switcher.addEventListener('change', (e) => {
-            this.setRegion(e.target.checked ? 'UK' : 'US');
+        document.getElementById('region-select').addEventListener('change', (e) => {
+            this.selectedRegion = e.target.value;
+            localStorage.setItem('selectedRegion', this.selectedRegion);
+            this.renderCalendar();
+            this.updateRegionSpecificText();
         });
 
-        // Month navigation
-        this.container.querySelector('#prevMonth').addEventListener('click', () => {
+        // Navigation buttons
+        document.querySelector('.prev-month').addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-            this.render();
+            this.renderCalendar();
         });
-        
-        this.container.querySelector('#nextMonth').addEventListener('click', () => {
+
+        document.querySelector('.next-month').addEventListener('click', () => {
             this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-            this.render();
+            this.renderCalendar();
         });
+
+        // PTO form submission
+        document.getElementById('pto-request-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handlePTOSubmission();
+        });
+    }
+
+    updateRegionSpecificText() {
+        const ptoTitle = document.querySelector('.pto-form h3');
+        ptoTitle.textContent = this.selectedRegion === 'US' ? 'Request PTO' : 'Request Annual Leave';
         
-        // Day selection
-        this.container.addEventListener('click', (e) => {
-            const dayCell = e.target.closest('.calendar-day.current-month');
-            if (dayCell) {
-                const dateStr = dayCell.dataset.date;
-                this.selectedDate = new Date(dateStr);
-                this.render();
-                
-                // Show PTO request form
-                this.showPTOForm(this.selectedDate);
-                
-                // Emit date selection event
-                const event = new CustomEvent('dateSelected', {
-                    detail: { 
-                        date: this.selectedDate,
-                        holiday: this.getHolidayForDate(this.selectedDate)
-                    }
-                });
-                this.container.dispatchEvent(event);
+        const legendItems = document.querySelectorAll('.legend-item');
+        legendItems[0].querySelector('span:last-child').textContent = 
+            this.selectedRegion === 'US' ? 'Federal Holiday' : 'Bank Holiday';
+        legendItems[2].querySelector('span:last-child').textContent = 
+            this.selectedRegion === 'US' ? 'PTO' : 'Annual Leave';
+    }
+
+    handlePTOSubmission() {
+        const startDate = document.getElementById('pto-start').value;
+        const endDate = document.getElementById('pto-end').value;
+        const reason = document.getElementById('pto-reason').value;
+
+        // SweetAlert2 confirmation
+        Swal.fire({
+            title: `${this.selectedRegion === 'US' ? 'PTO' : 'Annual Leave'} Request`,
+            html: `
+                <p>Start Date: ${startDate}</p>
+                <p>End Date: ${endDate}</p>
+                <p>Reason: ${reason}</p>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Submit Request',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Here you would typically send the request to your backend
+                Swal.fire(
+                    'Success!',
+                    `Your ${this.selectedRegion === 'US' ? 'PTO' : 'Annual Leave'} request has been submitted.`,
+                    'success'
+                );
+                document.getElementById('pto-request-form').reset();
             }
         });
-    }
-    showPTOForm(date) {
-        const formContainer = this.container.querySelector('#ptoForm');
-        const holiday = this.getHolidayForDate(date);
-        const dateString = date.toLocaleDateString();
-        const isWeekend = this.isWeekend(date.getFullYear(), date.getMonth(), date.getDate());
-        
-        formContainer.innerHTML = `
-            <div class="pto-form">
-                <h3>${this.region === 'US' ? 'PTO' : 'Annual Leave'} Request</h3>
-                <p>Selected Date: ${dateString}</p>
-                ${holiday ? `<p class="holiday-note">Note: This is a ${holiday.type} holiday (${holiday.name})</p>` : ''}
-                ${isWeekend ? `<p class="weekend-note">Note: This is a weekend</p>` : ''}
-                <form id="ptoRequestForm">
-                    <div class="form-group">
-                        <label for="leaveType">Type of Leave:</label>
-                        <select id="leaveType" required>
-                            <option value="full">Full Day</option>
-                            <option value="morning">Morning Only</option>
-                            <option value="afternoon">Afternoon Only</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="reason">Reason (optional):</label>
-                        <textarea id="reason" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">Submit Request</button>
-                </form>
-            </div>
-        `;
-
-        // Add form submission handler
-        const form = formContainer.querySelector('#ptoRequestForm');
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = {
-                date: dateString,
-                type: form.querySelector('#leaveType').value,
-                reason: form.querySelector('#reason').value
-            };
-            this.submitPTORequest(formData);
-        });
-    }
-
-    async submitPTORequest(formData) {
-        try {
-            // Show success message using SweetAlert2
-            await Swal.fire({
-                icon: 'success',
-                title: `${this.region === 'US' ? 'PTO' : 'Annual Leave'} Request Submitted`,
-                text: 'Your request has been submitted successfully!',
-                confirmButtonColor: '#228be6'
-            });
-            
-            // Clear the form
-            const formContainer = this.container.querySelector('#ptoForm');
-            formContainer.innerHTML = '';
-            
-            // Here you would typically send this to your backend
-            console.log('PTO Request:', formData);
-            
-        } catch (error) {
-            console.error('Error submitting PTO request:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'There was an error submitting your request. Please try again.',
-                confirmButtonColor: '#228be6'
-            });
-        }
-    }
-
-    // Helper methods
-    getMonthName(month) {
-        return new Date(2000, month).toLocaleString('default', { month: 'long' });
-    }
-
-    isToday(year, month, day) {
-        const today = new Date();
-        return year === today.getFullYear() 
-            && month === today.getMonth() 
-            && day === today.getDate();
-    }
-
-    isSelected(year, month, day) {
-        return year === this.selectedDate.getFullYear() 
-            && month === this.selectedDate.getMonth() 
-            && day === this.selectedDate.getDate();
-    }
-
-    isWeekend(year, month, day) {
-        const date = new Date(year, month, day);
-        const dayOfWeek = date.getDay();
-        return dayOfWeek === 0 || dayOfWeek === 6;
     }
 }
 
-export default Calendar;
+// Initialize the calendar when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new Calendar();
+});
