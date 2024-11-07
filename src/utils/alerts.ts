@@ -1,33 +1,35 @@
-// src/utils/alerts.ts
+import Swal from 'sweetalert2';
+import { Holiday } from '../types/holidays';
 
-declare const Swal: any;
+export const showHolidayConfirmation = async (holiday: Holiday, leaveType: string): Promise<boolean> => {
+  const result = await Swal.fire({
+    title: 'Holiday Notice',
+    text: `${holiday.date} is ${holiday.name}. Do you still want to request ${leaveType}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33'
+  });
 
-export const showSuccess = (message: string) => {
-    Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: message,
-        timer: 2000,
-        showConfirmButton: false
-    });
+  return result.isConfirmed;
 };
 
-export const showError = (message: string) => {
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: message
-    });
+export const showError = (message: string): void => {
+  Swal.fire({
+    title: 'Error',
+    text: message,
+    icon: 'error',
+    confirmButtonText: 'OK'
+  });
 };
 
-export const showConfirm = async (message: string) => {
-    const result = await Swal.fire({
-        icon: 'question',
-        title: 'Confirm',
-        text: message,
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No'
-    });
-    return result.isConfirmed;
+export const showSuccess = (message: string): void => {
+  Swal.fire({
+    title: 'Success',
+    text: message,
+    icon: 'success',
+    confirmButtonText: 'OK'
+  });
 };
