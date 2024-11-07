@@ -4,26 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="PTO Calendar Application">
-    <!-- Security headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;">
     
     <title>PTO Calendar</title>
     
-    <!-- Performance: Preload critical assets -->
-    <link rel="preload" href="scripts/main.js" as="script">
-    <link rel="preload" href="styles/main.css" as="style">
-    
-    <!-- Stylesheets with integrity checks -->
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/calendar.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" 
-          integrity="sha384-[Get-Actual-Hash]" 
-          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
-    <!-- Favicon handling -->
-    <link rel="icon" href="data:,">  <!-- Temporary blank favicon to prevent 404 -->
+    <!-- Prevent favicon 404 -->
+    <link rel="icon" href="data:,">
 </head>
 <body>
     <!-- Error Boundary -->
@@ -49,22 +39,9 @@
         <!-- Dynamic content will be injected here -->
     </div>
     
-    <!-- Scripts with error handling -->
+    <!-- Basic error handling -->
     <script>
         window.onerror = function(msg, url, lineNo, columnNo, error) {
-            const errorContainer = document.getElementById('error-container');
-            const errorDetails = document.getElementById('error-details');
-            const loadingElement = document.getElementById('loading');
-            const appElement = document.getElementById('app');
-            
-            if (errorContainer && errorDetails) {
-                errorDetails.textContent = `Error: ${msg}`;
-                errorContainer.style.display = 'block';
-                if (loadingElement) loadingElement.style.display = 'none';
-                if (appElement) appElement.style.display = 'none';
-            }
-            
-            // Log to console for debugging
             console.error('Application Error:', {
                 message: msg,
                 url: url,
@@ -72,15 +49,12 @@
                 columnNo: columnNo,
                 error: error
             });
-            
             return false;
         };
     </script>
     
     <!-- External Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" 
-            integrity="sha384-[Get-Actual-Hash]" 
-            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Application Code -->
     <script src="scripts/main.js" type="module"></script>
