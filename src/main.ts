@@ -353,3 +353,21 @@ declare global {
         ptoPlanner: PTOPlanner;
     }
 }
+// src/main.ts
+
+import { Calendar } from './components/Calendar';
+
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const calendar = new Calendar('calendar-container');
+        
+        // Add error handling for calendar initialization
+        window.onerror = (msg, url, line, col, error) => {
+            console.error('Calendar Error:', error);
+            // You can add more error handling here if needed
+        };
+        
+    } catch (error) {
+        console.error('Failed to initialize calendar:', error);
+    }
+});
