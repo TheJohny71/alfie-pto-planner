@@ -46,6 +46,79 @@
     color: #64748b;
     margin-top: 4px;
 }
+/* Add these to your styles/calendar.css */
+
+.calendar-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.calendar-navigation button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    background-color: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-navigation button:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.current-month {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.calendar-header {
+    display: contents;
+}
+
+.calendar-header-cell {
+    text-align: center;
+    font-weight: 600;
+    color: #64748b;
+    padding: 0.5rem;
+}
+
+.date-number {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+/* Add responsive styles */
+@media (max-width: 640px) {
+    .calendar-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .calendar-day {
+        min-height: 80px;
+    }
+    
+    .holiday-name {
+        font-size: 0.675rem;
+    }
+}
 
 .region-toggle {
     display: flex;
