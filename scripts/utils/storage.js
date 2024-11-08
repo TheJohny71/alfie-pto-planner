@@ -1,27 +1,28 @@
-// Import the storage manager from the TypeScript implementation
-import storageManager from '../../src/utils/storage';
+// storage.js
+const storageManager = {
+    storageKey: 'pto_calendar_data',
 
-// Re-export the storage manager
+    async saveLeaveRequest(request) {
+        try {
+            const currentData = await this.getAllLeaveRequests();
+            const updatedData = [...currentData, request];
+            localStorage.setItem(this.storageKey, JSON.stringify(updatedData));
+            return true;
+        } catch (error) {
+            console.error('Error saving leave request:', error);
+            return false;
+        }
+    },
+
+    async getAllLeaveRequests() {
+        try {
+            const data = localStorage.getItem(this.storageKey);
+            return data ? JSON.parse(data) : [];
+        } catch (error) {
+            console.error('Error retrieving leave requests:', error);
+            return [];
+        }
+    }
+};
+
 export default storageManager;
-
-// Example functions showing how to use the storage manager
-export const createLeaveRequest = async (employeeId, startDate, endDate, type) => {
-    const request = {
-        id: Date.now().toString(), // Simple ID generation
-        employeeId,
-        startDate,
-        endDate,
-        type,
-        status: 'pending'
-    };
-    
-    return await storageManager.saveLeaveRequest(request);
-};
-
-export const getEmployeeLeaves = async (employeeId) => {
-    return await storageManager.getLeaveRequestsByEmployee(employeeId);
-};
-
-export const updateLeaveStatus = async (requestId, newStatus) => {
-    return await storageManager.updateLeaveRequest(requestId, { status: newStatus });
-};
