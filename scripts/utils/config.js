@@ -1,5 +1,5 @@
 // config.js
-export const config = {
+const config = {
     appName: 'PTO Calendar',
     version: '1.0.0',
     defaultRegion: 'US',
