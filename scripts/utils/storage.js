@@ -1,48 +1,27 @@
-class StorageService {
-    static getLeaveData() {
-        const data = localStorage.getItem('leaveData')
-        return data ? JSON.parse(data) : null
-    }
+// Import the storage manager from the TypeScript implementation
+import storageManager from '../../src/utils/storage';
 
-    static setLeaveData(data) {
-        localStorage.setItem('leaveData', JSON.stringify(data))
-    }
+// Re-export the storage manager
+export default storageManager;
 
-    static getSettings() {
-        const settings = localStorage.getItem('settings')
-        return settings ? JSON.parse(settings) : {
-            theme: 'light',
-            region: 'US',
-            showWeekends: true
-        }
-    }
+// Example functions showing how to use the storage manager
+export const createLeaveRequest = async (employeeId, startDate, endDate, type) => {
+    const request = {
+        id: Date.now().toString(), // Simple ID generation
+        employeeId,
+        startDate,
+        endDate,
+        type,
+        status: 'pending'
+    };
+    
+    return await storageManager.saveLeaveRequest(request);
+};
 
-    static setSettings(settings) {
-        localStorage.setItem('settings', JSON.stringify(settings))
-    }
+export const getEmployeeLeaves = async (employeeId) => {
+    return await storageManager.getLeaveRequestsByEmployee(employeeId);
+};
 
-    static setHasVisited() {
-        localStorage.setItem('hasVisited', 'true')
-    }
-
-    static hasVisited() {
-        return localStorage.getItem('hasVisited') === 'true'
-    }
-
-    static getLeaveRequests() {
-        const requests = localStorage.getItem('leaveRequests')
-        return requests ? JSON.parse(requests) : []
-    }
-
-    static saveLeaveRequest(request) {
-        const requests = this.getLeaveRequests()
-        const newRequest = {
-            id: String(Date.now()),
-            status: 'pending',
-            ...request
-        }
-        requests.push(newRequest)
-        localStorage.setItem('leaveRequests', JSON.stringify(requests))
-        return newRequest
-    }
-}
+export const updateLeaveStatus = async (requestId, newStatus) => {
+    return await storageManager.updateLeaveRequest(requestId, { status: newStatus });
+};
