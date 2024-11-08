@@ -120,12 +120,13 @@
             <!-- Calendar content will be populated by JavaScript -->
         </div>
     </div>
+
     <!-- PTO Request Modal -->
     <div id="ptoModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
                 <h2>Request PTO</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button class="close-btn" data-action="closeModal">&times;</button>
             </div>
             <form id="ptoForm" class="pto-form">
                 <div class="form-group">
@@ -150,7 +151,7 @@
                     <textarea id="ptoNotes" rows="3"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="secondary-btn" data-action="closeModal">Cancel</button>
                     <button type="submit" class="primary-btn">Submit Request</button>
                 </div>
             </form>
@@ -161,7 +162,7 @@
     <div id="statsPanel" class="slide-panel">
         <div class="panel-header">
             <h2>PTO Statistics</h2>
-            <button class="close-btn" onclick="toggleStatsPanel()">&times;</button>
+            <button class="close-btn" data-action="toggleStatsPanel">&times;</button>
         </div>
         <div class="stats-content">
             <div class="stats-summary">
@@ -194,38 +195,27 @@
         <div class="modal-container">
             <div class="modal-header">
                 <h2>Export Calendar</h2>
-                <button class="close-btn" onclick="closeExportModal()">&times;</button>
+                <button class="close-btn" data-action="closeExportModal">&times;</button>
             </div>
             <div class="export-options">
-                <button class="export-btn" onclick="exportToICal()">
+                <button class="export-btn" data-action="exportToICal">
                     <span>Export to iCal</span>
                 </button>
-                <button class="export-btn" onclick="exportToGoogle()">
+                <button class="export-btn" data-action="exportToGoogle">
                     <span>Export to Google Calendar</span>
                 </button>
-                <button class="export-btn" onclick="exportToCSV()">
+                <button class="export-btn" data-action="exportToCSV">
                     <span>Export to CSV</span>
                 </button>
             </div>
         </div>
     </div>
-    <!-- Scripts -->
-    <!-- Utility Scripts -->
-    <script src="scripts/utils/config.js"></script>
-    <script src="scripts/utils/storage.js"></script>
-    <script src="scripts/utils/errors.js"></script>
-    <script src="scripts/utils/holidayCalculator.js"></script>
-    <script src="scripts/utils/services.js"></script>
-    
-    <!-- Component Scripts -->
-    <script src="scripts/components/calendar.js"></script>
-    <script src="scripts/components/LeaveRequestForm.js"></script>
-    
-    <!-- Main Script -->
-    <script src="scripts/main.js"></script>
+
+    <!-- Scripts (Module Version) -->
+    <script type="module" src="scripts/main.js"></script>
 
     <!-- Initialize Tooltips -->
-    <script>
+    <script type="module">
         // Enable tooltips on all elements with title attribute
         document.querySelectorAll('[title]').forEach(element => {
             element.addEventListener('mouseover', e => {
