@@ -1,16 +1,17 @@
-// src/utils/errors.ts
-export class LeaveError extends Error {
-    constructor(code, message, details) {
-        super(message);
-        this.code = code;
-        this.details = details;
-        this.name = 'LeaveError';
-        Object.setPrototypeOf(this, LeaveError.prototype);
+// errors.js
+export const handleError = (message, error) => {
+    console.error(message, error);
+    
+    // Display error to user
+    const errorContainer = document.getElementById('error-container');
+    const errorDetails = document.getElementById('error-details');
+    
+    if (errorContainer && errorDetails) {
+        errorDetails.textContent = `${message}: ${error.message || 'Unknown error'}`;
+        errorContainer.style.display = 'block';
     }
-}
-export const ErrorCodes = {
-    VALIDATION_FAILED: 'VALIDATION_FAILED',
-    STORAGE_ERROR: 'STORAGE_ERROR',
-    DATE_ERROR: 'DATE_ERROR',
-    NETWORK_ERROR: 'NETWORK_ERROR'
+};
+
+export default {
+    handleError
 };
