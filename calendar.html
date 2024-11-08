@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTO Calendar</title>
-    <!-- Keep your existing stylesheets -->
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/calendar.css">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/modern-theme.css">
-    <!-- Add new modal styles -->
+    
+    <!-- Inline Modal & Panel Styles -->
     <style>
+        /* Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -19,6 +22,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            animation: fadeIn 0.3s ease;
         }
 
         .modal-container {
@@ -27,13 +31,15 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 20px;
+            padding: 2rem;
             border-radius: 8px;
             z-index: 1001;
             max-width: 500px;
             width: 90%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        /* Slide Panel Styles */
         .slide-panel {
             position: fixed;
             right: -400px;
@@ -41,302 +47,202 @@
             width: 400px;
             height: 100%;
             background: white;
-            padding: 20px;
+            padding: 2rem;
             box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
             transition: right 0.3s ease;
             z-index: 999;
+            overflow-y: auto;
         }
 
         .slide-panel.open {
             right: 0;
         }
-    </style>
-</head>
-<body>
-    <div class="calendar-container">
-        <header class="header">
-            <h1 class="title">PTO Calendar</h1>
-            <select class="region-select" id="regionSelect">
-                <option value="US">United States</option>
-                <option value="UK">United Kingdom</option>
-            </select>
-        </header>
 
-        <div class="controls">
-            <button id="prevMonth">&larr; Previous</button>
-            <h2 id="currentMonth">January 2024</h2>
-            <button id="nextMonth">Next &rarr;</button>
-        </div>
-
-        <div class="calendar" id="calendar">
-            <!-- Calendar grid will be populated by JavaScript -->
-        </div>
-    </div>
-
-    <div class="pto-form">
-        <h3>Add PTO Days</h3>
-        <form id="ptoForm">
-            <div class="form-group">
-                <label for="ptoStart">Start Date:</label>
-                <input type="date" id="ptoStart" required>
-            </div>
-            <div class="form-group">
-                <label for="ptoEnd">End Date:</label>
-                <input type="date" id="ptoEnd" required>
-            </div>
-            <div class="form-group">
-                <label for="ptoType">Type:</label>
-                <select id="ptoType">
-                    <option value="vacation">Vacation</option>
-                    <option value="sick">Sick Leave</option>
-                    <option value="personal">Personal Day</option>
-                </select>
-            </div>
-            <button type="submit" class="export-button">Add PTO</button>
-        </form>
-        <button id="exportButton" class="export-button">Export Schedule</button>
-    </div>
-    <script>
-        class Calendar {
-            constructor() {
-                this.currentDate = new Date();
-                this.selectedDate = null;
-                this.region = 'US';
-                this.ptoDays = new Set();
-                this.ptoDetails = new Map(); // Store PTO details for export
-                
-                this.initializeElements();
-                this.addEventListeners();
-                this.render();
-            }
-
-            initializeElements() {
-                this.calendarElement = document.getElementById('calendar');
-                this.regionSelect = document.getElementById('regionSelect');
-                this.currentMonthElement = document.getElementById('currentMonth');
-                this.prevMonthButton = document.getElementById('prevMonth');
-                this.nextMonthButton = document.getElementById('nextMonth');
-                this.ptoForm = document.getElementById('ptoForm');
-                this.exportButton = document.getElementById('exportButton');
-            }
-
-            addEventListeners() {
-                this.prevMonthButton.addEventListener('click', () => this.previousMonth());
-                this.nextMonthButton.addEventListener('click', () => this.nextMonth());
-                this.regionSelect.addEventListener('change', (e) => {
-                    this.region = e.target.value;
-                    this.render();
-                });
-                
-                // PTO form submission
-                this.ptoForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.addPTODays();
-                });
-
-                // Export functionality
-                this.exportButton.addEventListener('click', () => this.exportSchedule());
-            }
-            addPTODays() {
-                const startDate = new Date(document.getElementById('ptoStart').value);
-                const endDate = new Date(document.getElementById('ptoEnd').value);
-                const ptoType = document.getElementById('ptoType').value;
-
-                let currentDate = new Date(startDate);
-                while (currentDate <= endDate) {
-                    // Skip weekends
-                    if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
-                        const dateString = this.formatDate(currentDate);
-                        this.ptoDays.add(dateString);
-                        this.ptoDetails.set(dateString, {
-                            type: ptoType,
-                            date: new Date(currentDate)
-                        });
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-
-                this.render();
-                this.ptoForm.reset();
-            }
-
-            exportSchedule() {
-                const schedule = {
-                    ptoDays: [],
-                    holidays: this.getHolidaysForYear(this.currentDate.getFullYear())
-                };
-
-                // Convert PTO details to array
-                this.ptoDetails.forEach((details, date) => {
-                    schedule.ptoDays.push({
-                        date: date,
-                        type: details.type
-                    });
-                });
-
-                // Create and download file
-                const blob = new Blob([JSON.stringify(schedule, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'pto-schedule.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
-            getHolidaysForYear(year) {
-                const holidays = {
-                    US: {},
-                    UK: {}
-                };
-
-                // US Holidays
-                holidays.US[`${year}-01-01`] = "New Year's Day";
-                holidays.US[`${year}-01-${this.getNthDayOfMonth(year, 0, 3, 1)}`] = "Martin Luther King Jr. Day"; // 3rd Monday of January
-                holidays.US[`${year}-02-${this.getNthDayOfMonth(year, 1, 3, 1)}`] = "Presidents Day"; // 3rd Monday of February
-                holidays.US[`${year}-05-${this.getLastDayOfMonth(year, 4, 1)}`] = "Memorial Day"; // Last Monday of May
-                holidays.US[`${year}-07-04`] = "Independence Day";
-                holidays.US[`${year}-09-${this.getNthDayOfMonth(year, 8, 1, 1)}`] = "Labor Day"; // 1st Monday of September
-                holidays.US[`${year}-11-${this.getNthDayOfMonth(year, 10, 4, 4)}`] = "Thanksgiving Day"; // 4th Thursday of November
-                holidays.US[`${year}-12-25`] = "Christmas Day";
-
-                // UK Holidays
-                holidays.UK[`${year}-01-01`] = "New Year's Day";
-                holidays.UK[`${year}-05-${this.getNthDayOfMonth(year, 4, 1, 1)}`] = "Early May Bank Holiday";
-                holidays.UK[`${year}-05-${this.getLastDayOfMonth(year, 4, 1)}`] = "Spring Bank Holiday";
-                holidays.UK[`${year}-08-${this.getLastDayOfMonth(year, 7, 1)}`] = "Summer Bank Holiday";
-                holidays.UK[`${year}-12-25`] = "Christmas Day";
-                holidays.UK[`${year}-12-26`] = "Boxing Day";
-
-                return holidays;
-            }
-
-            getNthDayOfMonth(year, month, nth, dayOfWeek) {
-                let date = new Date(year, month, 1);
-                let count = 0;
-                
-                while (count < nth) {
-                    if (date.getDay() === dayOfWeek) {
-                        count++;
-                    }
-                    if (count < nth) {
-                        date.setDate(date.getDate() + 1);
-                    }
-                }
-                
-                return date.getDate();
-            }
-
-            getLastDayOfMonth(year, month, dayOfWeek) {
-                let date = new Date(year, month + 1, 0);
-                
-                while (date.getDay() !== dayOfWeek) {
-                    date.setDate(date.getDate() - 1);
-                }
-                
-                return date.getDate();
-            }
-
-            formatDate(date) {
-                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            }
-
-            isHoliday(date) {
-                const formattedDate = this.formatDate(date);
-                const yearHolidays = this.getHolidaysForYear(date.getFullYear());
-                return yearHolidays[this.region][formattedDate];
-            }
-
-            previousMonth() {
-                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-                this.render();
-            }
-
-            nextMonth() {
-                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-                this.render();
-            }
-            render() {
-                const year = this.currentDate.getFullYear();
-                const month = this.currentDate.getMonth();
-                
-                // Update month display
-                const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
-                this.currentMonthElement.textContent = `${monthName} ${year}`;
-
-                // Clear calendar
-                this.calendarElement.innerHTML = '';
-
-                // Add weekday headers
-                const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                weekdays.forEach(day => {
-                    const dayElement = document.createElement('div');
-                    dayElement.className = 'weekday';
-                    dayElement.textContent = day;
-                    this.calendarElement.appendChild(dayElement);
-                });
-
-                // Get first day of month and number of days
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                // Add empty cells for days before start of month
-                for (let i = 0; i < firstDay; i++) {
-                    const emptyDay = document.createElement('div');
-                    emptyDay.className = 'day';
-                    this.calendarElement.appendChild(emptyDay);
-                }
-
-                // Add days of month
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(year, month, day);
-                    const dayElement = document.createElement('div');
-                    dayElement.className = 'day';
-                    
-                    const dateSpan = document.createElement('span');
-                    dateSpan.className = 'date';
-                    dateSpan.textContent = day;
-                    dayElement.appendChild(dateSpan);
-
-                    const formattedDate = this.formatDate(date);
-                    
-                    // Check for PTO
-                    if (this.ptoDays.has(formattedDate)) {
-                        dayElement.classList.add('pto');
-                        const ptoDetail = this.ptoDetails.get(formattedDate);
-                        const indicator = document.createElement('span');
-                        indicator.className = 'indicator';
-                        indicator.textContent = ptoDetail.type;
-                        dayElement.appendChild(indicator);
-                    }
-
-                    // Check for holidays
-                    const holidayName = this.isHoliday(date);
-                    if (holidayName) {
-                        dayElement.classList.add('holiday');
-                        const indicator = document.createElement('span');
-                        indicator.className = 'indicator';
-                        indicator.textContent = holidayName;
-                        dayElement.appendChild(indicator);
-                    }
-
-                    dayElement.addEventListener('click', () => {
-                        const selected = this.calendarElement.querySelector('.selected');
-                        if (selected) selected.classList.remove('selected');
-                        dayElement.classList.add('selected');
-                        this.selectedDate = date;
-                    });
-
-                    this.calendarElement.appendChild(dayElement);
-                }
-            }
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        // Initialize calendar when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new Calendar();
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-purple-50">
+    <!-- Main Container -->
+    <div class="calendar-container">
+        <!-- Enhanced Header -->
+        <div class="calendar-header">
+            <div class="header-left">
+                <h1>PTO Calendar</h1>
+                <div class="view-controls">
+                    <button class="view-btn active" data-view="month" title="Month View">Month</button>
+                    <button class="view-btn" data-view="week" title="Week View">Week</button>
+                    <button class="view-btn" data-view="year" title="Year View">Year</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="statsButton" class="secondary-btn" title="View PTO Statistics">
+                    <span>Statistics</span>
+                </button>
+                <button id="addPTOBtn" class="primary-btn" title="Request PTO">
+                    <span>Add PTO</span>
+                </button>
+                <select id="regionSelect" class="region-select" title="Select Region">
+                    <option value="US">US</option>
+                    <option value="UK">UK</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="calendar-nav">
+            <button id="prevBtn" class="nav-btn" title="Previous">
+                <span>←</span>
+            </button>
+            <div class="date-range-selector">
+                <h2 id="currentMonth">September 2024</h2>
+                <div class="quick-nav">
+                    <button class="quick-nav-btn" data-nav="today">Today</button>
+                    <button class="quick-nav-btn" data-nav="thisWeek">This Week</button>
+                    <button class="quick-nav-btn" data-nav="thisMonth">This Month</button>
+                </div>
+            </div>
+            <button id="nextBtn" class="nav-btn" title="Next">
+                <span>→</span>
+            </button>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div id="calendar" class="calendar-grid">
+            <!-- Calendar content will be populated by JavaScript -->
+        </div>
+    </div>
+    <!-- PTO Request Modal -->
+    <div id="ptoModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Request PTO</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="ptoForm" class="pto-form">
+                <div class="form-group">
+                    <label for="ptoStartDate">Start Date</label>
+                    <input type="date" id="ptoStartDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="ptoEndDate">End Date</label>
+                    <input type="date" id="ptoEndDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="ptoType">Leave Type</label>
+                    <select id="ptoType" required>
+                        <option value="vacation">Vacation</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="personal">Personal Leave</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ptoNotes">Notes (Optional)</label>
+                    <textarea id="ptoNotes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="secondary-btn" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="primary-btn">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Slide Panel -->
+    <div id="statsPanel" class="slide-panel">
+        <div class="panel-header">
+            <h2>PTO Statistics</h2>
+            <button class="close-btn" onclick="toggleStatsPanel()">&times;</button>
+        </div>
+        <div class="stats-content">
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <h3>Total PTO Days</h3>
+                    <p id="totalPTODays">25</p>
+                </div>
+                <div class="stat-item">
+                    <h3>Days Taken</h3>
+                    <p id="daysTaken">0</p>
+                </div>
+                <div class="stat-item">
+                    <h3>Days Remaining</h3>
+                    <p id="daysRemaining">0</p>
+                </div>
+            </div>
+            <div class="upcoming-pto">
+                <h3>Upcoming PTO</h3>
+                <ul id="upcomingPTOList"></ul>
+            </div>
+            <div class="pto-breakdown">
+                <h3>PTO Breakdown</h3>
+                <div id="ptoBreakdown"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div id="exportModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>Export Calendar</h2>
+                <button class="close-btn" onclick="closeExportModal()">&times;</button>
+            </div>
+            <div class="export-options">
+                <button class="export-btn" onclick="exportToICal()">
+                    <span>Export to iCal</span>
+                </button>
+                <button class="export-btn" onclick="exportToGoogle()">
+                    <span>Export to Google Calendar</span>
+                </button>
+                <button class="export-btn" onclick="exportToCSV()">
+                    <span>Export to CSV</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Scripts -->
+    <!-- Utility Scripts -->
+    <script src="scripts/utils/config.js"></script>
+    <script src="scripts/utils/storage.js"></script>
+    <script src="scripts/utils/errors.js"></script>
+    <script src="scripts/utils/holidayCalculator.js"></script>
+    <script src="scripts/utils/services.js"></script>
+    
+    <!-- Component Scripts -->
+    <script src="scripts/components/calendar.js"></script>
+    <script src="scripts/components/LeaveRequestForm.js"></script>
+    
+    <!-- Main Script -->
+    <script src="scripts/main.js"></script>
+
+    <!-- Initialize Tooltips -->
+    <script>
+        // Enable tooltips on all elements with title attribute
+        document.querySelectorAll('[title]').forEach(element => {
+            element.addEventListener('mouseover', e => {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = e.target.title;
+                document.body.appendChild(tooltip);
+                
+                const rect = e.target.getBoundingClientRect();
+                tooltip.style.left = rect.left + (rect.width - tooltip.offsetWidth) / 2 + 'px';
+                tooltip.style.top = rect.top - tooltip.offsetHeight - 5 + 'px';
+            });
+            
+            element.addEventListener('mouseout', () => {
+                const tooltip = document.querySelector('.tooltip');
+                if (tooltip) tooltip.remove();
+            });
         });
     </script>
 </body>
