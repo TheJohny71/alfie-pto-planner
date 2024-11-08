@@ -2,7 +2,6 @@
 export const handleError = (message, error) => {
     console.error(message, error);
     
-    // Display error to user
     const errorContainer = document.getElementById('error-container');
     const errorDetails = document.getElementById('error-details');
     
