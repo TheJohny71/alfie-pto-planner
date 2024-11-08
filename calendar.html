@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTO Calendar</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABYWFgAWFhYAFhYWABYWFgAWFhYAFhYWABYWFgAWFhYAAAAAAAAAAAAAAAAAAAAAAAAAAAAWFhYAFhYWBNYWFhsWFhYqlhYWM1YWFjbWFhY21hYWM1YWFiqWFhYbFhYWBNYWFgAWFhYAAAAAAAAAAAAWFhYE1hYWJtYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWJtYWFgTWFhYAAAAAAAAAAAAAAAAAFhYWGxYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFhsAAAAAAAAAAAAAAAAAAAAAFhYWKpYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFiqAAAAAAAAAAAAAAAAAAAAAFhYWM1YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFjNAAAAAAAAAAAAAAAAAAAAAFhYWNtYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFjbAAAAAAAAAAAAAAAAAAAAAFhYWNtYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFjbAAAAAAAAAAAAAAAAAAAAAFhYWM1YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFjNAAAAAAAAAAAAAAAAAAAAAFhYWKpYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFiqAAAAAAAAAAAAAAAAAAAAAFhYWGxYWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWP9YWFhsAAAAAAAAAAAAAAAAAAAAAFhYWBNYWFibWFhY/1hYWP9YWFj/WFhY/1hYWP9YWFj/WFhY/1hYWJtYWFgTAAAAAAAAAAAAAAAAWFhYAFhYWABYWFgTWFhYbFhYWKpYWFjNWFhY21hYWNtYWFjNWFhYqlhYWGxYWFgTWFhYAFhYWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="/>
     <style>
         /* Apple-style CSS Reset */
         * {
@@ -29,6 +30,9 @@
             background-color: #FFFFFF;
             color: #1C1C1E;
             line-height: 1.5;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         /* Header Styles */
@@ -39,13 +43,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-radius: 12px 12px 0 0;
         }
 
         .title {
             font-size: 1.75rem;
             font-weight: 600;
         }
-
         /* Controls Container */
         .controls {
             display: flex;
@@ -79,12 +83,26 @@
             border-color: var(--apple-blue);
         }
 
+        /* Region Selector */
+        .region-select {
+            padding: 0.5rem;
+            border: 1px solid var(--apple-border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--apple-blue);
+            background-color: #FFFFFF;
+            cursor: pointer;
+        }
         /* Calendar Grid */
         .calendar {
             padding: 1.5rem;
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 0.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            border-radius: 0 0 12px 12px;
         }
 
         .weekday {
@@ -106,6 +124,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            background-color: #FFFFFF;
         }
 
         .day:hover {
@@ -133,17 +152,6 @@
             color: var(--apple-gray);
         }
 
-        /* Region Selector */
-        .region-select {
-            padding: 0.5rem;
-            border: 1px solid var(--apple-border);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: var(--apple-blue);
-            background-color: #FFFFFF;
-            cursor: pointer;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .calendar {
@@ -164,7 +172,7 @@
             }
         }
     </style>
-</head>
+    </head>
 <body>
     <header class="header">
         <h1 class="title">PTO Calendar</h1>
@@ -183,7 +191,6 @@
     <div class="calendar" id="calendar">
         <!-- Calendar grid will be populated by JavaScript -->
     </div>
-
     <script>
         class Calendar {
             constructor() {
@@ -217,7 +224,6 @@
                 this.addEventListeners();
                 this.render();
             }
-
             initializeElements() {
                 this.calendarElement = document.getElementById('calendar');
                 this.regionSelect = document.getElementById('regionSelect');
@@ -253,7 +259,6 @@
                 this.currentDate.setMonth(this.currentDate.getMonth() + 1);
                 this.render();
             }
-
             render() {
                 const year = this.currentDate.getFullYear();
                 const month = this.currentDate.getMonth();
