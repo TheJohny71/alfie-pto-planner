@@ -4,11 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTO Calendar</title>
+    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📅</text></svg>">
-    
-    <style>
-        /* Base Styles */
+</head>
+<style>
+        /* Base Reset and Variables */
+        :root {
+            --purple-50: #f8f7ff;
+            --purple-100: #f3f1ff;
+            --purple-200: #e9e5ff;
+            --purple-300: #d4ccff;
+            --purple-400: #b3a3ff;
+            --purple-500: #8b72ff;
+            --purple-600: #7152f3;
+            --green-50: #f0fdf4;
+            --green-500: #22c55e;
+            --gray-50: #f9fafb;
+            --gray-200: #e5e7eb;
+            --gray-500: #6b7280;
+        }
+
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -19,13 +35,13 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
                          Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
-            background-color: #f8f7ff;
+            background-color: var(--purple-50);
             color: #1a1a1a;
             min-height: 100vh;
             padding: 20px;
         }
 
-        /* Calendar Container */
+        /* Basic Container Styles */
         .calendar-container {
             max-width: 1000px;
             margin: 0 auto;
@@ -33,13 +49,31 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            animation: fadeIn 0.3s ease-out;
+        }
+    /* Header and Controls */
+        .header {
+            background: linear-gradient(135deg, var(--purple-500) 0%, var(--purple-600) 100%);
+            padding: 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Header */
-        .header {
-            background: linear-gradient(to right, #8b72ff, #7152f3);
-            padding: 20px;
-            color: white;
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%239C92FF' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
         }
 
         .header-top {
@@ -51,7 +85,7 @@
 
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
 
@@ -69,64 +103,47 @@
             color: white;
             border-radius: 6px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .view-button.active {
             background: white;
-            color: #7152f3;
+            color: var(--purple-600);
         }
 
         .add-pto-btn, .region-select {
             padding: 8px 16px;
             border: none;
             background: white;
-            color: #7152f3;
+            color: var(--purple-600);
             border-radius: 8px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Navigation */
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .add-pto-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        .month-title {
-            width: 200px;
-            text-align: center;
-            font-size: 1.25rem;
-        }
-
-        .nav-button {
-            padding: 8px;
-            border: none;
-            background: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 50%;
-        }
-
-        .nav-button:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Calendar Grid */
+    /* Calendar Grid Styles */
         .calendar-grid {
-            padding: 20px;
+            padding: 24px;
+            background: white;
         }
 
         .weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
         .weekday {
             text-align: center;
-            color: #666;
-            padding: 10px;
-            font-weight: 500;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--gray-500);
+            font-size: 0.875rem;
         }
 
         .days {
@@ -138,52 +155,207 @@
         .day {
             aspect-ratio: 1;
             padding: 8px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background: white;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
         .day:hover {
-            border-color: #7152f3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(113, 82, 243, 0.15);
         }
 
         .day.weekend {
-            background: #f9fafb;
+            background: var(--gray-50);
+        }
+
+        .day.today {
+            border-color: var(--purple-600);
+            font-weight: 600;
         }
 
         .day.holiday {
-            border-color: #22c55e;
-            background: #f0fdf4;
+            border-color: var(--green-500);
+            background: var(--green-50);
         }
 
         .day.selected {
-            border-color: #7152f3;
-            background: #f8f7ff;
+            background: var(--purple-50);
+            border-color: var(--purple-600);
         }
 
-        .modal {
-            display: none;
+        .day-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .day-number {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .event-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+
+        .event-indicator.holiday {
+            background: var(--green-500);
+        }
+
+        .event-indicator.pto {
+            background: var(--purple-600);
+        }
+    /* Modal Styles */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
         }
 
-        .modal.active {
-            display: flex;
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .modal-content {
             background: white;
+            border-radius: 16px;
             padding: 24px;
-            border-radius: 12px;
             width: 90%;
-            max-width: 400px;
+            max-width: 480px;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--gray-500);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--purple-600);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(113, 82, 243, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: var(--gray-50);
+            color: var(--gray-500);
+        }
+
+        .btn-submit {
+            background: var(--purple-600);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: var(--purple-500);
+            transform: translateY(-1px);
+        }
+    /* Animations */
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 12px;
+            background: #333;
+            color: white;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .day:hover .tooltip {
+            opacity: 1;
         }
 
         /* Responsive Design */
@@ -202,34 +374,47 @@
                 justify-content: center;
                 flex-wrap: wrap;
             }
+
+            .day {
+                padding: 4px;
+            }
+
+            .day-number {
+                font-size: 0.75rem;
+            }
         }
     </style>
-</head>
-<body>
+    <body>
     <div class="calendar-container">
+        <!-- Header Section -->
         <div class="header">
-            <div class="header-top">
-                <h1>PTO Calendar</h1>
-                <div class="controls">
-                    <div class="view-switcher">
-                        <button class="view-button active">Month</button>
-                        <button class="view-button">Week</button>
-                        <button class="view-button">Year</button>
+            <div class="header-content">
+                <div class="header-top">
+                    <h1>PTO Calendar</h1>
+                    <div class="controls">
+                        <div class="view-switcher">
+                            <button class="view-button active" data-view="month">Month</button>
+                            <button class="view-button" data-view="week">Week</button>
+                            <button class="view-button" data-view="year">Year</button>
+                        </div>
+                        <button class="add-pto-btn" onclick="toggleModal()">
+                            Add PTO
+                        </button>
+                        <select class="region-select" onchange="changeRegion(this.value)">
+                            <option value="US">US</option>
+                            <option value="UK">UK</option>
+                        </select>
                     </div>
-                    <button class="add-pto-btn" onclick="toggleModal()">Add PTO</button>
-                    <select class="region-select" onchange="changeRegion(this.value)">
-                        <option value="US">US</option>
-                        <option value="UK">UK</option>
-                    </select>
                 </div>
-            </div>
-            <div class="calendar-nav">
-                <button class="nav-button" onclick="previousMonth()">←</button>
-                <div class="month-title"></div>
-                <button class="nav-button" onclick="nextMonth()">→</button>
+                <div class="calendar-nav">
+                    <button class="nav-button" onclick="previousMonth()">←</button>
+                    <h2 class="month-title"></h2>
+                    <button class="nav-button" onclick="nextMonth()">→</button>
+                </div>
             </div>
         </div>
 
+        <!-- Calendar Grid -->
         <div class="calendar-grid">
             <div class="weekdays">
                 <div class="weekday">Sun</div>
@@ -244,140 +429,463 @@
         </div>
     </div>
 
-    <div class="modal" id="ptoModal">
+    <!-- PTO Modal -->
+    <div class="modal-overlay" id="ptoModal">
         <div class="modal-content">
             <h2>Request PTO</h2>
-            <form id="ptoForm">
-                <div>
-                    <label>Start Date</label>
-                    <input type="date" id="startDate" required>
+            <form id="ptoForm" onsubmit="submitPTO(event)">
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-input" id="startDate" required>
                 </div>
-                <div>
-                    <label>End Date</label>
-                    <input type="date" id="endDate" required>
+                <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-input" id="endDate" required>
                 </div>
-                <div>
-                    <label>Type</label>
-                    <select id="ptoType" required>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="ptoType" required>
                         <option value="vacation">Vacation</option>
                         <option value="sick">Sick Leave</option>
                         <option value="personal">Personal</option>
                     </select>
                 </div>
-                <div>
-                    <button type="button" onclick="toggleModal()">Cancel</button>
-                    <button type="submit">Submit</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="toggleModal()">Cancel</button>
+                    <button type="submit" class="btn btn-submit">Submit</button>
                 </div>
             </form>
         </div>
     </div>
-
-    <script>
-        let currentDate = new Date();
-        let selectedDates = [];
-        let region = 'US';
-
-        // Initialize calendar
-        function initCalendar() {
-            updateMonthTitle();
-            renderCalendar();
-            setupEventListeners();
-        }
-
-        function updateMonthTitle() {
-            const monthTitle = document.querySelector('.month-title');
-            monthTitle.textContent = currentDate.toLocaleString('default', { 
-                month: 'long', 
-                year: 'numeric' 
-            });
-        }
-
-        function renderCalendar() {
-            const daysContainer = document.querySelector('.days');
-            daysContainer.innerHTML = '';
-
-            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-            
-            // Add padding days
-            const startPadding = firstDay.getDay();
-            for (let i = 0; i < startPadding; i++) {
-                const dayElement = createDayElement('');
-                dayElement.style.visibility = 'hidden';
-                daysContainer.appendChild(dayElement);
-            }
-
-            // Add month days
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-                const dayElement = createDayElement(day);
-                
-                if (date.getDay() === 0 || date.getDay() === 6) {
-                    dayElement.classList.add('weekend');
-                }
-                
-                if (isHoliday(date)) {
-                    dayElement.classList.add('holiday');
-                }
-
-                if (isSelected(date)) {
-                    dayElement.classList.add('selected');
-                }
-
-                daysContainer.appendChild(dayElement);
-            }
-        }
-
-        function createDayElement(content) {
-            const div = document.createElement('div');
-            div.className = 'day';
-            div.textContent = content;
-            return div;
-        }
-
-        function previousMonth() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateMonthTitle();
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateMonthTitle();
-            renderCalendar();
-        }
-
-        function toggleModal() {
-            const modal = document.getElementById('ptoModal');
-            modal.classList.toggle('active');
-        }
-
-        function changeRegion(newRegion) {
-            region = newRegion;
-            renderCalendar();
-        }
-
-        function isHoliday(date) {
-            // Implement holiday check based on region
-            return false; // Placeholder
-        }
-
-        function isSelected(date) {
-            return selectedDates.some(selected => 
-                selected.toDateString() === date.toDateString()
-            );
-        }
-
-        function setupEventListeners() {
-            document.getElementById('ptoForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Handle PTO submission
-                toggleModal();
-            });
-        }
-
-        // Initialize the calendar when the page loads
-        document.addEventListener('DOMContentLoaded', initCalendar);
-    </script>
 </body>
+<script>
+    // Calendar State
+    let currentDate = new Date();
+    let selectedDates = new Set();
+    let region = 'US';
+    let ptoEvents = new Map();
+
+    // Initialize calendar
+    function initCalendar() {
+        loadSavedData();
+        updateMonthTitle();
+        renderCalendar();
+        setupEventListeners();
+    }
+
+    function loadSavedData() {
+        const savedPTO = localStorage.getItem('ptoEvents');
+        if (savedPTO) {
+            ptoEvents = new Map(JSON.parse(savedPTO));
+        }
+        
+        const savedRegion = localStorage.getItem('region');
+        if (savedRegion) {
+            region = savedRegion;
+            document.querySelector('.region-select').value = region;
+        }
+    }
+
+    function updateMonthTitle() {
+        const monthTitle = document.querySelector('.month-title');
+        monthTitle.textContent = currentDate.toLocaleString('default', { 
+            month: 'long', 
+            year: 'numeric' 
+        });
+    }
+
+    function renderCalendar() {
+        const daysContainer = document.querySelector('.days');
+        daysContainer.innerHTML = '';
+
+        const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        
+        // Add padding days
+        const startPadding = firstDay.getDay();
+        for (let i = 0; i < startPadding; i++) {
+            const dayElement = createDayElement('');
+            dayElement.style.visibility = 'hidden';
+            daysContainer.appendChild(dayElement);
+        }
+
+        // Add month days
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            const dayElement = createDayElement(day, date);
+            daysContainer.appendChild(dayElement);
+        }
+    }
+
+    function createDayElement(content, date) {
+        const div = document.createElement('div');
+        div.className = 'day';
+        
+        const dayContent = document.createElement('div');
+        dayContent.className = 'day-content';
+        
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = content;
+        
+        dayContent.appendChild(dayNumber);
+        div.appendChild(dayContent);
+
+        if (date) {
+            // Add classes for special days
+            if (date.getDay() === 0 || date.getDay() === 6) {
+                div.classList.add('weekend');
+            }
+            
+            if (isToday(date)) {
+                div.classList.add('today');
+            }
+            
+            if (isHoliday(date)) {
+                div.classList.add('holiday');
+                addEventIndicator(dayContent, 'holiday');
+            }
+            
+            if (isPTODay(date)) {
+                div.classList.add('pto');
+                addEventIndicator(dayContent, 'pto');
+            }
+
+            // Add click handler
+            div.addEventListener('click', () => toggleDateSelection(date));
+        }
+
+        return div;
+    }
+    function addEventIndicator(container, type) {
+        const indicator = document.createElement('div');
+        indicator.className = `event-indicator ${type}`;
+        container.appendChild(indicator);
+    }
+
+    function isToday(date) {
+        const today = new Date();
+        return date.toDateString() === today.toDateString();
+    }
+
+    function isHoliday(date) {
+        const holidays = getHolidays(date.getFullYear(), region);
+        return holidays.some(holiday => 
+            holiday.date.toDateString() === date.toDateString()
+        );
+    }
+
+    function isPTODay(date) {
+        const dateStr = date.toISOString().split('T')[0];
+        return ptoEvents.has(dateStr);
+    }
+
+    function toggleDateSelection(date) {
+        const dateStr = date.toISOString().split('T')[0];
+        if (selectedDates.has(dateStr)) {
+            selectedDates.delete(dateStr);
+        } else {
+            selectedDates.add(dateStr);
+        }
+        renderCalendar();
+    }
+
+    function previousMonth() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        updateMonthTitle();
+        renderCalendar();
+    }
+
+    function nextMonth() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        updateMonthTitle();
+        renderCalendar();
+    }
+
+    function changeRegion(newRegion) {
+        region = newRegion;
+        localStorage.setItem('region', region);
+        renderCalendar();
+    }
+
+    function toggleModal() {
+        const modal = document.querySelector('.modal-overlay');
+        modal.classList.toggle('active');
+    }
+
+    function submitPTO(event) {
+        event.preventDefault();
+        
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const type = document.getElementById('ptoType').value;
+        
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+            const dateStr = date.toISOString().split('T')[0];
+            ptoEvents.set(dateStr, { type, requestDate: new Date() });
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('ptoEvents', JSON.stringify([...ptoEvents]));
+        
+        // Reset form and close modal
+        event.target.reset();
+        toggleModal();
+        renderCalendar();
+    }
+
+    function setupEventListeners() {
+        // View switcher
+        document.querySelectorAll('.view-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.view-button').forEach(btn => 
+                    btn.classList.remove('active')
+                );
+                button.classList.add('active');
+                // TODO: Implement view switching
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') previousMonth();
+            if (e.key === 'ArrowRight') nextMonth();
+            if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal-overlay');
+                if (modal.classList.contains('active')) toggleModal();
+            }
+        });
+    }
+
+    // Initialize the calendar when the page loads
+    document.addEventListener('DOMContentLoaded', initCalendar);
+</script>
 </html>
+<script>
+    // Holiday Calculation Module
+    function getHolidays(year, region) {
+        return region === 'US' ? getUSHolidays(year) : getUKHolidays(year);
+    }
+
+    function getUSHolidays(year) {
+        const holidays = [
+            { name: "New Year's Day", date: new Date(year, 0, 1) },
+            { name: "Memorial Day", date: getMemorialDay(year) },
+            { name: "Independence Day", date: new Date(year, 6, 4) },
+            { name: "Labor Day", date: getLaborDay(year) },
+            { name: "Thanksgiving", date: getThanksgiving(year) },
+            { name: "Christmas Day", date: new Date(year, 11, 25) }
+        ];
+
+        // Adjust for weekends
+        holidays.forEach(holiday => {
+            if (holiday.date.getDay() === 0) { // Sunday
+                holiday.date = new Date(holiday.date.setDate(holiday.date.getDate() + 1));
+            } else if (holiday.date.getDay() === 6) { // Saturday
+                holiday.date = new Date(holiday.date.setDate(holiday.date.getDate() - 1));
+            }
+        });
+
+        return holidays;
+    }
+
+    function getUKHolidays(year) {
+        const holidays = [
+            { name: "New Year's Day", date: new Date(year, 0, 1) },
+            { name: "Good Friday", date: getEasterSunday(year, -2) },
+            { name: "Easter Monday", date: getEasterSunday(year, 1) },
+            { name: "Early May Bank Holiday", date: getFirstMondayOfMonth(year, 4) },
+            { name: "Spring Bank Holiday", date: getLastMondayOfMonth(year, 4) },
+            { name: "Summer Bank Holiday", date: getLastMondayOfMonth(year, 7) },
+            { name: "Christmas Day", date: new Date(year, 11, 25) },
+            { name: "Boxing Day", date: new Date(year, 11, 26) }
+        ];
+
+        // Adjust for weekends
+        holidays.forEach(holiday => {
+            if (holiday.date.getDay() === 0) { // Sunday
+                holiday.date = new Date(holiday.date.setDate(holiday.date.getDate() + 1));
+            } else if (holiday.date.getDay() === 6) { // Saturday
+                holiday.date = new Date(holiday.date.setDate(holiday.date.getDate() - 1));
+            }
+        });
+
+        return holidays;
+    }
+
+    // Helper functions for holiday calculations
+    function getMemorialDay(year) {
+        // Last Monday in May
+        return getLastMondayOfMonth(year, 4);
+    }
+
+    function getLaborDay(year) {
+        // First Monday in September
+        return getFirstMondayOfMonth(year, 8);
+    }
+
+    function getThanksgiving(year) {
+        // Fourth Thursday in November
+        const date = new Date(year, 10, 1);
+        while (date.getDay() !== 4) {
+            date.setDate(date.getDate() + 1);
+        }
+        date.setDate(date.getDate() + 21);
+        return date;
+    }
+
+    function getFirstMondayOfMonth(year, month) {
+        const date = new Date(year, month, 1);
+        while (date.getDay() !== 1) {
+            date.setDate(date.getDate() + 1);
+        }
+        return date;
+    }
+
+    function getLastMondayOfMonth(year, month) {
+        const date = new Date(year, month + 1, 0);
+        while (date.getDay() !== 1) {
+            date.setDate(date.getDate() - 1);
+        }
+        return date;
+    }
+
+    function getEasterSunday(year, offset = 0) {
+        // Meeus/Jones/Butcher algorithm
+        const a = year % 19;
+        const b = Math.floor(year / 100);
+        const c = year % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+        const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+        const easter = new Date(year, month, day);
+        if (offset) {
+            easter.setDate(easter.getDate() + offset);
+        }
+        return easter;
+    }
+</script>
+<script>
+    // Statistics and Export Module
+    function calculatePTOStatistics() {
+        const stats = {
+            total: 0,
+            byType: {
+                vacation: 0,
+                sick: 0,
+                personal: 0
+            },
+            byMonth: Array(12).fill(0),
+            remaining: {
+                vacation: 15,
+                sick: 10,
+                personal: 5
+            }
+        };
+
+        ptoEvents.forEach((event, dateStr) => {
+            const date = new Date(dateStr);
+            stats.total++;
+            stats.byType[event.type]++;
+            stats.byMonth[date.getMonth()]++;
+            stats.remaining[event.type]--;
+        });
+
+        return stats;
+    }
+
+    function exportToCalendar() {
+        let icsContent = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//PTO Calendar//EN',
+            'CALSCALE:GREGORIAN'
+        ];
+
+        ptoEvents.forEach((event, dateStr) => {
+            const date = new Date(dateStr);
+            const nextDay = new Date(date);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            icsContent = icsContent.concat([
+                'BEGIN:VEVENT',
+                `DTSTART;VALUE=DATE:${formatDateForICS(date)}`,
+                `DTEND;VALUE=DATE:${formatDateForICS(nextDay)}`,
+                `SUMMARY:PTO - ${event.type.charAt(0).toUpperCase() + event.type.slice(1)}`,
+                `DESCRIPTION:Requested on ${event.requestDate.toLocaleDateString()}`,
+                'END:VEVENT'
+            ]);
+        });
+
+        icsContent.push('END:VCALENDAR');
+        
+        // Create and download file
+        const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pto-calendar.ics';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    function formatDateForICS(date) {
+        return date.toISOString().replace(/[-:]/g, '').split('T')[0];
+    }
+
+    // Add statistics button to header
+    document.querySelector('.controls').insertAdjacentHTML('beforeend', `
+        <button class="add-pto-btn" onclick="showStatistics()">
+            Statistics
+        </button>
+        <button class="add-pto-btn" onclick="exportToCalendar()">
+            Export
+        </button>
+    `);
+
+    function showStatistics() {
+        const stats = calculatePTOStatistics();
+        const modal = document.querySelector('.modal-overlay');
+        const content = modal.querySelector('.modal-content');
+        
+        content.innerHTML = `
+            <h2>PTO Statistics</h2>
+            <div class="stats-container">
+                <div class="stats-section">
+                    <h3>Total PTO Days Used: ${stats.total}</h3>
+                    <div class="stats-grid">
+                        <div>
+                            <h4>By Type</h4>
+                            <p>Vacation: ${stats.byType.vacation}</p>
+                            <p>Sick: ${stats.byType.sick}</p>
+                            <p>Personal: ${stats.byType.personal}</p>
+                        </div>
+                        <div>
+                            <h4>Remaining Days</h4>
+                            <p>Vacation: ${stats.remaining.vacation}</p>
+                            <p>Sick: ${stats.remaining.sick}</p>
+                            <p>Personal: ${stats.remaining.personal}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-submit" onclick="toggleModal()">Close</button>
+            </div>
+        `;
+        
+        modal.classList.add('active');
+    }
+</script>
