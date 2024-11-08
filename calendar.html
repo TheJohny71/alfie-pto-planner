@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTO Calendar</title>
     
+    <!-- Favicon fix -->
+    <link rel="icon" href="data:,">
+    
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/calendar.css">
     <link rel="stylesheet" href="styles/main.css">
@@ -119,6 +122,11 @@
         <div id="calendar" class="calendar-grid">
             <!-- Calendar content will be populated by JavaScript -->
         </div>
+
+        <!-- Error Container -->
+        <div id="error-container" style="display: none;" class="error-message">
+            <p id="error-details"></p>
+        </div>
     </div>
 
     <!-- PTO Request Modal -->
@@ -190,50 +198,7 @@
         </div>
     </div>
 
-    <!-- Export Options Modal -->
-    <div id="exportModal" class="modal-overlay">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2>Export Calendar</h2>
-                <button class="close-btn" data-action="closeExportModal">&times;</button>
-            </div>
-            <div class="export-options">
-                <button class="export-btn" data-action="exportToICal">
-                    <span>Export to iCal</span>
-                </button>
-                <button class="export-btn" data-action="exportToGoogle">
-                    <span>Export to Google Calendar</span>
-                </button>
-                <button class="export-btn" data-action="exportToCSV">
-                    <span>Export to CSV</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts (Module Version) -->
+    <!-- Module Scripts -->
     <script type="module" src="scripts/main.js"></script>
-
-    <!-- Initialize Tooltips -->
-    <script type="module">
-        // Enable tooltips on all elements with title attribute
-        document.querySelectorAll('[title]').forEach(element => {
-            element.addEventListener('mouseover', e => {
-                const tooltip = document.createElement('div');
-                tooltip.className = 'tooltip';
-                tooltip.textContent = e.target.title;
-                document.body.appendChild(tooltip);
-                
-                const rect = e.target.getBoundingClientRect();
-                tooltip.style.left = rect.left + (rect.width - tooltip.offsetWidth) / 2 + 'px';
-                tooltip.style.top = rect.top - tooltip.offsetHeight - 5 + 'px';
-            });
-            
-            element.addEventListener('mouseout', () => {
-                const tooltip = document.querySelector('.tooltip');
-                if (tooltip) tooltip.remove();
-            });
-        });
-    </script>
 </body>
 </html>
