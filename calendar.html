@@ -7,8 +7,8 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📅</text></svg>">
     
-    <!-- Modern CSS Reset -->
     <style>
+        /* Base Styles */
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -21,227 +21,363 @@
             -webkit-font-smoothing: antialiased;
             background-color: #f8f7ff;
             color: #1a1a1a;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Calendar Container */
+        .calendar-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(to right, #8b72ff, #7152f3);
+            padding: 20px;
+            color: white;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .view-switcher {
+            display: flex;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .view-button {
+            padding: 6px 16px;
+            border: none;
+            background: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .view-button.active {
+            background: white;
+            color: #7152f3;
+        }
+
+        .add-pto-btn, .region-select {
+            padding: 8px 16px;
+            border: none;
+            background: white;
+            color: #7152f3;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Navigation */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .month-title {
+            width: 200px;
+            text-align: center;
+            font-size: 1.25rem;
+        }
+
+        .nav-button {
+            padding: 8px;
+            border: none;
+            background: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            padding: 20px;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            color: #666;
+            padding: 10px;
+            font-weight: 500;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day:hover {
+            border-color: #7152f3;
+        }
+
+        .day.weekend {
+            background: #f9fafb;
+        }
+
+        .day.holiday {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        .day.selected {
+            border-color: #7152f3;
+            background: #f8f7ff;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Calendar Container -->
-        <div class="calendar-container">
-            <!-- Header will go here -->
-            
-            <!-- Calendar grid will go here -->
-            
-            <!-- Modal will go here -->
+    <div class="calendar-container">
+        <div class="header">
+            <div class="header-top">
+                <h1>PTO Calendar</h1>
+                <div class="controls">
+                    <div class="view-switcher">
+                        <button class="view-button active">Month</button>
+                        <button class="view-button">Week</button>
+                        <button class="view-button">Year</button>
+                    </div>
+                    <button class="add-pto-btn" onclick="toggleModal()">Add PTO</button>
+                    <select class="region-select" onchange="changeRegion(this.value)">
+                        <option value="US">US</option>
+                        <option value="UK">UK</option>
+                    </select>
+                </div>
+            </div>
+            <div class="calendar-nav">
+                <button class="nav-button" onclick="previousMonth()">←</button>
+                <div class="month-title"></div>
+                <button class="nav-button" onclick="nextMonth()">→</button>
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            <div class="weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+            <div class="days"></div>
         </div>
     </div>
+
+    <div class="modal" id="ptoModal">
+        <div class="modal-content">
+            <h2>Request PTO</h2>
+            <form id="ptoForm">
+                <div>
+                    <label>Start Date</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div>
+                    <label>End Date</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div>
+                    <label>Type</label>
+                    <select id="ptoType" required>
+                        <option value="vacation">Vacation</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="personal">Personal</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="button" onclick="toggleModal()">Cancel</button>
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDates = [];
+        let region = 'US';
+
+        // Initialize calendar
+        function initCalendar() {
+            updateMonthTitle();
+            renderCalendar();
+            setupEventListeners();
+        }
+
+        function updateMonthTitle() {
+            const monthTitle = document.querySelector('.month-title');
+            monthTitle.textContent = currentDate.toLocaleString('default', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+        }
+
+        function renderCalendar() {
+            const daysContainer = document.querySelector('.days');
+            daysContainer.innerHTML = '';
+
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            // Add padding days
+            const startPadding = firstDay.getDay();
+            for (let i = 0; i < startPadding; i++) {
+                const dayElement = createDayElement('');
+                dayElement.style.visibility = 'hidden';
+                daysContainer.appendChild(dayElement);
+            }
+
+            // Add month days
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const dayElement = createDayElement(day);
+                
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    dayElement.classList.add('weekend');
+                }
+                
+                if (isHoliday(date)) {
+                    dayElement.classList.add('holiday');
+                }
+
+                if (isSelected(date)) {
+                    dayElement.classList.add('selected');
+                }
+
+                daysContainer.appendChild(dayElement);
+            }
+        }
+
+        function createDayElement(content) {
+            const div = document.createElement('div');
+            div.className = 'day';
+            div.textContent = content;
+            return div;
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateMonthTitle();
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateMonthTitle();
+            renderCalendar();
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('ptoModal');
+            modal.classList.toggle('active');
+        }
+
+        function changeRegion(newRegion) {
+            region = newRegion;
+            renderCalendar();
+        }
+
+        function isHoliday(date) {
+            // Implement holiday check based on region
+            return false; // Placeholder
+        }
+
+        function isSelected(date) {
+            return selectedDates.some(selected => 
+                selected.toDateString() === date.toDateString()
+            );
+        }
+
+        function setupEventListeners() {
+            document.getElementById('ptoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Handle PTO submission
+                toggleModal();
+            });
+        }
+
+        // Initialize the calendar when the page loads
+        document.addEventListener('DOMContentLoaded', initCalendar);
+    </script>
 </body>
 </html>
-<style>
-    /* Variables */
-    :root {
-        --purple-50: #f8f7ff;
-        --purple-100: #f3f1ff;
-        --purple-200: #e9e5ff;
-        --purple-300: #d4ccff;
-        --purple-400: #b3a3ff;
-        --purple-500: #8b72ff;
-        --purple-600: #7152f3;
-        --green-50: #f0fdf4;
-        --green-500: #22c55e;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-500: #6b7280;
-        --white: #ffffff;
-        
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        
-        --radius-lg: 0.5rem;
-        --radius-md: 0.375rem;
-    }
-
-    /* Layout */
-    .calendar-container {
-        max-width: 64rem;
-        margin: 2rem auto;
-        background: var(--white);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-    }
-
-    /* Header Styles */
-    .header {
-        background: linear-gradient(to right, var(--purple-500), var(--purple-600));
-        padding: 1rem;
-        color: var(--white);
-    }
-
-    .header-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .header-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-
-    .header-controls {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    /* View Switcher */
-    .view-switcher {
-        display: flex;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: var(--radius-md);
-        padding: 0.25rem;
-    }
-
-    .view-button {
-        padding: 0.375rem 1rem;
-        border-radius: var(--radius-md);
-        border: none;
-        background: none;
-        color: var(--white);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .view-button.active {
-        background: var(--white);
-        color: var(--purple-600);
-    }
-
-    /* Navigation */
-    .header-navigation {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .month-title {
-        width: 12rem;
-        text-align: center;
-        font-size: 1.25rem;
-        font-weight: 500;
-    }
-
-    .nav-button {
-        padding: 0.5rem;
-        border-radius: 9999px;
-        border: none;
-        background: none;
-        color: var(--white);
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .nav-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
-</style>
-<style>
-    /* Calendar Grid */
-    .calendar-grid {
-        padding: 1.5rem;
-    }
-
-    .weekdays {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        margin-bottom: 1rem;
-    }
-
-    .weekday {
-        text-align: center;
-        color: var(--gray-500);
-        font-weight: 500;
-        padding: 0.5rem;
-    }
-
-    .days-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 0.5rem;
-    }
-
-    .day-cell {
-        aspect-ratio: 1;
-        padding: 0.5rem;
-        border: 1px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        transition: all 0.2s;
-        cursor: pointer;
-    }
-
-    .day-cell:hover {
-        border-color: var(--purple-300);
-    }
-
-    .day-cell.weekend {
-        background: var(--gray-50);
-    }
-
-    .day-cell.holiday {
-        border-color: var(--green-500);
-        background: var(--green-50);
-    }
-
-    .day-cell.pto {
-        border-color: var(--purple-500);
-        background: var(--purple-100);
-    }
-
-    .day-number {
-        font-size: 0.875rem;
-    }
-
-    .day-content {
-        margin-top: 0.25rem;
-        font-size: 0.75rem;
-    }
-
-    /* Event Indicators */
-    .event-dot {
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 9999px;
-        margin-top: 0.25rem;
-    }
-
-    .event-dot.holiday {
-        background: var(--green-500);
-    }
-
-    .event-dot.pto {
-        background: var(--purple-500);
-    }
-
-    /* Tooltip */
-    .tooltip {
-        position: absolute;
-        background: var(--white);
-        border-radius: var(--radius-md);
-        padding: 0.5rem;
-        box-shadow: var(--shadow);
-        z-index: 10;
-        font-size: 0.875rem;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.2s;
-    }
-
-    .day-cell:hover .tooltip {
-        opacity: 1;
-    }
-</style>
