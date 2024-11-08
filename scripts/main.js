@@ -1,214 +1,212 @@
 // Import utility modules
-import './utils/config.js';
-import storageManager from './utils/storage.js';
+import config from './utils/config.js';
 import { handleError } from './utils/errors.js';
-import { calculateHolidays } from './utils/holidayCalculator.js';
-import { initializeServices } from './utils/services.js';
+import storageManager from './utils/storage.js';
 
-// Import components
-import { Calendar } from './components/calendar.js';
-import { LeaveRequestForm } from './components/LeaveRequestForm.js';
-
-class PTOApplication {
+class PTOCalendar {
     constructor() {
-        this.calendar = null;
-        this.leaveRequestForm = null;
-        this.currentRegion = 'US';
+        this.currentDate = new Date();
+        this.selectedView = 'month';
+        this.bindEvents();
+        this.loadInitialData();
     }
 
-    async initialize() {
-        try {
-            // Initialize components
-            this.initializeCalendar();
-            this.initializeLeaveRequestForm();
-            this.setupEventListeners();
-            this.setupModals();
-            
-            // Initialize services and load data
-            await this.loadInitialData();
-        } catch (error) {
-            handleError('Failed to initialize application', error);
-        }
-    }
-
-    initializeCalendar() {
-        const calendarEl = document.getElementById('calendar');
-        if (!calendarEl) throw new Error('Calendar element not found');
-        
-        this.calendar = new Calendar(calendarEl);
-        this.calendar.init();
-    }
-
-    initializeLeaveRequestForm() {
-        const formEl = document.getElementById('ptoForm');
-        if (!formEl) throw new Error('PTO form element not found');
-        
-        this.leaveRequestForm = new LeaveRequestForm(formEl, {
-            onSubmit: this.handleLeaveRequest.bind(this)
-        });
-    }
-
-    setupEventListeners() {
+    bindEvents() {
         // View controls
         document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleViewChange(e.target.dataset.view));
+            btn.addEventListener('click', (e) => this.changeView(e.target.dataset.view));
         });
 
         // Navigation
-        document.getElementById('prevBtn')?.addEventListener('click', () => this.calendar.previousMonth());
-        document.getElementById('nextBtn')?.addEventListener('click', () => this.calendar.nextMonth());
+        document.getElementById('prevBtn')?.addEventListener('click', () => this.navigate('prev'));
+        document.getElementById('nextBtn')?.addEventListener('click', () => this.navigate('next'));
 
         // Quick navigation
         document.querySelectorAll('.quick-nav-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleQuickNav(e.target.dataset.nav));
+            btn.addEventListener('click', (e) => this.quickNav(e.target.dataset.nav));
         });
 
-        // Region selection
-        document.getElementById('regionSelect')?.addEventListener('change', (e) => {
-            this.handleRegionChange(e.target.value);
-        });
+        // Modal controls
+        document.getElementById('addPTOBtn')?.addEventListener('click', () => this.openModal('ptoModal'));
+        document.getElementById('statsButton')?.addEventListener('click', () => this.toggleStatsPanel());
 
-        // Modal actions
-        document.querySelectorAll('[data-action]').forEach(element => {
-            element.addEventListener('click', (e) => {
-                const action = e.target.dataset.action;
-                if (typeof this[action] === 'function') {
-                    this[action]();
-                }
-            });
-        });
-    }
+        // Form submission
+        document.getElementById('ptoForm')?.addEventListener('submit', (e) => this.handlePTOSubmit(e));
 
-    setupModals() {
-        // Close modals when clicking outside
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeModal(modal.id);
-            });
+        // Close buttons
+        document.querySelectorAll('[data-action="closeModal"]').forEach(btn => {
+            btn.addEventListener('click', () => this.closeModal('ptoModal'));
         });
     }
 
     async loadInitialData() {
         try {
-            // Load holidays for current region
-            const holidays = await calculateHolidays(this.currentRegion);
-            this.calendar.setHolidays(holidays);
-
-            // Load saved PTO requests
-            const savedRequests = await storageManager.getAllLeaveRequests();
-            this.calendar.setLeaveRequests(savedRequests);
-
-            // Update statistics
-            await this.updateStatistics();
+            const requests = await storageManager.getAllLeaveRequests();
+            this.renderCalendar();
+            this.updateStats(requests);
         } catch (error) {
             handleError('Failed to load initial data', error);
         }
     }
 
-    // Event Handlers
-    handleViewChange(view) {
-        this.calendar.setView(view);
+    changeView(view) {
+        this.selectedView = view;
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.view === view);
         });
+        this.renderCalendar();
     }
 
-    handleQuickNav(navType) {
-        switch (navType) {
-            case 'today':
-                this.calendar.goToToday();
+    navigate(direction) {
+        switch(this.selectedView) {
+            case 'month':
+                this.currentDate.setMonth(
+                    this.currentDate.getMonth() + (direction === 'prev' ? -1 : 1)
+                );
                 break;
-            case 'thisWeek':
-                this.calendar.goToThisWeek();
+            case 'week':
+                this.currentDate.setDate(
+                    this.currentDate.getDate() + (direction === 'prev' ? -7 : 7)
+                );
                 break;
-            case 'thisMonth':
-                this.calendar.goToThisMonth();
+            case 'year':
+                this.currentDate.setFullYear(
+                    this.currentDate.getFullYear() + (direction === 'prev' ? -1 : 1)
+                );
+                break;
+        }
+        this.renderCalendar();
+    }
+
+    quickNav(navType) {
+        this.currentDate = new Date();
+        if (navType === 'thisWeek') {
+            this.selectedView = 'week';
+        } else if (navType === 'thisMonth') {
+            this.selectedView = 'month';
+        }
+        this.renderCalendar();
+    }
+
+    renderCalendar() {
+        const calendarEl = document.getElementById('calendar');
+        if (!calendarEl) return;
+
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        document.getElementById('currentMonth').textContent = 
+            `${monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+
+        // Implementation of calendar rendering based on view type
+        switch(this.selectedView) {
+            case 'month':
+                this.renderMonthView(calendarEl);
+                break;
+            case 'week':
+                this.renderWeekView(calendarEl);
+                break;
+            case 'year':
+                this.renderYearView(calendarEl);
                 break;
         }
     }
 
-    async handleRegionChange(region) {
-        this.currentRegion = region;
-        const holidays = await calculateHolidays(region);
-        this.calendar.setHolidays(holidays);
-        this.calendar.render();
+    renderMonthView(container) {
+        // Month view implementation
+        // This is a placeholder - implement your month view logic here
+        container.innerHTML = '<div class="placeholder">Month view implementation pending</div>';
     }
 
-    async handleLeaveRequest(requestData) {
+    renderWeekView(container) {
+        // Week view implementation
+        container.innerHTML = '<div class="placeholder">Week view implementation pending</div>';
+    }
+
+    renderYearView(container) {
+        // Year view implementation
+        container.innerHTML = '<div class="placeholder">Year view implementation pending</div>';
+    }
+
+    async handlePTOSubmit(e) {
+        e.preventDefault();
         try {
-            const success = await storageManager.saveLeaveRequest(requestData);
+            const formData = {
+                id: Date.now().toString(),
+                startDate: document.getElementById('ptoStartDate').value,
+                endDate: document.getElementById('ptoEndDate').value,
+                type: document.getElementById('ptoType').value,
+                notes: document.getElementById('ptoNotes').value,
+                status: 'pending'
+            };
+
+            const success = await storageManager.saveLeaveRequest(formData);
             if (success) {
-                await this.loadInitialData(); // Refresh calendar and stats
                 this.closeModal('ptoModal');
+                this.loadInitialData();
+            } else {
+                throw new Error('Failed to save PTO request');
             }
         } catch (error) {
-            handleError('Failed to save leave request', error);
+            handleError('Error submitting PTO request', error);
         }
-    }
-
-    // Modal Controls
-    closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) modal.style.display = 'none';
-    }
-
-    openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) modal.style.display = 'block';
     }
 
     toggleStatsPanel() {
         const panel = document.getElementById('statsPanel');
-        if (panel) panel.classList.toggle('open');
-    }
-
-    // Statistics
-    async updateStatistics() {
-        try {
-            const requests = await storageManager.getAllLeaveRequests();
-            const stats = this.calculateStatistics(requests);
-            this.updateStatisticsDisplay(stats);
-        } catch (error) {
-            handleError('Failed to update statistics', error);
+        if (panel) {
+            panel.classList.toggle('open');
         }
     }
 
-    calculateStatistics(requests) {
-        // Add your statistics calculation logic here
-        return {
-            totalDays: 25, // Example value
-            daysTaken: requests.length,
-            daysRemaining: 25 - requests.length
-        };
+    openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+        }
     }
 
-    updateStatisticsDisplay(stats) {
-        document.getElementById('totalPTODays').textContent = stats.totalDays;
-        document.getElementById('daysTaken').textContent = stats.daysTaken;
-        document.getElementById('daysRemaining').textContent = stats.daysRemaining;
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            if (modalId === 'ptoModal') {
+                document.getElementById('ptoForm').reset();
+            }
+        }
     }
 
-    // Export functions
-    exportToICal() {
-        // Implement iCal export
-        console.log('Export to iCal not implemented');
-    }
+    async updateStats(requests) {
+        const totalPTODays = config.maxPTODays;
+        const daysTaken = requests.length;
+        const daysRemaining = totalPTODays - daysTaken;
 
-    exportToGoogle() {
-        // Implement Google Calendar export
-        console.log('Export to Google Calendar not implemented');
-    }
+        document.getElementById('totalPTODays').textContent = totalPTODays;
+        document.getElementById('daysTaken').textContent = daysTaken;
+        document.getElementById('daysRemaining').textContent = daysRemaining;
 
-    exportToCSV() {
-        // Implement CSV export
-        console.log('Export to CSV not implemented');
+        // Update upcoming PTO list
+        const upcomingList = document.getElementById('upcomingPTOList');
+        if (upcomingList) {
+            upcomingList.innerHTML = requests
+                .filter(req => new Date(req.startDate) >= new Date())
+                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+                .map(req => `
+                    <li class="upcoming-item">
+                        <span class="date">${new Date(req.startDate).toLocaleDateString()}</span>
+                        <span class="type">${req.type}</span>
+                    </li>
+                `)
+                .join('');
+        }
     }
 }
 
-// Initialize application when DOM is loaded
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new PTOApplication();
-    app.initialize().catch(error => {
-        handleError('Failed to initialize application', error);
-    });
+    try {
+        new PTOCalendar();
+    } catch (error) {
+        handleError('Failed to initialize calendar', error);
+    }
 });
