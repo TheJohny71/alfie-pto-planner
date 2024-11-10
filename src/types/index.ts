@@ -52,3 +52,44 @@ declare global {
 }
 
 export {};
+// Add these new types to your existing index.ts file
+
+export type Region = 'US' | 'UK' | 'both';
+export type ViewMode = 'month' | 'week' | 'year';
+
+export interface Holiday {
+  date: Date;
+  name: string;
+  type: 'regular' | 'observed' | 'weekend';
+  region: Region;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface PTORequest {
+  id: string;
+  userId: string;
+  startDate: Date;
+  endDate: Date;
+  type: 'vacation' | 'sick' | 'personal';
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface TeamAvailability {
+  date: Date;
+  availableMembers: TeamMember[];
+  awayMembers: TeamMember[];
+}
+
+export interface DayInfo {
+  date: Date;
+  isToday: boolean;
+  isCurrentMonth: boolean;
+  holidays: Holiday[];
+  ptoRequests: PTORequest[];
+  teamAvailability: TeamAvailability;
+}
