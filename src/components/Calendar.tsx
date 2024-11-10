@@ -44,7 +44,14 @@ const getWeekDays = (currentDate: Date) => {
   return weekDays;
 };
 
-// Component for selecting US/UK/Both regions
+const getMonthsForYear = (year: number) => {
+  const months: Date[] = [];
+  for (let month = 0; month < 12; month++) {
+    months.push(new Date(year, month, 1));
+  }
+  return months;
+};
+// Region Selector Component
 const RegionSelector: React.FC<{
   selectedRegion: Region;
   onRegionChange: (region: Region) => void;
@@ -63,13 +70,17 @@ const RegionSelector: React.FC<{
   );
 };
 
-// Component for switching between Month/Week/Year views
+// View Selector Component
 const ViewSelector: React.FC<{
   currentView: ViewMode;
   onViewChange: (view: ViewMode) => void;
 }> = ({ currentView, onViewChange }) => {
   return (
-    <div className="flex rounded-md overflow-hidden border border-purple-200" role="group" aria-label="Calendar view options">
+    <div 
+      className="flex rounded-md overflow-hidden border border-purple-200" 
+      role="group" 
+      aria-label="Calendar view options"
+    >
       {['Month', 'Week', 'Year'].map((view) => (
         <button
           key={view}
@@ -87,8 +98,7 @@ const ViewSelector: React.FC<{
     </div>
   );
 };
-
-// Calendar Header showing current period and navigation
+// Calendar Header Component
 const CalendarHeader: React.FC<{
   currentDate: Date;
   viewMode: ViewMode;
@@ -96,6 +106,9 @@ const CalendarHeader: React.FC<{
   onNext: () => void;
 }> = ({ currentDate, viewMode, onPrevious, onNext }) => {
   const formatHeader = () => {
+    if (viewMode === 'year') {
+      return currentDate.getFullYear().toString();
+    }
     const formatter = new Intl.DateTimeFormat('en-US', {
       month: 'long',
       year: 'numeric',
@@ -140,6 +153,76 @@ const CalendarHeader: React.FC<{
   );
 };
 
+// Year Grid Component
+const YearGrid: React.FC<{
+  currentDate: Date;
+  holidays: Holiday[];
+  teamAvailability: TeamAvailability[];
+  onMonthClick: (date: Date) => void;
+}> = ({ currentDate, holidays, teamAvailability, onMonthClick }) => {
+  const months = getMonthsForYear(currentDate.getFullYear());
+  const today = new Date();
+
+  const getHolidaysForMonth = (month: Date) => {
+    return holidays.filter(holiday => 
+      holiday.date.getMonth() === month.getMonth() &&
+      holiday.date.getFullYear() === month.getFullYear()
+    );
+  };
+
+  const getAwayCountForMonth = (month: Date) => {
+    const monthAvailability = teamAvailability.filter(ta =>
+      ta.date.getMonth() === month.getMonth() &&
+      ta.date.getFullYear() === month.getFullYear() &&
+      ta.awayMembers.length > 0
+    );
+    
+    return monthAvailability.length;
+  };
+
+  return (
+    <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-4" role="grid">
+      {months.map((month, index) => {
+        const monthHolidays = getHolidaysForMonth(month);
+        const awayDays = getAwayCountForMonth(month);
+        const isCurrentMonth = month.getMonth() === today.getMonth() && 
+                             month.getFullYear() === today.getFullYear();
+
+        return (
+          <button
+            key={index}
+            onClick={() => onMonthClick(month)}
+            className={`
+              p-4 rounded-lg border transition-all
+              ${isCurrentMonth ? 'border-purple-500' : 'border-gray-100'}
+              hover:border-purple-200 hover:shadow-md
+              focus:outline-none focus:ring-2 focus:ring-purple-500
+            `}
+            role="gridcell"
+          >
+            <div className="text-lg font-semibold text-gray-700 mb-2">
+              {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(month)}
+            </div>
+
+            <div className="space-y-1 text-sm">
+              {monthHolidays.length > 0 && (
+                <div className="text-blue-600">
+                  {monthHolidays.length} holiday{monthHolidays.length !== 1 ? 's' : ''}
+                </div>
+              )}
+              
+              {awayDays > 0 && (
+                <div className="text-amber-600">
+                  {awayDays} PTO day{awayDays !== 1 ? 's' : ''}
+                </div>
+              )}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 // Calendar Grid Component
 const CalendarGrid: React.FC<{
   currentDate: Date;
@@ -247,7 +330,6 @@ const CalendarGrid: React.FC<{
     </div>
   );
 };
-
 // Main Calendar Component
 const Calendar: React.FC = () => {
   // State management
@@ -283,24 +365,32 @@ const Calendar: React.FC = () => {
   // Navigation handlers
   const handlePrevious = () => {
     const newDate = new Date(currentDate);
-    if (viewMode === 'month') {
-      newDate.setMonth(currentDate.getMonth() - 1);
-    } else if (viewMode === 'week') {
-      newDate.setDate(currentDate.getDate() - 7);
-    } else {
-      newDate.setFullYear(currentDate.getFullYear() - 1);
+    switch (viewMode) {
+      case 'month':
+        newDate.setMonth(currentDate.getMonth() - 1);
+        break;
+      case 'week':
+        newDate.setDate(currentDate.getDate() - 7);
+        break;
+      case 'year':
+        newDate.setFullYear(currentDate.getFullYear() - 1);
+        break;
     }
     setCurrentDate(newDate);
   };
 
   const handleNext = () => {
     const newDate = new Date(currentDate);
-    if (viewMode === 'month') {
-      newDate.setMonth(currentDate.getMonth() + 1);
-    } else if (viewMode === 'week') {
-      newDate.setDate(currentDate.getDate() + 7);
-    } else {
-      newDate.setFullYear(currentDate.getFullYear() + 1);
+    switch (viewMode) {
+      case 'month':
+        newDate.setMonth(currentDate.getMonth() + 1);
+        break;
+      case 'week':
+        newDate.setDate(currentDate.getDate() + 7);
+        break;
+      case 'year':
+        newDate.setFullYear(currentDate.getFullYear() + 1);
+        break;
     }
     setCurrentDate(newDate);
   };
@@ -328,12 +418,24 @@ const Calendar: React.FC = () => {
         onNext={handleNext}
       />
       
-      <CalendarGrid 
-        currentDate={currentDate}
-        viewMode={viewMode}
-        holidays={holidays}
-        teamAvailability={teamAvailability}
-      />
+      {viewMode === 'year' ? (
+        <YearGrid 
+          currentDate={currentDate}
+          holidays={holidays}
+          teamAvailability={teamAvailability}
+          onMonthClick={(date) => {
+            setCurrentDate(date);
+            setViewMode('month');
+          }}
+        />
+      ) : (
+        <CalendarGrid 
+          currentDate={currentDate}
+          viewMode={viewMode}
+          holidays={holidays}
+          teamAvailability={teamAvailability}
+        />
+      )}
     </div>
   );
 };
