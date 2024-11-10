@@ -1,308 +1,281 @@
-// src/services/storage/types.ts
+// File: alfie-pto-planner/src/utils/storage.ts
 
-import { LeaveData, PTOSettings } from '../../types';
+import type { LeaveData, PTOSettings } from '../types';
 
-export interface StorageState {
-  leaveData: LeaveData | null;
-  settings: PTOSettings | null;
-  version: string;
-  lastUpdated: string;
+// Types
+interface StorageState {
+    leaveData: LeaveData | null;
+    settings: PTOSettings | null;
+    version: string;
+    lastUpdated: string;
 }
 
-export interface StorageHistory {
-  past: StorageState[];
-  future: StorageState[];
-  current: StorageState | null;
+interface HistoryEntry {
+    state: StorageState;
+    timestamp: string;
 }
 
-export interface SyncMetadata {
-  lastSynced: string;
-  deviceId: string;
-  version: string;
-  status: 'synced' | 'pending' | 'error';
-}
+// Enhanced StorageService Class
+export class StorageService {
+    private static instance: StorageService;
+    private readonly VERSION = '2.0.0';
+    private readonly MAX_HISTORY = 10;
+    private history: HistoryEntry[] = [];
+    private currentHistoryIndex = -1;
+    private listeners: Map<string, Function[]> = new Map();
 
-export interface CompressedData {
-  data: string; // Base64 encoded compressed data
-  algorithm: 'lz' | 'gzip';
-  originalSize: number;
-  compressedSize: number;
-}
-
-export interface StorageErrorEvent {
-  code: string;
-  message: string;
-  timestamp: string;
-  data?: unknown;
-}
-
-export type StorageEventType = 
-  | 'save'
-  | 'load'
-  | 'sync'
-  | 'error'
-  | 'undo'
-  | 'redo'
-  | 'compress'
-  | 'decompress';
-
-export interface StorageEventCallback {
-  (event: StorageEventType, data?: unknown): void;
-}
-// src/services/storage/compression.ts
-
-import { CompressedData } from './types';
-
-export class CompressionUtil {
-  private static instance: CompressionUtil;
-  private constructor() {}
-
-  static getInstance(): CompressionUtil {
-    if (!CompressionUtil.instance) {
-      CompressionUtil.instance = new CompressionUtil();
+    private constructor() {
+        this.initializeHistory();
+        this.setupStorageListener();
     }
-    return CompressionUtil.instance;
-  }
 
-  async compress(data: unknown): Promise<CompressedData> {
-    try {
-      const jsonString = JSON.stringify(data);
-      const textEncoder = new TextEncoder();
-      const uint8Array = textEncoder.encode(jsonString);
-      
-      // Use CompressionStream if available
-      if ('CompressionStream' in window) {
-        const cs = new CompressionStream('gzip');
-        const writer = cs.writable.getWriter();
-        const compressedStream = writer.write(uint8Array);
-        await writer.close();
-        
-        const reader = cs.readable.getReader();
-        const chunks = [];
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
+    static getInstance(): StorageService {
+        if (!StorageService.instance) {
+            StorageService.instance = new StorageService();
         }
-        
-        const compressedData = new Uint8Array(
-          chunks.reduce((acc, chunk) => acc + chunk.length, 0)
-        );
-        
-        let offset = 0;
-        for (const chunk of chunks) {
-          compressedData.set(chunk, offset);
-          offset += chunk.length;
+        return StorageService.instance;
+    }
+
+    // Core Storage Methods
+    static getLeaveData(): LeaveData | null {
+        try {
+            const compressed = localStorage.getItem('leaveData');
+            if (!compressed) return null;
+            return this.decompress(compressed);
+        } catch (error) {
+            console.error('Error getting leave data:', error);
+            this.handleStorageError('read', error);
+            return null;
         }
-        
-        return {
-          data: btoa(String.fromCharCode.apply(null, [...compressedData])),
-          algorithm: 'gzip',
-          originalSize: uint8Array.length,
-          compressedSize: compressedData.length
+    }
+
+    static setLeaveData(data: LeaveData): void {
+        try {
+            const compressed = this.compress(data);
+            localStorage.setItem('leaveData', compressed);
+            this.getInstance().addToHistory({
+                leaveData: data,
+                settings: this.getSettings(),
+                version: this.getInstance().VERSION,
+                lastUpdated: new Date().toISOString()
+            });
+            this.getInstance().notifyListeners('leaveData', data);
+        } catch (error) {
+            console.error('Error setting leave data:', error);
+            this.handleStorageError('write', error);
+        }
+    }
+
+    static getSettings(): PTOSettings | null {
+        try {
+            const settings = localStorage.getItem('settings');
+            return settings ? JSON.parse(settings) : null;
+        } catch (error) {
+            console.error('Error getting settings:', error);
+            this.handleStorageError('read', error);
+            return null;
+        }
+    }
+
+    static setSettings(settings: PTOSettings): void {
+        try {
+            localStorage.setItem('settings', JSON.stringify(settings));
+            this.getInstance().addToHistory({
+                leaveData: this.getLeaveData(),
+                settings: settings,
+                version: this.getInstance().VERSION,
+                lastUpdated: new Date().toISOString()
+            });
+            this.getInstance().notifyListeners('settings', settings);
+        } catch (error) {
+            console.error('Error setting settings:', error);
+            this.handleStorageError('write', error);
+        }
+    }
+
+    // History Management
+    undo(): boolean {
+        if (this.currentHistoryIndex > 0) {
+            this.currentHistoryIndex--;
+            this.restoreHistoryState(this.history[this.currentHistoryIndex]);
+            return true;
+        }
+        return false;
+    }
+
+    redo(): boolean {
+        if (this.currentHistoryIndex < this.history.length - 1) {
+            this.currentHistoryIndex++;
+            this.restoreHistoryState(this.history[this.currentHistoryIndex]);
+            return true;
+        }
+        return false;
+    }
+
+    // Compression Methods
+    private static compress(data: any): string {
+        try {
+            const jsonString = JSON.stringify(data);
+            return btoa(this.lzCompress(jsonString));
+        } catch (error) {
+            console.error('Compression failed:', error);
+            return JSON.stringify(data); // Fallback to regular JSON
+        }
+    }
+
+    private static decompress(compressed: string): any {
+        try {
+            const decompressed = this.lzDecompress(atob(compressed));
+            return JSON.parse(decompressed);
+        } catch (error) {
+            console.error('Decompression failed:', error);
+            return JSON.parse(compressed); // Fallback to regular JSON
+        }
+    }
+
+    // LZ77 Compression Implementation
+    private static lzCompress(input: string): string {
+        let dictionary = new Map<string, number>();
+        let current = '';
+        let output = '';
+        let dictSize = 256;
+
+        for (let i = 0; i < 256; i++) {
+            dictionary.set(String.fromCharCode(i), i);
+        }
+
+        for (let char of input) {
+            const phrase = current + char;
+            if (dictionary.has(phrase)) {
+                current = phrase;
+            } else {
+                output += String.fromCharCode(dictionary.get(current)!);
+                dictionary.set(phrase, dictSize++);
+                current = char;
+            }
+        }
+
+        if (current !== '') {
+            output += String.fromCharCode(dictionary.get(current)!);
+        }
+
+        return output;
+    }
+
+    private static lzDecompress(input: string): string {
+        let dictionary = new Map<number, string>();
+        let current = input[0];
+        let output = current;
+        let dictSize = 256;
+
+        for (let i = 0; i < 256; i++) {
+            dictionary.set(i, String.fromCharCode(i));
+        }
+
+        for (let i = 1; i < input.length; i++) {
+            const next = input.charCodeAt(i);
+            let phrase: string;
+
+            if (dictionary.has(next)) {
+                phrase = dictionary.get(next)!;
+            } else if (next === dictSize) {
+                phrase = current + current[0];
+            } else {
+                throw new Error('Invalid compressed data');
+            }
+
+            output += phrase;
+            dictionary.set(dictSize++, current + phrase[0]);
+            current = phrase;
+        }
+
+        return output;
+    }
+
+    // Event Handling
+    addEventListener(event: string, callback: Function): void {
+        const callbacks = this.listeners.get(event) || [];
+        callbacks.push(callback);
+        this.listeners.set(event, callbacks);
+    }
+
+    removeEventListener(event: string, callback: Function): void {
+        const callbacks = this.listeners.get(event) || [];
+        const index = callbacks.indexOf(callback);
+        if (index !== -1) {
+            callbacks.splice(index, 1);
+            this.listeners.set(event, callbacks);
+        }
+    }
+
+    // Private Helper Methods
+    private initializeHistory(): void {
+        const currentState: StorageState = {
+            leaveData: StorageService.getLeaveData(),
+            settings: StorageService.getSettings(),
+            version: this.VERSION,
+            lastUpdated: new Date().toISOString()
         };
-      }
-      
-      // Fallback to basic LZ compression
-      return this.lzCompress(jsonString);
-    } catch (error) {
-      console.error('Compression failed:', error);
-      throw new Error('Failed to compress data');
+        this.history = [{ state: currentState, timestamp: new Date().toISOString() }];
+        this.currentHistoryIndex = 0;
     }
-  }
 
-  async decompress(compressed: CompressedData): Promise<unknown> {
-    try {
-      if (compressed.algorithm === 'gzip') {
-        const compressedData = Uint8Array.from(
-          atob(compressed.data)
-            .split('')
-            .map(char => char.charCodeAt(0))
-        );
-        
-        if ('DecompressionStream' in window) {
-          const ds = new DecompressionStream('gzip');
-          const writer = ds.writable.getWriter();
-          await writer.write(compressedData);
-          await writer.close();
-          
-          const reader = ds.readable.getReader();
-          const chunks = [];
-          
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-          }
-          
-          const decompressedData = new Uint8Array(
-            chunks.reduce((acc, chunk) => acc + chunk.length, 0)
-          );
-          
-          let offset = 0;
-          for (const chunk of chunks) {
-            decompressedData.set(chunk, offset);
-            offset += chunk.length;
-          }
-          
-          const textDecoder = new TextDecoder();
-          const jsonString = textDecoder.decode(decompressedData);
-          return JSON.parse(jsonString);
+    private addToHistory(state: StorageState): void {
+        // Remove any future history if we're not at the end
+        if (this.currentHistoryIndex < this.history.length - 1) {
+            this.history = this.history.slice(0, this.currentHistoryIndex + 1);
         }
-      }
-      
-      // Fallback to LZ decompression
-      return this.lzDecompress(compressed.data);
-    } catch (error) {
-      console.error('Decompression failed:', error);
-      throw new Error('Failed to decompress data');
-    }
-  }
 
-  private lzCompress(input: string): CompressedData {
-    // Basic LZ77 compression implementation
-    let output = '';
-    let dictionary = new Map<string, number>();
-    let current = '';
-    let counter = 0;
+        // Add new state
+        this.history.push({
+            state,
+            timestamp: new Date().toISOString()
+        });
 
-    for (let char of input) {
-      current += char;
-      if (!dictionary.has(current)) {
-        dictionary.set(current, counter++);
-        if (current.length > 1) {
-          output += `${dictionary.get(current.slice(0, -1))},${char}`;
+        // Maintain history size
+        if (this.history.length > this.MAX_HISTORY) {
+            this.history.shift();
         } else {
-          output += char;
+            this.currentHistoryIndex++;
         }
-        current = '';
-      }
     }
 
-    return {
-      data: btoa(output),
-      algorithm: 'lz',
-      originalSize: input.length,
-      compressedSize: output.length
-    };
-  }
-
-  private lzDecompress(input: string): unknown {
-    // Basic LZ77 decompression implementation
-    const compressed = atob(input);
-    let dictionary = new Map<number, string>();
-    let counter = 0;
-    let output = '';
-    let current = '';
-
-    for (let i = 0; i < compressed.length; i++) {
-      const char = compressed[i];
-      if (char === ',') {
-        const index = parseInt(current);
-        if (dictionary.has(index)) {
-          output += dictionary.get(index);
+    private restoreHistoryState(entry: HistoryEntry): void {
+        const { state } = entry;
+        if (state.leaveData) {
+            localStorage.setItem('leaveData', StorageService.compress(state.leaveData));
         }
-        current = '';
-      } else {
-        current += char;
-        if (current.length === 1) {
-          dictionary.set(counter++, current);
-          output += current;
-          current = '';
+        if (state.settings) {
+            localStorage.setItem('settings', JSON.stringify(state.settings));
         }
-      }
+        this.notifyListeners('historyChange', state);
     }
 
-    return JSON.parse(output);
-  }
+    private setupStorageListener(): void {
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'leaveData' || event.key === 'settings') {
+                this.notifyListeners(event.key, event.newValue ? JSON.parse(event.newValue) : null);
+            }
+        });
+    }
+
+    private notifyListeners(event: string, data: any): void {
+        const callbacks = this.listeners.get(event) || [];
+        callbacks.forEach(callback => callback(data));
+    }
+
+    private static handleStorageError(operation: 'read' | 'write', error: any): void {
+        const errorData = {
+            operation,
+            timestamp: new Date().toISOString(),
+            error: error.message
+        };
+        console.error('Storage operation failed:', errorData);
+        // You could implement additional error handling here
+    }
 }
-// src/services/storage/history-manager.ts
 
-import { StorageState, StorageHistory } from './types';
+// Initialize static instance
+StorageService.getInstance();
 
-export class HistoryManager {
-  private static instance: HistoryManager;
-  private history: StorageHistory;
-  private maxHistorySize: number;
-
-  private constructor() {
-    this.history = {
-      past: [],
-      future: [],
-      current: null
-    };
-    this.maxHistorySize = 50; // Configurable history size
-  }
-
-  static getInstance(): HistoryManager {
-    if (!HistoryManager.instance) {
-      HistoryManager.instance = new HistoryManager();
-    }
-    return HistoryManager.instance;
-  }
-
-  push(state: StorageState): void {
-    if (this.history.current) {
-      this.history.past.push(this.history.current);
-      if (this.history.past.length > this.maxHistorySize) {
-        this.history.past.shift();
-      }
-    }
-    this.history.current = this.deepClone(state);
-    this.history.future = [];
-  }
-
-  undo(): StorageState | null {
-    if (this.history.past.length === 0) return null;
-
-    const previous = this.history.past.pop()!;
-    if (this.history.current) {
-      this.history.future.push(this.history.current);
-    }
-    this.history.current = this.deepClone(previous);
-    return this.history.current;
-  }
-
-  redo(): StorageState | null {
-    if (this.history.future.length === 0) return null;
-
-    const next = this.history.future.pop()!;
-    if (this.history.current) {
-      this.history.past.push(this.history.current);
-    }
-    this.history.current = this.deepClone(next);
-    return this.history.current;
-  }
-
-  getCurrentState(): StorageState | null {
-    return this.history.current ? this.deepClone(this.history.current) : null;
-  }
-
-  canUndo(): boolean {
-    return this.history.past.length > 0;
-  }
-
-  canRedo(): boolean {
-    return this.history.future.length > 0;
-  }
-
-  clear(): void {
-    this.history = {
-      past: [],
-      future: [],
-      current: null
-    };
-  }
-
-  getHistorySize(): { past: number; future: number } {
-    return {
-      past: this.history.past.length,
-      future: this.history.future.length
-    };
-  }
-
-  private deepClone<T>(obj: T): T {
-    return JSON.parse(JSON.stringify(obj));
-  }
-}
+export default StorageService;
