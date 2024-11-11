@@ -1,8 +1,9 @@
 :root {
   /* Primary Colors */
-  --primary-color: #7c3aed;  /* Your purple theme color */
+  --primary-color: #845EF7;  /* Your existing purple color */
   --primary-light: #9f67ff;
   --primary-dark: #5b21b6;
+  --weekend-color: #F3E8FF;
 
   /* Secondary Colors */
   --secondary-color: #007bff;
@@ -10,9 +11,9 @@
   --secondary-dark: #0056b3;
 
   /* Neutral Colors */
-  --background-color: #ffffff;
-  --surface-color: #f8f9fa;
-  --border-color: #dee2e6;
+  --background-color: #F8F9FA;
+  --surface-color: #ffffff;
+  --border-color: #E2E8F0;
   --text-primary: #212529;
   --text-secondary: #6c757d;
 
@@ -38,4 +39,14 @@
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Base styles */
+body {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
 }
