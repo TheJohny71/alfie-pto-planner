@@ -1,4 +1,4 @@
-name: TypeScript Compilation
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -7,48 +7,35 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.head_ref }}
-        fetch-depth: 0
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
-    
-    - name: Install dependencies
-      run: |
-        npm init -y
-        npm install typescript
-    
-    - name: Debug TypeScript files
-      run: |
-        echo "TypeScript files in src:"
-        ls -R src/
-        echo "Current tsconfig.json:"
-        cat tsconfig.json
-    
-    - name: Compile TypeScript
-      run: |
-        mkdir -p scripts
-        npx tsc --project tsconfig.json
-    
-    - name: Debug compilation output
-      run: |
-        echo "Compiled files in scripts:"
-        ls -la scripts/
-    
-    - name: Commit and push if changed
-      run: |
-        git config --global user.name 'GitHub Action'
-        git config --global user.email 'action@github.com'
-        git add scripts/
-        git commit -m "Add compiled JavaScript" || echo "No changes to commit"
-        git push || echo "No changes to push"
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_URL: '/alfie-pto-planner'
+
+      - name: Debug build output
+        run: |
+          echo "Build output files:"
+          ls -la dist/
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
