@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useHolidays } from '../hooks/useHolidays';
 import { useTeamAvailability } from '../hooks/useTeamAvailability';
 import type { Region, ViewMode } from '../types';
@@ -92,7 +92,7 @@ const CalendarGrid: React.FC<{
   // Basic calendar grid rendering - we'll expand this soon
   return (
     <div className="grid grid-cols-7 gap-1">
-      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
         <div key={day} className="p-2 text-center text-gray-600 font-medium">
           {day}
         </div>
@@ -105,7 +105,7 @@ const CalendarGrid: React.FC<{
 // Main Calendar Component
 const Calendar: React.FC = () => {
   // State management
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedRegion, setSelectedRegion] = useState<Region>('both');
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   
