@@ -1,87 +1,41 @@
-.calendar-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+:root {
+  /* Primary Colors */
+  --primary-color: #7c3aed;  /* Your purple theme color */
+  --primary-light: #9f67ff;
+  --primary-dark: #5b21b6;
 
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 4px;
-}
+  /* Secondary Colors */
+  --secondary-color: #007bff;
+  --secondary-light: #3995ff;
+  --secondary-dark: #0056b3;
 
-.calendar-nav {
-    padding: 8px 16px;
-    border: none;
-    background: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-}
+  /* Neutral Colors */
+  --background-color: #ffffff;
+  --surface-color: #f8f9fa;
+  --border-color: #dee2e6;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
 
-.calendar-nav:hover {
-    background: #0056b3;
-}
+  /* Status Colors */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --error-color: #dc3545;
+  --info-color: #17a2b8;
 
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-}
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
 
-.calendar-day-header {
-    padding: 10px;
-    text-align: center;
-    font-weight: bold;
-    background: #e9ecef;
-}
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
 
-.calendar-day {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #dee2e6;
-    cursor: pointer;
-    min-height: 60px;
-}
-
-.calendar-day:hover {
-    background: #f8f9fa;
-}
-
-.calendar-day.weekend {
-    background: #f8f9fa;
-    color: #6c757d;
-}
-
-.calendar-day.selected {
-    background: #007bff;
-    color: white;
-}
-
-.calendar-day.empty {
-    background: #f8f9fa;
-    cursor: default;
-}
-
-.calendar-day.holiday {
-    border-color: #dc3545;
-    color: #dc3545;
-}
-
-@media (max-width: 768px) {
-    .calendar-container {
-        padding: 10px;
-    }
-
-    .calendar-day {
-        min-height: 40px;
-        padding: 5px;
-    }
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
