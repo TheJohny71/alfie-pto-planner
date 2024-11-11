@@ -1,4 +1,3 @@
-// vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -11,36 +10,21 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  css: {
-    modules: {
-      localsConvention: 'camelCase',
-    },
-    preprocessorOptions: {
-      css: {
-        charset: false
-      }
-    }
-  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'ui-vendor': [
-            '@headlessui/react',
-            'framer-motion',
-            '@react-spring/web',
-            'lucide-react',
-          ],
+        assetFileNames: (assetInfo) => {
+          let extType = assetInfo.name.split('.')[1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            extType = 'img';
+          }
+          return `assets/${extType}/${assetInfo.name}`;
         },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
-  },
-  server: {
-    port: 3000,
-    open: true,
   },
 });
