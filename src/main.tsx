@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import WelcomePage from './components/welcome/WelcomePage';
 import { Calendar } from './components/calendar/Calendar';
 import './styles/main.css';
+import './styles/components/gradients.css';  // Add this import
 
 const renderApp = () => {
   const rootElement = document.getElementById('root');
@@ -42,7 +43,9 @@ const renderApp = () => {
   // Determine which page to render based on URL
   const getCurrentPage = () => {
     const path = window.location.pathname;
-    if (path.includes('calendar.html')) {
+    // Updated to handle base path for GitHub Pages
+    const basePath = '/alfie-pto-planner';
+    if (path.includes('calendar.html') || path === `${basePath}/calendar.html`) {
       return <CalendarPage />;
     }
     return <WelcomePage />;
