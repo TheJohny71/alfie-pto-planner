@@ -1,24 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import { resolve } from 'path'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/alfie-pto-planner/',
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@styles': path.resolve(__dirname, './styles'),
-      '@assets': path.resolve(__dirname, './assets')
+      '@': resolve(__dirname, './src')
     }
   },
-  base: './',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'index.html'),
-        calendar: path.resolve(__dirname, 'calendar.html')
+        main: resolve(__dirname, 'index.html')
+      },
+      output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name].js`,
+        assetFileNames: `assets/[name].[ext]`
       }
     }
   }
