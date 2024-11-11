@@ -9,9 +9,11 @@
     <title>Welcome to Alfie</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
-    <link rel="mask-icon" href="./assets/favicon.svg" color="#4F3D83">
-    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href=".github/assets/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href=".github/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href=".github/assets/favicon-16x16.png">
+    <link rel="mask-icon" href=".github/assets/favicon.svg" color="#4F3D83">
+    <link rel="apple-touch-icon" href=".github/assets/apple-touch-icon.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,9 +32,7 @@
             --text: #FFFFFF;
             --loading-bg: rgba(13, 17, 23, 0.9);
         }
-
         /* Your existing styles here... */
-
         .loading-overlay {
             display: none;
             position: fixed;
@@ -48,14 +48,12 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
         /* Rest of your styles... */
     </style>
 </head>
 <body>
     <!-- Skip to main content for accessibility -->
     <a href="#root" class="visually-hidden">Skip to main content</a>
-
     <!-- Loading Overlay -->
     <div id="loading" class="loading-overlay" aria-live="polite">
         <div class="loading-content">
@@ -63,10 +61,8 @@
             <div>Loading Alfie...</div>
         </div>
     </div>
-
     <!-- React Root -->
     <div id="root"></div>
-
     <!-- Fallback content -->
     <div id="fallback" aria-hidden="true">
         <div class="loading-content">
@@ -77,27 +73,22 @@
             </p>
         </div>
     </div>
-
     <!-- Main Script -->
     <script type="module" src="./src/main.tsx"></script>
-
     <!-- Fallback Handler -->
     <script>
         // Show loading initially
         document.getElementById('loading').classList.add('active');
-
         // Handle loading states
         const loadingTimeout = setTimeout(() => {
             const root = document.getElementById('root');
             const fallback = document.getElementById('fallback');
             const loading = document.getElementById('loading');
-
             if (!root.children.length) {
                 fallback.classList.add('show');
                 loading.classList.remove('active');
             }
         }, 3000);
-
         // Cleanup loading states
         const cleanup = () => {
             clearTimeout(loadingTimeout);
@@ -107,7 +98,6 @@
                 setTimeout(() => loading.remove(), 300);
             }
         };
-
         window.addEventListener('load', cleanup);
         window.addEventListener('error', cleanup);
     </script>
