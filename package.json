@@ -10,7 +10,10 @@
   },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "@types/node": "^20.11.5"
+    "@types/node": "^20.11.5",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.33",
+    "autoprefixer": "^10.4.17"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.10",
@@ -18,7 +21,10 @@
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "chart.js": "^4.4.1",
-    "sweetalert2": "^11.10.5"
+    "sweetalert2": "^11.10.5",
+    "lucide-react": "^0.309.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "repository": {
     "type": "git",
@@ -30,9 +36,5 @@
     "leave-management"
   ],
   "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/TheJohny71/alfie-pto-planner/issues"
-  },
-  "homepage": "https://github.com/TheJohny71/alfie-pto-planner#readme"
+  "license": "MIT"
 }
