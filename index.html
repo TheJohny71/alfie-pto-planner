@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+<!-- Previous head content remains the same -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,8 +16,6 @@
     <link rel="mask-icon" href="/alfie-pto-planner/assets/favicon.svg" color="#4F3D83">
     <link rel="apple-touch-icon" href="/alfie-pto-planner/assets/apple-touch-icon.png">
     
-    <!-- Rest of your head section remains the same -->
-    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +23,7 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="./styles/main.css">
     
     <!-- Initial loading styles -->
     <style>
@@ -34,7 +34,6 @@
             --text: #FFFFFF;
             --loading-bg: rgba(13, 17, 23, 0.9);
         }
-        /* Your existing styles here... */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -50,7 +49,6 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        /* Rest of your styles... */
     </style>
 </head>
 <body>
@@ -75,8 +73,8 @@
             </p>
         </div>
     </div>
-    <!-- Main Script -->
-    <script type="module" src="/alfie-pto-planner/dist/index.js"></script>
+    <!-- Main Script - Updated path -->
+    <script type="module" src="./src/main.tsx"></script>
     <!-- Fallback Handler -->
     <script>
         // Show loading initially
