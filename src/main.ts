@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import WelcomePage from './components/welcome/WelcomePage';
-import { Calendar } from './components/Calendar';
+import { Calendar } from './components/calendar/Calendar';
+import './styles/main.css';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle welcome page rendering
+    // Handle welcome page rendering (index.html)
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         const rootElement = document.getElementById('root');
         if (rootElement) {
@@ -16,12 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handle calendar page functionality
+    // Handle calendar page (calendar.html)
     if (window.location.pathname.includes('calendar.html')) {
         const loadingEl = document.getElementById('loading');
+        const calendarContainer = document.getElementById('calendar-container');
         
         try {
-            const calendar = new Calendar('calendar-container');
+            if (calendarContainer) {
+                const calendar = new Calendar('calendar-container');
+            }
             // Remove loading message once calendar is initialized
             if (loadingEl) {
                 loadingEl.remove();
