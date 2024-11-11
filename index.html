@@ -8,18 +8,41 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
     
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- External CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F3D83',
+                        secondary: '#234B9B',
+                        background: '#0D1117'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="min-h-screen bg-[#0D1117] overflow-x-hidden">
+<body class="min-h-screen bg-background overflow-x-hidden font-sans">
     <!-- Gradient Overlay -->
-    <div class="fixed inset-0 bg-gradient-to-br from-[#0D1117] via-[#1F0A4D] to-[#0E1E4A] opacity-80"></div>
+    <div class="fixed inset-0 bg-gradient-to-br from-background via-primary to-secondary opacity-80"></div>
 
     <!-- Glow Effects -->
     <div class="fixed inset-0 pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#4F3D83] rounded-full opacity-20 blur-[100px] animate-pulse"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#234B9B] rounded-full opacity-20 blur-[100px] animate-pulse animation-delay-1000"></div>
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full opacity-20 blur-[100px] animate-glow"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary rounded-full opacity-20 blur-[100px] animate-glow animation-delay-1000"></div>
     </div>
 
     <!-- Main Content -->
@@ -32,45 +55,57 @@
             
             <!-- Main Title -->
             <h1 class="text-5xl md:text-7xl font-bold text-white leading-tight animate__animated animate__fadeIn">
-                The modern way to<br>manage time off
+                Create moments for<br>what <span class="text-[#A78BFA]">matters</span>
             </h1>
             
             <!-- Subtitle -->
             <p class="text-xl md:text-2xl text-gray-400 font-light max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-1s">
-                Plan, track, and coordinate team time off with ease using our intelligent PTO management system
+                Because the <span class="text-[#C4B5FD]">best stories</span> aren't written at your desk
             </p>
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8 animate__animated animate__fadeIn animate__delay-1s">
-                <a href="calendar.html" class="inline-flex items-center px-8 py-3 text-lg font-medium text-white bg-[#4F3D83] rounded-lg hover:bg-[#5A468E] transition-all duration-300 shadow-lg hover:shadow-[#4F3D83]/50">
+                <a href="calendar.html" class="inline-flex items-center px-8 py-3 text-lg font-medium text-white bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] rounded-full hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-primary/50 transform hover:scale-105">
                     Get Started
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </a>
-                <a href="#features" class="inline-flex items-center px-8 py-3 text-lg font-medium text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-all duration-300">
+                <button class="inline-flex items-center px-8 py-3 text-lg font-medium text-white bg-white/10 rounded-full hover:bg-white/20 transition-all duration-300">
                     Learn More
-                </a>
+                </button>
             </div>
 
             <!-- Features Grid -->
-            <div id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24 text-left">
-                <div class="bg-[#1A1E27]/50 backdrop-blur-sm p-8 rounded-xl border border-gray-800 hover:border-[#4F3D83]/50 transition-all duration-300">
-                    <div class="text-[#4F3D83] text-4xl mb-4">📅</div>
+            <div id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24">
+                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div class="text-white text-3xl mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
                     <h3 class="text-xl font-semibold text-white mb-3">Smart Calendar</h3>
-                    <p class="text-gray-400">Intelligent scheduling with team availability insights and conflict detection</p>
+                    <p class="text-purple-200">Intelligent scheduling with team availability insights and conflict detection</p>
                 </div>
                 
-                <div class="bg-[#1A1E27]/50 backdrop-blur-sm p-8 rounded-xl border border-gray-800 hover:border-[#4F3D83]/50 transition-all duration-300">
-                    <div class="text-[#4F3D83] text-4xl mb-4">✨</div>
+                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div class="text-white text-3xl mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
                     <h3 class="text-xl font-semibold text-white mb-3">Auto-Tracking</h3>
-                    <p class="text-gray-400">Automated PTO balance calculations and smart notifications for your team</p>
+                    <p class="text-purple-200">Automated PTO balance calculations and smart notifications for your team</p>
                 </div>
                 
-                <div class="bg-[#1A1E27]/50 backdrop-blur-sm p-8 rounded-xl border border-gray-800 hover:border-[#4F3D83]/50 transition-all duration-300">
-                    <div class="text-[#4F3D83] text-4xl mb-4">🤝</div>
+                <div class="bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
+                    <div class="text-white text-3xl mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
                     <h3 class="text-xl font-semibold text-white mb-3">Team Sync</h3>
-                    <p class="text-gray-400">Seamless coordination with integrated approval workflows and team calendars</p>
+                    <p class="text-purple-200">Seamless coordination with integrated approval workflows and team calendars</p>
                 </div>
             </div>
         </div>
@@ -89,6 +124,18 @@
 
         .animate-glow {
             animation: glow 3s infinite;
+        }
+
+        /* Gradient animation */
+        .bg-gradient-animate {
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </body>
