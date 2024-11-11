@@ -1,5 +1,27 @@
 /* styles/main.css */
-/* Global styles */
+:root {
+    /* Core brand colors */
+    --primary: #4F3D83;
+    --secondary: #234B9B;
+    --background: #0D1117;
+    --accent-purple: #7C3AED;
+    --accent-purple-dark: #6D28D9;
+    --text-purple-light: #C4B5FD;
+    --text-purple: #A78BFA;
+
+    /* Functional colors */
+    --border-color: rgba(255, 255, 255, 0.1);
+    --card-background: rgba(255, 255, 255, 0.05);
+}
+
+/* Base styles */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background);
+    color: white;
+}
 
 /* Loading indicator */
 #loading {
@@ -8,32 +30,79 @@
     color: #666;
 }
 
-/* Region toggle */
-.region-toggle {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 1rem;
+/* Animations */
+@keyframes glow {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.4; }
+    100% { opacity: 0.3; }
 }
 
-.region-toggle button {
-    padding: 0.5rem 1rem;
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Utility classes */
+.animate-glow {
+    animation: glow 3s infinite;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.bg-gradient-animate {
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+/* Feature cards */
+.feature-card {
+    background: var(--card-background);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
-.region-toggle button.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+.feature-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-    .region-toggle {
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-container {
         flex-direction: column;
     }
 }
