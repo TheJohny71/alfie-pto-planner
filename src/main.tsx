@@ -4,37 +4,66 @@ import WelcomePage from './components/welcome/WelcomePage';
 import { Calendar } from './components/calendar/Calendar';
 import './styles/main.css';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Handle welcome page rendering (index.html)
-    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        const rootElement = document.getElementById('root');
-        if (rootElement) {
-            ReactDOM.createRoot(rootElement).render(
-                <React.StrictMode>
-                    <WelcomePage />
-                </React.StrictMode>
-            );
-        }
-    }
+const renderApp = () => {
+  const rootElement = document.getElementById('root');
+  if (!rootElement) return;
 
-    // Handle calendar page (calendar.html)
-    if (window.location.pathname.includes('calendar.html')) {
-        const loadingEl = document.getElementById('loading');
-        const calendarContainer = document.getElementById('calendar-container');
-        
+  // Create a component to handle calendar page
+  const CalendarPage: React.FC = () => {
+    const calendarRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+      if (calendarRef.current) {
         try {
-            if (calendarContainer) {
-                const calendar = new Calendar('calendar-container');
-            }
-            // Remove loading message once calendar is initialized
-            if (loadingEl) {
-                loadingEl.remove();
-            }
+          const calendar = new Calendar('calendar-container');
+          
+          // Cleanup on unmount
+          return () => {
+            // Add any cleanup needed for calendar
+          };
         } catch (error) {
-            console.error('Failed to initialize calendar:', error);
-            if (loadingEl) {
-                loadingEl.textContent = 'Failed to load calendar. Please try again.';
-            }
+          console.error('Failed to initialize calendar:', error);
+          const loadingEl = document.getElementById('loading');
+          if (loadingEl) {
+            loadingEl.textContent = 'Failed to load calendar. Please try again.';
+          }
         }
+      }
+    }, []);
+
+    return (
+      <div className="calendar-page">
+        <div id="loading">Loading calendar...</div>
+        <div id="calendar-container" ref={calendarRef}></div>
+      </div>
+    );
+  };
+
+  // Determine which page to render based on URL
+  const getCurrentPage = () => {
+    const path = window.location.pathname;
+    if (path.includes('calendar.html')) {
+      return <CalendarPage />;
     }
-});
+    return <WelcomePage />;
+  };
+
+  // Render the appropriate page
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <div className="app-container">
+        {getCurrentPage()}
+      </div>
+    </React.StrictMode>
+  );
+};
+
+// Initialize app when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderApp);
+} else {
+  renderApp();
+}
+
+// Export for development/testing
+export { renderApp };
