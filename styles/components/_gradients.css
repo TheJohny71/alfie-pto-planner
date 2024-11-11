@@ -1,9 +1,44 @@
+/* Existing animations */
 @keyframes glow {
     0% { opacity: 0.3; }
     50% { opacity: 0.4; }
     100% { opacity: 0.3; }
 }
 
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* New modern animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+/* Animation utility classes */
 .animation-delay-1000 {
     animation-delay: 1s;
 }
@@ -17,8 +52,95 @@
     animation: gradient 15s ease infinite;
 }
 
-@keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.fade-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Modern gradient effects */
+.gradient-primary {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--text-purple-light), var(--text-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Glass effect */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Noise overlay for texture */
+.noise-overlay {
+    background: url('data:image/svg+xml,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.05"/></svg>');
+}
+
+/* Shimmer effect */
+.shimmer-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+/* Modern hover effects */
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+.hover-glow {
+    transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+}
+
+/* Background patterns */
+.dot-pattern {
+    background-image: radial-gradient(
+        rgba(255, 255, 255, 0.1) 1px,
+        transparent 1px
+    );
+    background-size: 20px 20px;
+}
+
+.grid-pattern {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: center center;
 }
