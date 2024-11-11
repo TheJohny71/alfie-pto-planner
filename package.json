@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "PTO Planning Application",
   "main": "src/main.tsx",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -76,5 +77,20 @@
     "trailingComma": "es5",
     "tabWidth": 2,
     "printWidth": 100
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
