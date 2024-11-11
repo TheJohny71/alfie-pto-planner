@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../../styles/components/gradients.css';
 
 interface GradientBackgroundProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ const GradientBackground: React.FC<GradientBackgroundProps> = ({ children, class
   return (
     <div className="min-h-screen bg-background overflow-x-hidden font-sans">
       {/* Gradient Overlay */}
-      <div className="fixed inset-0 bg-gradient-to-br from-background via-primary to-secondary opacity-80"></div>
+      <div className="fixed inset-0 bg-gradient-animate gradient-primary opacity-80"></div>
 
       {/* Glow Effects */}
       <div className="fixed inset-0 pointer-events-none">
