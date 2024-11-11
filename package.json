@@ -10,7 +10,9 @@
     "start": "vite",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
@@ -23,6 +25,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.33",
     "prettier": "^3.2.4",
     "tailwindcss": "^3.4.1",
@@ -66,7 +69,7 @@
   "bugs": {
     "url": "https://github.com/TheJohny71/alfie-pto-planner/issues"
   },
-  "homepage": "https://github.com/TheJohny71/alfie-pto-planner#readme",
+  "homepage": "https://thejohny71.github.io/alfie-pto-planner",
   "prettier": {
     "semi": true,
     "singleQuote": true,
