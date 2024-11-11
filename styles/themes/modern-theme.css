@@ -1,52 +1,193 @@
 :root {
   /* Primary Colors */
-  --primary-color: #845EF7;  /* Your existing purple color */
+  --primary-color: #845EF7;
   --primary-light: #9f67ff;
   --primary-dark: #5b21b6;
   --weekend-color: #F3E8FF;
-
+  
   /* Secondary Colors */
   --secondary-color: #007bff;
   --secondary-light: #3995ff;
   --secondary-dark: #0056b3;
-
+  
   /* Neutral Colors */
   --background-color: #F8F9FA;
   --surface-color: #ffffff;
   --border-color: #E2E8F0;
   --text-primary: #212529;
   --text-secondary: #6c757d;
-
+  
   /* Status Colors */
   --success-color: #28a745;
   --warning-color: #ffc107;
   --error-color: #dc3545;
   --info-color: #17a2b8;
-
+  
+  /* Modern UI Colors */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --gradient-start: var(--primary-color);
+  --gradient-end: var(--primary-dark);
+  
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
-
+  
   /* Border Radius */
   --border-radius-sm: 4px;
   --border-radius-md: 8px;
   --border-radius-lg: 16px;
-
+  
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  /* Modern Shadows */
+  --shadow-glow: 0 0 20px rgba(132, 94, 247, 0.3);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --shadow-float: 0 10px 20px rgba(0, 0, 0, 0.15);
+  
+  /* Calendar Theme */
+  --fc-border-color: var(--border-color);
+  --fc-today-bg-color: rgba(132, 94, 247, 0.1);
+  --fc-event-bg-color: var(--primary-color);
+  --fc-event-border-color: var(--primary-dark);
 }
 
 /* Base styles */
 body {
     background-color: var(--background-color);
     color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.5;
     margin: 0;
     padding: 0;
+}
+
+/* Modern Card Styles */
+.modern-card {
+    background: var(--surface-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.modern-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-float);
+}
+
+/* Glass Card */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-glass);
+}
+
+/* Modern Form Elements */
+.modern-input {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: all 0.3s ease;
+}
+
+.modern-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(132, 94, 247, 0.2);
+    outline: none;
+}
+
+/* Modern Buttons */
+.modern-button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.modern-button-primary {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+}
+
+.modern-button-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-glow);
+}
+
+.modern-button-secondary {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+}
+
+.modern-button-secondary:hover {
+    background: var(--glass-border);
+}
+
+/* Calendar Customization */
+.modern-calendar {
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.modern-calendar .fc-header-toolbar {
+    background: var(--surface-color);
+    padding: var(--spacing-md);
+    margin: 0 !important;
+}
+
+.modern-calendar .fc-button {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    transition: all 0.3s ease !important;
+}
+
+.modern-calendar .fc-button:hover {
+    background: var(--glass-border) !important;
+    transform: translateY(-1px);
+}
+
+/* Modern Loading States */
+.modern-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--surface-color) 0%,
+        var(--border-color) 50%,
+        var(--surface-color) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--border-radius-md);
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    :root {
+        --spacing-lg: 16px;
+        --spacing-xl: 24px;
+    }
+    
+    .modern-card {
+        padding: var(--spacing-md);
+    }
 }
