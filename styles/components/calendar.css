@@ -102,3 +102,48 @@
         gap: var(--spacing-sm);
     }
 }
+
+/* Week View Styles */
+.week-view {
+  @apply flex flex-col h-full bg-white rounded-lg shadow-lg;
+}
+
+.week-header {
+  @apply flex border-b border-gray-200;
+}
+
+.week-grid {
+  @apply flex flex-1 overflow-y-auto;
+}
+
+.time-column {
+  @apply w-20 flex flex-col sticky left-0 bg-white z-10;
+}
+
+.time-slot {
+  @apply h-16 border-b border-gray-200 relative;
+}
+
+.time-slot:hover {
+  @apply bg-purple-50;
+}
+
+.time-slot.selected {
+  @apply bg-purple-100;
+}
+
+.event-block {
+  @apply absolute left-0 right-0 mx-1 rounded-md p-1 text-xs text-white;
+}
+
+.current-time-indicator {
+  @apply absolute left-0 right-0 flex items-center z-20;
+}
+
+.current-time-dot {
+  @apply w-2 h-2 rounded-full bg-red-500 -ml-1;
+}
+
+.current-time-line {
+  @apply flex-1 border-t border-red-500;
+}
