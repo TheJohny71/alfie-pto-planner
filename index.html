@@ -6,44 +6,42 @@
     <title>Welcome to Alfie</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" href="/assets/favicon-32x32.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- External CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="styles/main.css">
-
-    <!-- React Dependencies -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#4F3D83',
-                        secondary: '#234B9B',
-                        background: '#0D1117'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-
+    
+    <!-- Initial loading styles -->
     <style>
+        :root {
+            --background: #0D1117;
+            --primary: #4F3D83;
+            --secondary: #234B9B;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
         @keyframes glow {
             0% { opacity: 0.3; }
             50% { opacity: 0.4; }
             100% { opacity: 0.3; }
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .animation-delay-1000 {
@@ -59,13 +57,6 @@
             animation: gradient 15s ease infinite;
         }
 
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Loading state styles */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -77,38 +68,88 @@
             z-index: 50;
             justify-content: center;
             align-items: center;
+            color: white;
+            font-size: 1.25rem;
         }
 
         .loading-overlay.active {
             display: flex;
         }
+
+        #fallback {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--background), var(--primary), var(--secondary));
+            opacity: 0.8;
+            color: white;
+            text-align: center;
+            padding-top: 20vh;
+        }
+
+        #fallback.show {
+            display: block;
+        }
+
+        .init-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body class="min-h-screen bg-background overflow-x-hidden font-sans">
+<body>
     <!-- Loading Overlay -->
     <div id="loading" class="loading-overlay">
-        <div class="text-white text-xl">Loading...</div>
+        <div>
+            <div class="init-spinner"></div>
+            <div>Loading...</div>
+        </div>
     </div>
 
     <!-- React Root -->
     <div id="root"></div>
 
-    <!-- Fallback content (shows while React loads or if it fails) -->
-    <div id="fallback" class="hidden">
-        <!-- Your current static HTML content here as fallback -->
-        <div class="fixed inset-0 bg-gradient-to-br from-background via-primary to-secondary opacity-80"></div>
-        <!-- ... rest of your current content ... -->
+    <!-- Fallback content -->
+    <div id="fallback">
+        <div class="init-spinner"></div>
+        <div>Loading Alfie...</div>
+        <p style="margin-top: 1rem; opacity: 0.7">If nothing loads, please ensure JavaScript is enabled.</p>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="src/main.ts"></script>
+    <!-- Main Script -->
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Fallback Handler -->
     <script>
-        // Show fallback if React doesn't load within 2 seconds
-        setTimeout(() => {
-            if (!document.getElementById('root').children.length) {
-                document.getElementById('fallback').classList.remove('hidden');
+        // Show loading initially
+        document.getElementById('loading').classList.add('active');
+
+        // Handle loading states
+        let loadingTimeout = setTimeout(() => {
+            const root = document.getElementById('root');
+            const fallback = document.getElementById('fallback');
+            const loading = document.getElementById('loading');
+
+            if (!root.children.length) {
+                fallback.classList.add('show');
+                loading.classList.remove('active');
             }
-        }, 2000);
+        }, 3000);
+
+        // Cleanup loading states when React mounts
+        window.addEventListener('load', () => {
+            clearTimeout(loadingTimeout);
+            document.getElementById('loading').classList.remove('active');
+        });
     </script>
 </body>
 </html>
