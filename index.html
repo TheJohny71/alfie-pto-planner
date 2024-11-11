@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alfie - Create moments that matter with our intuitive PTO planning application">
+    <meta name="theme-color" content="#4F3D83">
+    
     <title>Welcome to Alfie</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,26 +26,56 @@
             --background: #0D1117;
             --primary: #4F3D83;
             --secondary: #234B9B;
+            --text: #FFFFFF;
+            --loading-bg: rgba(13, 17, 23, 0.9);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --background: #F8FAFC;
+                --text: #0D1117;
+                --loading-bg: rgba(248, 250, 252, 0.9);
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--background);
             min-height: 100vh;
             overflow-x: hidden;
+            color: var(--text);
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #root {
+            min-height: 100vh;
+            isolation: isolate;
         }
 
         @keyframes glow {
-            0% { opacity: 0.3; }
-            50% { opacity: 0.4; }
-            100% { opacity: 0.3; }
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.5; }
         }
 
         @keyframes gradient {
-            0% { background-position: 0% 50%; }
+            0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .animation-delay-1000 {
@@ -49,7 +83,7 @@
         }
 
         .animate-glow {
-            animation: glow 3s infinite;
+            animation: glow 3s ease-in-out infinite;
         }
 
         .bg-gradient-animate {
@@ -60,20 +94,27 @@
         .loading-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(13, 17, 23, 0.8);
+            inset: 0;
+            background: var(--loading-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 50;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: var(--text);
             font-size: 1.25rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .loading-overlay.active {
             display: flex;
+            opacity: 1;
+        }
+
+        .loading-content {
+            text-align: center;
+            animation: pulse 2s ease-in-out infinite;
         }
 
         #fallback {
@@ -81,14 +122,16 @@
             position: fixed;
             inset: 0;
             background: linear-gradient(135deg, var(--background), var(--primary), var(--secondary));
-            opacity: 0.8;
-            color: white;
+            opacity: 0;
+            color: var(--text);
             text-align: center;
             padding-top: 20vh;
+            transition: opacity 0.3s ease;
         }
 
         #fallback.show {
             display: block;
+            opacity: 0.98;
         }
 
         .init-spinner {
@@ -96,22 +139,53 @@
             height: 40px;
             border: 3px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+            border-top-color: currentColor;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
             margin: 0 auto 1rem;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @media (prefers-reduced-motion) {
+            .animate-glow,
+            .bg-gradient-animate,
+            .init-spinner {
+                animation: none;
+            }
+
+            html {
+                scroll-behavior: auto;
+            }
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        ::selection {
+            background-color: var(--primary);
+            color: white;
         }
     </style>
+
+    <!-- Preload important assets -->
+    <link rel="preload" as="image" href="/assets/favicon-32x32.png">
 </head>
 <body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#root" class="visually-hidden">Skip to main content</a>
+
     <!-- Loading Overlay -->
-    <div id="loading" class="loading-overlay">
-        <div>
-            <div class="init-spinner"></div>
-            <div>Loading...</div>
+    <div id="loading" class="loading-overlay" aria-live="polite">
+        <div class="loading-content">
+            <div class="init-spinner" role="progressbar" aria-label="Loading"></div>
+            <div>Loading Alfie...</div>
         </div>
     </div>
 
@@ -119,10 +193,14 @@
     <div id="root"></div>
 
     <!-- Fallback content -->
-    <div id="fallback">
-        <div class="init-spinner"></div>
-        <div>Loading Alfie...</div>
-        <p style="margin-top: 1rem; opacity: 0.7">If nothing loads, please ensure JavaScript is enabled.</p>
+    <div id="fallback" aria-hidden="true">
+        <div class="loading-content">
+            <div class="init-spinner"></div>
+            <div>Loading Alfie...</div>
+            <p style="margin-top: 1rem; opacity: 0.7">
+                If nothing loads, please ensure JavaScript is enabled and try refreshing the page.
+            </p>
+        </div>
     </div>
 
     <!-- Main Script -->
@@ -134,7 +212,7 @@
         document.getElementById('loading').classList.add('active');
 
         // Handle loading states
-        let loadingTimeout = setTimeout(() => {
+        const loadingTimeout = setTimeout(() => {
             const root = document.getElementById('root');
             const fallback = document.getElementById('fallback');
             const loading = document.getElementById('loading');
@@ -145,11 +223,30 @@
             }
         }, 3000);
 
-        // Cleanup loading states when React mounts
-        window.addEventListener('load', () => {
+        // Cleanup loading states
+        const cleanup = () => {
             clearTimeout(loadingTimeout);
-            document.getElementById('loading').classList.remove('active');
-        });
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.classList.remove('active');
+                // Remove loading overlay after transition
+                setTimeout(() => loading.remove(), 300);
+            }
+        };
+
+        // Cleanup on successful load or error
+        window.addEventListener('load', cleanup);
+        window.addEventListener('error', cleanup);
+
+        // Handle color scheme changes
+        if (window.matchMedia) {
+            const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleColorSchemeChange = (e) => {
+                document.documentElement.classList.toggle('dark', e.matches);
+            };
+            colorSchemeQuery.addListener(handleColorSchemeChange);
+            handleColorSchemeChange(colorSchemeQuery);
+        }
     </script>
 </body>
 </html>
