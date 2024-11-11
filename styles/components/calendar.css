@@ -1,149 +1,83 @@
-/* Calendar Container */
+/* Add these new styles to your existing calendar.css */
+
 .calendar-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: var(--spacing-lg);
-    background: var(--surface-color);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
+  @apply flex flex-col min-h-screen bg-gray-50;
 }
 
-/* Calendar Header */
 .calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding: var(--spacing-sm);
-    background: var(--background-color);
-    border-radius: var(--border-radius-sm);
+  @apply bg-purple-600 text-white p-4;
 }
 
-/* Calendar Navigation */
-.calendar-nav {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    background: var(--primary-color);
-    color: var(--surface-color);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+.header-button {
+  @apply px-4 py-1.5 rounded-full text-sm font-medium transition-all;
 }
 
-.calendar-nav:hover {
-    background: var(--primary-dark);
+.header-button-active {
+  @apply bg-white text-purple-600;
 }
 
-/* Calendar Grid */
+.header-button-inactive {
+  @apply text-white hover:bg-white/10;
+}
+
+.region-select {
+  @apply bg-transparent border border-white/30 rounded-full px-3 text-sm;
+}
+
 .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-md);
+  @apply grid grid-cols-7 gap-0 bg-white rounded-lg p-6;
 }
 
-/* Calendar Day Header */
-.calendar-day-header {
-    padding: var(--spacing-sm);
-    text-align: center;
-    font-weight: bold;
-    background: var(--background-color);
-    border-radius: var(--border-radius-sm);
-}
-
-/* Calendar Day Cell */
 .calendar-day {
-    min-height: 100px;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    background: var(--surface-color);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  @apply aspect-square p-2 border-t border-l relative;
 }
 
-.calendar-day:hover {
-    background: var(--background-color);
+.calendar-day-number {
+  @apply inline-flex w-7 h-7 items-center justify-center rounded-full;
 }
 
-.calendar-day.weekend {
-    background: var(--weekend-color);
+.calendar-day-current {
+  @apply bg-purple-600 text-white;
 }
 
-.calendar-day.selected {
-    background: var(--primary-color);
-    color: var(--surface-color);
-    border-color: var(--primary-color);
-}
-
-.calendar-day.empty {
-    background: var(--background-color);
-    cursor: default;
-}
-
-.calendar-day.holiday {
-    border-color: var(--error-color);
-    color: var(--error-color);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .calendar-container {
-        padding: var(--spacing-sm);
-        margin: var(--spacing-sm);
-    }
-
-    .calendar-day {
-        min-height: 80px;
-        padding: var(--spacing-xs);
-    }
-    
-    .calendar-header {
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-}
-
-/* Week View Styles */
+/* Week View specific styles */
 .week-view {
-  @apply flex flex-col h-full bg-white rounded-lg shadow-lg;
+  @apply bg-white rounded-lg shadow-sm;
 }
 
 .week-header {
-  @apply flex border-b border-gray-200;
+  @apply grid grid-cols-8 border-b;
 }
 
 .week-grid {
-  @apply flex flex-1 overflow-y-auto;
-}
-
-.time-column {
-  @apply w-20 flex flex-col sticky left-0 bg-white z-10;
+  @apply divide-y;
 }
 
 .time-slot {
-  @apply h-16 border-b border-gray-200 relative;
+  @apply grid grid-cols-8 h-16;
 }
 
-.time-slot:hover {
-  @apply bg-purple-50;
+.time-column {
+  @apply border-r p-2 text-right text-sm text-gray-500;
 }
 
-.time-slot.selected {
-  @apply bg-purple-100;
+.day-column {
+  @apply border-r last:border-r-0 relative;
 }
 
+/* Event styles */
 .event-block {
-  @apply absolute left-0 right-0 mx-1 rounded-md p-1 text-xs text-white;
+  @apply absolute left-1 right-1 rounded-md p-1.5 text-xs text-white overflow-hidden;
 }
 
-.current-time-indicator {
-  @apply absolute left-0 right-0 flex items-center z-20;
+.event-vacation {
+  @apply bg-purple-600;
 }
 
-.current-time-dot {
-  @apply w-2 h-2 rounded-full bg-red-500 -ml-1;
+.event-sick {
+  @apply bg-red-500;
 }
 
-.current-time-line {
-  @apply flex-1 border-t border-red-500;
+.event-personal {
+  @apply bg-amber-500;
 }
