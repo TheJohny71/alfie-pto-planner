@@ -1,47 +1,11 @@
 /* styles/main.css */
-
-/* Base styles */
-:root {
-    --primary-color: #845EF7;
-    --weekend-color: #F3E8FF;
-    --border-color: #E2E8F0;
-}
-
-body {
-    background-color: #F8F9FA;
-}
+/* Global styles */
 
 /* Loading indicator */
 #loading {
     text-align: center;
     padding: 2rem;
     color: #666;
-}
-
-/* Calendar styles */
-.calendar-container {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-top: 1rem;
-}
-
-.calendar-day {
-    min-height: 100px;
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    background: white;
-}
-
-.calendar-day.weekend {
-    background: var(--weekend-color);
 }
 
 /* Region toggle */
@@ -69,10 +33,6 @@ body {
 
 /* Responsive design */
 @media (max-width: 768px) {
-    .calendar-day {
-        min-height: 80px;
-    }
-    
     .region-toggle {
         flex-direction: column;
     }
