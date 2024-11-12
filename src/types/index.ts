@@ -1,29 +1,39 @@
-// Declare module types
-declare module '*.css';
-declare module '*.scss';
-
-// Calendar Types
-export interface CalendarType {
-  id: string;
-  title: string;
-  date: Date;
-  view: 'month' | 'week' | 'day';
+export interface CalendarState {
+    date: Date;
+    viewMode: ViewMode;
+    region: string;
 }
 
-// Export holiday types
-export interface Holiday {
-  date: string;
-  name: string;
-  type: 'public' | 'company' | 'personal';
+export enum ViewMode {
+    Day = 'day',
+    Week = 'week',
+    Month = 'month'
 }
 
-// TeamAvailability types
-export interface TeamMember {
-  id: string;
-  name: string;
-  availability: boolean;
+export interface TeamAvailability {
+    region: string;
+    teamAvailability: boolean;
 }
 
-// Common types used across components
-export type ViewMode = 'month' | 'week' | 'day';
-export type Status = 'loading' | 'error' | 'success' | 'idle';
+export interface LeaveRequest {
+    id?: string;
+    startDate: Date;
+    endDate: Date;
+    status: LeaveStatus;
+    type: LeaveType;
+    notes?: string;
+}
+
+export enum LeaveStatus {
+    Pending = 'pending',
+    Approved = 'approved',
+    Rejected = 'rejected'
+}
+
+export enum LeaveType {
+    Vacation = 'vacation',
+    Sick = 'sick',
+    Personal = 'personal'
+}
+
+export type Region = string;
