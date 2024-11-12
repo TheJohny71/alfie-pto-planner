@@ -1,17 +1,20 @@
-// Main entry point for all styles
+// Base styles
+@import 'base/variables';
+@import 'base/reset';
+@import 'base/utilities';
 
-// Import base styles
-@import 'base/index';
+// Layouts
+@import 'layouts/calendar';
+@import 'layouts/modal';
 
-// Import layouts
-@import 'layouts/index';
+// Themes
+@import 'themes/light';
+@import 'themes/dark';
 
-// Import themes
-@import 'themes/index';
-
-// Any additional global styles can go here
+// Root styles
 body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
