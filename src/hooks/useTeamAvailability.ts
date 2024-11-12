@@ -1,3 +1,9 @@
+// At the top of your file
+import { TeamAvailability } from '../types';
+
+export const useTeamAvailability = (region: string) => {
+    // Your hook code
+}
 import { useState, useEffect } from 'react';
 import type { TeamAvailability, Region } from '../types';
 
