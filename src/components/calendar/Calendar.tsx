@@ -1,37 +1,33 @@
 import React from 'react';
-import { CalendarProps, ViewMode } from '../../types/calendar';
 
-export const Calendar: React.FC<CalendarProps> = ({ 
+type ViewMode = 'day' | 'week' | 'month';
+
+interface CalendarState {
+    date: Date;
+    viewMode: ViewMode;
+    region: string;
+    selectedDate?: Date;
+}
+
+interface FCCalendarProps {
+    state: CalendarState;
+    setDate: (date: Date) => void;
+    setViewMode: (mode: ViewMode) => void;
+    setRegion: (region: string) => void;
+    setSelectedDate?: (date: Date | undefined) => void;
+}
+
+export const Calendar: React.FC<FCCalendarProps> = ({ 
     state, 
     setDate, 
     setViewMode, 
     setRegion,
     setSelectedDate 
 }) => {
-    // Your component code
+    // Your existing component code
+    return (
+        <div>
+            {/* Your existing JSX */}
+        </div>
+    );
 };
-import React from 'react';
-import { ViewMode } from '../../types';
-import { useCalendarState } from '../../hooks/useCalendarState';
-import { useHolidays } from '../../hooks/useHolidays';
-
-interface CalendarProps {
-  initialView?: ViewMode;
-  onViewChange?: (view: ViewMode) => void;
-}
-
-export const Calendar: React.FC<CalendarProps> = ({ 
-  initialView = 'month',
-  onViewChange 
-}) => {
-  const { calendarState } = useCalendarState();
-  const { holidays } = useHolidays();
-
-  return (
-    <div className="calendar-container">
-      {/* Your calendar content */}
-    </div>
-  );
-};
-
-export default Calendar;
