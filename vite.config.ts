@@ -1,27 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
   base: '/alfie-pto-planner/',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true,
     rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          calendar: ['@fullcalendar/core', '@fullcalendar/daygrid']
-        }
-      }
-    }
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "./src/styles/base/_variables.scss";`
-      }
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        calendar: path.resolve(__dirname, 'calendar.html'),
+      },
     }
   }
 })
