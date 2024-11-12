@@ -10,15 +10,14 @@
     "@typescript-eslint/parser": "^6.19.0",
     "@vitejs/plugin-react": "^4.2.1",
     "typescript": "^5.3.3",
-    "vite": "^5.0.12"
-  }
-}
-{
-  // ... other content ...
+    "vite": "^5.0.12",
+    "sass": "^1.69.5"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
-  }
-  // ... other content ...
+  },
+  "type": "module",
+  "private": true
 }
