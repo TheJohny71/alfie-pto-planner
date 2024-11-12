@@ -1,17 +1,15 @@
-export interface CalendarState {
+import React from 'react';
+
+type ViewMode = 'day' | 'week' | 'month';
+
+interface CalendarState {
     date: Date;
     viewMode: ViewMode;
     region: string;
     selectedDate?: Date;
 }
 
-export enum ViewMode {
-    Day = 'day',
-    Week = 'week',
-    Month = 'month'
-}
-
-export interface CalendarProps {
+interface FCCalendarProps {
     state: CalendarState;
     setDate: (date: Date) => void;
     setViewMode: (mode: ViewMode) => void;
@@ -19,13 +17,17 @@ export interface CalendarProps {
     setSelectedDate?: (date: Date | undefined) => void;
 }
 
-export interface WeekViewProps {
-    state: CalendarState;
-    holidays?: Holiday[];
-}
-
-export interface Holiday {
-    date: Date;
-    name: string;
-    type: string;
-}
+export const Calendar: React.FC<FCCalendarProps> = ({ 
+    state, 
+    setDate, 
+    setViewMode, 
+    setRegion,
+    setSelectedDate 
+}) => {
+    // Your existing component code
+    return (
+        <div>
+            {/* Your existing JSX */}
+        </div>
+    );
+};
