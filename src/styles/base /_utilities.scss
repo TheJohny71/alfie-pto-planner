@@ -1,1 +1,67 @@
+// Layout utilities
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: $spacing-medium;
+  padding-left: $spacing-medium;
+  
+  @media (min-width: $breakpoint-sm) {
+    max-width: 640px;
+  }
+  
+  @media (min-width: $breakpoint-md) {
+    max-width: 768px;
+  }
+  
+  @media (min-width: $breakpoint-lg) {
+    max-width: 1024px;
+  }
+}
 
+// Spacing utilities
+.margin {
+  &-small { margin: $spacing-small; }
+  &-medium { margin: $spacing-medium; }
+  &-large { margin: $spacing-large; }
+}
+
+.padding {
+  &-small { padding: $spacing-small; }
+  &-medium { padding: $spacing-medium; }
+  &-large { padding: $spacing-large; }
+}
+
+// Text utilities
+.text {
+  &-center { text-align: center; }
+  &-left { text-align: left; }
+  &-right { text-align: right; }
+}
+
+// Display utilities
+.d {
+  &-none { display: none; }
+  &-block { display: block; }
+  &-flex { display: flex; }
+  &-grid { display: grid; }
+}
+
+// Flex utilities
+.flex {
+  &-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &-column { flex-direction: column; }
+  &-wrap { flex-wrap: wrap; }
+}
+
+// Grid utilities
+.grid {
+  &-center {
+    display: grid;
+    place-items: center;
+  }
+}
