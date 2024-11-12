@@ -1,1 +1,56 @@
+// Calendar Layout Styles
 
+.calendar {
+  &-container {
+    @extend .container;
+    margin-top: $spacing-large;
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-medium;
+  }
+
+  &-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: $spacing-small;
+  }
+
+  &-day {
+    padding: $spacing-small;
+    text-align: center;
+    border: 1px solid var(--border-color, #e2e8f0);
+    
+    &.today {
+      background-color: var(--highlight-color, $primary-color);
+      color: white;
+    }
+    
+    &.selected {
+      border-color: var(--selected-color, $secondary-color);
+      font-weight: bold;
+    }
+  }
+
+  &-controls {
+    display: flex;
+    gap: $spacing-medium;
+    margin-bottom: $spacing-medium;
+    
+    button {
+      padding: $spacing-small $spacing-medium;
+      background-color: var(--button-bg, $primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+}
