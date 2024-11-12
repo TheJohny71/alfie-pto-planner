@@ -1,8 +1,21 @@
 import { useState, useEffect } from 'react';
-import type { TeamAvailability } from '../types';
-import { getStorageService } from '../utils/storage';
+import type { TeamAvailability, Region } from '../types';
 
-export const useTeamAvailability = (currentDate: Date) => {
+// Sample team availability data - replace with actual API call later
+const SAMPLE_TEAM_AVAILABILITY: TeamAvailability[] = [
+  {
+    userId: '1',
+    dates: ['2024-03-15', '2024-03-16', '2024-03-17'],
+    type: 'PTO'
+  },
+  {
+    userId: '2',
+    dates: ['2024-03-20', '2024-03-21'],
+    type: 'PTO'
+  }
+];
+
+export function useTeamAvailability(region: Region = 'both') {
   const [teamAvailability, setTeamAvailability] = useState<TeamAvailability[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -11,44 +24,10 @@ export const useTeamAvailability = (currentDate: Date) => {
     const fetchTeamAvailability = async () => {
       try {
         setLoading(true);
-        const storage = getStorageService();
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Get the start and end of the month
-        const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-        
-        // Use your existing storage service to fetch PTO requests
-        const ptoRequests = await storage.getPTORequests(startDate, endDate);
-        const teamMembers = await storage.getTeamMembers();
-        
-        // Calculate availability for each day
-        const availability: TeamAvailability[] = [];
-        let currentDay = new Date(startDate);
-        
-        while (currentDay <= endDate) {
-          const awayMembers = teamMembers.filter(member =>
-            ptoRequests.some(request =>
-              request.userId === member.id &&
-              request.status === 'approved' &&
-              new Date(request.startDate) <= currentDay &&
-              new Date(request.endDate) >= currentDay
-            )
-          );
-          
-          const availableMembers = teamMembers.filter(
-            member => !awayMembers.some(away => away.id === member.id)
-          );
-          
-          availability.push({
-            date: new Date(currentDay),
-            availableMembers,
-            awayMembers
-          });
-          
-          currentDay.setDate(currentDay.getDate() + 1);
-        }
-        
-        setTeamAvailability(availability);
+        setTeamAvailability(SAMPLE_TEAM_AVAILABILITY);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch team availability'));
@@ -58,11 +37,15 @@ export const useTeamAvailability = (currentDate: Date) => {
     };
 
     fetchTeamAvailability();
-  }, [currentDate]);
+  }, [region]);
 
   return {
     teamAvailability,
     loading,
-    error
+    error,
+    refreshTeamAvailability: () => setTeamAvailability([...SAMPLE_TEAM_AVAILABILITY]),
+    addTeamAvailability: (newAvailability: TeamAvailability) => {
+      setTeamAvailability(prev => [...prev, newAvailability]);
+    }
   };
-};
+}
