@@ -1,3 +1,15 @@
+// At the top of your file
+import { CalendarState } from '../../types';
+import { Holiday } from '../../types/holidays';
+
+interface WeekViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
+
+export const WeekView: React.FC<WeekViewProps> = ({ state, holidays }) => {
+    // Your component code
+}
 import { useReducer, useCallback } from 'react';
 import type { CalendarState, ViewMode, Region } from '../types';
 
