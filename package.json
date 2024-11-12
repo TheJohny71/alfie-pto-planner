@@ -13,3 +13,12 @@
     "vite": "^5.0.12"
   }
 }
+{
+  // ... other content ...
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  }
+  // ... other content ...
+}
