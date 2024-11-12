@@ -1,67 +1,76 @@
 import React from 'react';
-import { WeekViewProps } from '../../types/calendar';
+import { CalendarState } from '../types';
 
-export const WeekView: React.FC<WeekViewProps> = ({ 
-    state, 
-    holidays 
-}) => {
-    // Your component code
-};
-import { useReducer, useCallback } from 'react';
-import type { CalendarState, ViewMode, Region } from '../types';
-
-type CalendarAction =
-  | { type: 'SET_DATE'; payload: Date }
-  | { type: 'SET_VIEW_MODE'; payload: ViewMode }
-  | { type: 'SET_REGION'; payload: Region }
-  | { type: 'SET_SELECTED_DATE'; payload: Date | undefined };
-
-const initialState: CalendarState = {
-  currentDate: new Date(),
-  selectedDate: undefined,
-  viewMode: 'month',
-  region: 'UK'
-};
-
-function calendarReducer(state: CalendarState, action: CalendarAction): CalendarState {
-  switch (action.type) {
-    case 'SET_DATE':
-      return { ...state, currentDate: action.payload };
-    case 'SET_VIEW_MODE':
-      return { ...state, viewMode: action.payload };
-    case 'SET_REGION':
-      return { ...state, region: action.payload };
-    case 'SET_SELECTED_DATE':
-      return { ...state, selectedDate: action.payload };
-    default:
-      return state;
-  }
+interface Holiday {
+    date: Date;
+    name: string;
+    type: string;
 }
 
-export function useCalendarState() {
-  const [state, dispatch] = useReducer(calendarReducer, initialState);
-
-  const setDate = useCallback((date: Date) => {
-    dispatch({ type: 'SET_DATE', payload: date });
-  }, []);
-
-  const setViewMode = useCallback((viewMode: ViewMode) => {
-    dispatch({ type: 'SET_VIEW_MODE', payload: viewMode });
-  }, []);
-
-  const setRegion = useCallback((region: Region) => {
-    dispatch({ type: 'SET_REGION', payload: region });
-  }, []);
-
-  const setSelectedDate = useCallback((date: Date | undefined) => {
-    dispatch({ type: 'SET_SELECTED_DATE', payload: date });
-  }, []);
-
-  return {
-    state,
-    setDate,
-    setViewMode,
-    setRegion,
-    setSelectedDate
-  };
+interface WeekViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
 }
+
+export const WeekView: React.FC<WeekViewProps> = ({ state, holidays }) => {
+    const { currentDate, selectedDate, viewMode, region } = state;
+
+    const getWeekDays = (date: Date) => {
+        const week = [];
+        const current = new Date(date);
+        current.setDate(current.getDate() - current.getDay()); // Start of week (Sunday)
+        
+        for (let i = 0; i < 7; i++) {
+            week.push(new Date(current));
+            current.setDate(current.getDate() + 1);
+        }
+        return week;
+    };
+
+    const weekDays = getWeekDays(currentDate);
+
+    return (
+        <div className="week-view">
+            <div className="week-header">
+                {weekDays.map((day, index) => (
+                    <div 
+                        key={day.toISOString()} 
+                        className={`day-header ${
+                            selectedDate && day.toDateString() === selectedDate.toDateString() 
+                                ? 'selected' 
+                                : ''
+                        }`}
+                    >
+                        <div className="day-name">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                        <div className="day-date">{day.getDate()}</div>
+                    </div>
+                ))}
+            </div>
+            
+            <div className="week-body">
+                {weekDays.map((day) => {
+                    const dayHolidays = holidays?.filter(
+                        holiday => holiday.date.toDateString() === day.toDateString()
+                    );
+                    
+                    return (
+                        <div 
+                            key={day.toISOString()} 
+                            className={`day-column ${
+                                selectedDate && day.toDateString() === selectedDate.toDateString()
+                                    ? 'selected'
+                                    : ''
+                            }`}
+                        >
+                            {dayHolidays?.map((holiday, index) => (
+                                <div key={index} className={`holiday-item ${holiday.type.toLowerCase()}`}>
+                                    {holiday.name}
+                                </div>
+                            ))}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
