@@ -1,39 +1,20 @@
-export interface CalendarState {
-    date: Date;
-    viewMode: ViewMode;
-    region: string;
-}
-
-export enum ViewMode {
-    Day = 'day',
-    Week = 'week',
-    Month = 'month'
-}
-
-export interface TeamAvailability {
-    region: string;
-    teamAvailability: boolean;
-}
-
-export interface LeaveRequest {
-    id?: string;
-    startDate: Date;
-    endDate: Date;
-    status: LeaveStatus;
-    type: LeaveType;
-    notes?: string;
-}
-
-export enum LeaveStatus {
-    Pending = 'pending',
-    Approved = 'approved',
-    Rejected = 'rejected'
-}
-
-export enum LeaveType {
-    Vacation = 'vacation',
-    Sick = 'sick',
-    Personal = 'personal'
-}
-
+export type ViewMode = 'day' | 'week' | 'month';
 export type Region = string;
+
+export interface CalendarState {
+    currentDate: Date;
+    selectedDate?: Date;
+    viewMode: ViewMode;
+    region: Region;
+}
+
+export interface Holiday {
+    date: Date;
+    name: string;
+    type: string;
+}
+
+export interface WeekViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
