@@ -1,31 +1,21 @@
 {
-  "name": "alfie-pto-planner",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf node_modules dist"
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthrough": true
   },
-  "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "sweetalert2": "11.10.5"
-  },
-  "devDependencies": {
-    "@types/node": "18.19.8",
-    "@types/react": "18.2.48",
-    "@types/react-dom": "18.2.18",
-    "@typescript-eslint/eslint-plugin": "6.19.0",
-    "@typescript-eslint/parser": "6.19.0",
-    "@vitejs/plugin-react": "4.2.1",
-    "typescript": "5.3.3",
-    "vite": "5.0.12",
-    "sass": "1.69.5"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
