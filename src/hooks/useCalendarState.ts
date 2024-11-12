@@ -1,3 +1,9 @@
+// At the top of your file
+import { CalendarState, ViewMode } from '../types';
+
+export const useCalendarState = () => {
+    // Your hook code
+}
 import { useReducer, useCallback } from 'react';
 import type { CalendarState, ViewMode, Region } from '../types';
 
