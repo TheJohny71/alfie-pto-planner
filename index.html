@@ -22,9 +22,8 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="/src/styles/main.css">
-    
-    <!-- Initial loading styles - Move to _utilities.scss later -->
+    <link rel="stylesheet" href="./styles/main.css">
+    <!-- Initial loading styles -->
     <style>
         :root {
             --background: #0D1117;
@@ -77,14 +76,12 @@
     </div>
     
     <!-- Main Script -->
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./main.tsx"></script>
     
     <!-- Fallback Handler -->
     <script>
-        // Show loading initially
         document.getElementById('loading').classList.add('active');
         
-        // Handle loading states
         const loadingTimeout = setTimeout(() => {
             const root = document.getElementById('root');
             const fallback = document.getElementById('fallback');
@@ -95,7 +92,6 @@
             }
         }, 3000);
         
-        // Cleanup loading states
         const cleanup = () => {
             clearTimeout(loadingTimeout);
             const loading = document.getElementById('loading');
