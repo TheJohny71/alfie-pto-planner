@@ -1,30 +1,31 @@
-// Utilities for calendar manipulation
+export interface CalendarState {
+    date: Date;
+    viewMode: ViewMode;
+    region: string;
+    selectedDate?: Date;
+}
 
-export type CalendarUtils = {
-  addDays: (date: Date, days: number) => Date;
-  subtractDays: (date: Date, days: number) => Date;
-  formatDate: (date: Date) => string;
-};
+export enum ViewMode {
+    Day = 'day',
+    Week = 'week',
+    Month = 'month'
+}
 
-// Add a specific number of days to a date
-export const addDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
+export interface CalendarProps {
+    state: CalendarState;
+    setDate: (date: Date) => void;
+    setViewMode: (mode: ViewMode) => void;
+    setRegion: (region: string) => void;
+    setSelectedDate?: (date: Date | undefined) => void;
+}
 
-// Subtract a specific number of days from a date
-export const subtractDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() - days);
-  return result;
-};
+export interface WeekViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
 
-// Format a date as 'Month Day, Year'
-export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-};
+export interface Holiday {
+    date: Date;
+    name: string;
+    type: string;
+}
