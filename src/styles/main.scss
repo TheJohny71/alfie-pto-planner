@@ -1,1 +1,17 @@
+// Main entry point for all styles
 
+// Import base styles
+@import 'base/index';
+
+// Import layouts
+@import 'layouts/index';
+
+// Import themes
+@import 'themes/index';
+
+// Any additional global styles can go here
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
