@@ -1,80 +1,58 @@
-import React from 'react';
+import { useReducer, useCallback } from 'react';
+import type { CalendarState, ViewMode, Region } from '../types';
 
-interface WeekViewProps {
-  currentDate: Date;
-  holidays: any[];
-  teamAvailability: any[];
-}
+type CalendarAction =
+  | { type: 'SET_DATE'; payload: Date }
+  | { type: 'SET_VIEW_MODE'; payload: ViewMode }
+  | { type: 'SET_REGION'; payload: Region }
+  | { type: 'SET_SELECTED_DATE'; payload: Date | undefined };
 
-const WeekView: React.FC<WeekViewProps> = ({
-  currentDate,
-  holidays,
-  teamAvailability,
-}) => {
-  // Get week dates
-  const getWeekDates = () => {
-    const dates = [];
-    const startDate = new Date(currentDate);
-    startDate.setDate(currentDate.getDate() - currentDate.getDay());
-
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
-
-  const weekDates = getWeekDates();
-  const workHours = Array.from({ length: 9 }, (_, i) => i + 9); // 9 AM to 5 PM
-
-  return (
-    <div className="bg-white rounded-lg shadow">
-      {/* Week header */}
-      <div className="grid grid-cols-8 border-b">
-        <div className="p-4 border-r text-gray-500">Time</div>
-        {weekDates.map((date) => (
-          <div
-            key={date.toISOString()}
-            className={`p-4 text-center ${
-              date.toDateString() === new Date().toDateString()
-                ? 'bg-purple-50'
-                : ''
-            }`}
-          >
-            <div className="font-medium">
-              {date.toLocaleDateString('en-US', { weekday: 'short' })}
-            </div>
-            <div className="text-sm text-gray-500">
-              {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Time grid */}
-      <div className="divide-y">
-        {workHours.map((hour) => (
-          <div key={hour} className="grid grid-cols-8 h-16">
-            {/* Time column */}
-            <div className="border-r p-2 text-right text-sm text-gray-500">
-              {hour % 12 || 12}:00 {hour >= 12 ? 'PM' : 'AM'}
-            </div>
-
-            {/* Day columns */}
-            {weekDates.map((date) => (
-              <div
-                key={`${date.toISOString()}-${hour}`}
-                className="border-r last:border-r-0 relative"
-              >
-                {/* You can add event rendering logic here */}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+const initialState: CalendarState = {
+  currentDate: new Date(),
+  selectedDate: undefined,
+  viewMode: 'month',
+  region: 'UK'
 };
 
-export default WeekView;
+function calendarReducer(state: CalendarState, action: CalendarAction): CalendarState {
+  switch (action.type) {
+    case 'SET_DATE':
+      return { ...state, currentDate: action.payload };
+    case 'SET_VIEW_MODE':
+      return { ...state, viewMode: action.payload };
+    case 'SET_REGION':
+      return { ...state, region: action.payload };
+    case 'SET_SELECTED_DATE':
+      return { ...state, selectedDate: action.payload };
+    default:
+      return state;
+  }
+}
+
+export function useCalendarState() {
+  const [state, dispatch] = useReducer(calendarReducer, initialState);
+
+  const setDate = useCallback((date: Date) => {
+    dispatch({ type: 'SET_DATE', payload: date });
+  }, []);
+
+  const setViewMode = useCallback((viewMode: ViewMode) => {
+    dispatch({ type: 'SET_VIEW_MODE', payload: viewMode });
+  }, []);
+
+  const setRegion = useCallback((region: Region) => {
+    dispatch({ type: 'SET_REGION', payload: region });
+  }, []);
+
+  const setSelectedDate = useCallback((date: Date | undefined) => {
+    dispatch({ type: 'SET_SELECTED_DATE', payload: date });
+  }, []);
+
+  return {
+    state,
+    setDate,
+    setViewMode,
+    setRegion,
+    setSelectedDate
+  };
+}
