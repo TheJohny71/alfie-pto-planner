@@ -35,14 +35,12 @@ const CalendarGrid: React.FC<{
 
   return (
     <div className="grid grid-cols-7 gap-0 bg-white rounded-lg p-6">
-      {/* Day headers */}
       {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
         <div key={day} className="pb-4 text-center text-gray-600">
           {day}
         </div>
       ))}
       
-      {/* Calendar days */}
       {days.map((date, i) => {
         const isCurrentMonth = date.getMonth() === currentDate.getMonth();
         const isToday = date.toDateString() === new Date().toDateString();
@@ -72,6 +70,10 @@ const Calendar: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedRegion, setSelectedRegion] = useState<Region>('UK');
   const [viewMode, setViewMode] = useState<ViewMode>('month');
+  
+  // Use the hooks and extract the data
+  const { holidays } = useHolidays();
+  const { teamAvailability } = useTeamAvailability();
 
   const handlePreviousMonth = () => {
     setCurrentDate(prev => {
@@ -166,8 +168,8 @@ const Calendar: React.FC = () => {
         {viewMode === 'week' ? (
           <WeekView
             currentDate={currentDate}
-            holidays={[]}
-            teamAvailability={[]}
+            holidays={holidays || []}
+            teamAvailability={teamAvailability || []}
           />
         ) : (
           <CalendarGrid 
