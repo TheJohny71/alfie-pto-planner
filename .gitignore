@@ -7,8 +7,9 @@
 /coverage
 
 # production
-/dist
-/build
+# Removed these lines so the build output is included in the repository
+# /dist
+# /build
 dist-ssr
 
 # misc
