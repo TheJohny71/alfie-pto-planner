@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alfie - Create moments that matter with our intuitive PTO planning application">
+    <meta name="theme-color" content="#4F3D83">
+    
+    <title>Welcome to Alfie</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/alfie-pto-planner/assets/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/alfie-pto-planner/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/alfie-pto-planner/assets/favicon-16x16.png">
+    <link rel="mask-icon" href="/alfie-pto-planner/assets/favicon.svg" color="#4F3D83">
+    <link rel="apple-touch-icon" href="/alfie-pto-planner/assets/apple-touch-icon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Initial loading styles -->
+    <style>
+        :root {
+            --background: #0D1117;
+            --primary: #4F3D83;
+            --secondary: #234B9B;
+            --text: #FFFFFF;
+            --loading-bg: rgba(13, 17, 23, 0.9);
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--loading-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+            font-size: 1.25rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#root" class="visually-hidden">Skip to main content</a>
+    
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay" aria-live="polite">
+        <div class="loading-content">
+            <div class="init-spinner" role="progressbar" aria-label="Loading"></div>
+            <div>Loading Alfie...</div>
+        </div>
+    </div>
+    
+    <!-- React Root -->
+    <div id="root"></div>
+    
+    <!-- Fallback content -->
+    <div id="fallback" aria-hidden="true">
+        <div class="loading-content">
+            <div class="init-spinner"></div>
+            <div>Loading Alfie...</div>
+            <p style="margin-top: 1rem; opacity: 0.7">
+                If nothing loads, please ensure JavaScript is enabled and try refreshing the page.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Main Script -->
+    <script type="module" src="/alfie-pto-planner/assets/main.js"></script>
+    
+    <!-- Fallback Handler -->
+    <script>
+        document.getElementById('loading').classList.add('active');
+        
+        const loadingTimeout = setTimeout(() => {
+            const root = document.getElementById('root');
+            const fallback = document.getElementById('fallback');
+            const loading = document.getElementById('loading');
+            if (!root.children.length) {
+                fallback.classList.add('show');
+                loading.classList.remove('active');
+            }
+        }, 3000);
+        
+        const cleanup = () => {
+            clearTimeout(loadingTimeout);
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.classList.remove('active');
+                setTimeout(() => loading.remove(), 300);
+            }
+        };
+        
+        window.addEventListener('load', cleanup);
+        window.addEventListener('error', cleanup);
+    </script>
+</body>
+</html>

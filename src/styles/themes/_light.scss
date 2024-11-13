@@ -1,0 +1,63 @@
+@import '../base/variables';
+
+:root {
+    // Base colors
+    --background: #ffffff;
+    --surface: #f8f9fa;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+
+    // Brand colors
+    --primary: #{$primary};
+    --secondary: #{$secondary};
+    
+    // State colors
+    --success: #{$green-500};
+    --success-light: #{$green-50};
+    
+    // UI Elements
+    --border-color: #{$gray-200};
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --overlay-background: rgba(0, 0, 0, 0.5);
+    
+    // Calendar specific
+    --day-background: #ffffff;
+    --day-hover: #{$purple-50};
+    --weekend-background: #{$gray-50};
+    --selected-background: #{$purple-100};
+    --selected-border: #{$purple-600};
+    
+    // Modal
+    --modal-background: #ffffff;
+    --modal-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+// Light theme specific overrides
+.theme-light {
+    background-color: var(--background);
+    color: var(--text-primary);
+    
+    .calendar-container {
+        background-color: var(--surface);
+    }
+    
+    .day {
+        background-color: var(--day-background);
+        
+        &:hover {
+            background-color: var(--day-hover);
+        }
+        
+        &.weekend {
+            background-color: var(--weekend-background);
+        }
+    }
+    
+    .modal-content {
+        background-color: var(--modal-background);
+        box-shadow: var(--modal-shadow);
+    }
+}
