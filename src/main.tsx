@@ -10,7 +10,7 @@ const renderApp = () => {
 
   const getCurrentPage = () => {
     const path = window.location.pathname;
-    const basePath = import.meta.env.BASE_URL;
+    const basePath = '/alfie-pto-planner/';
     
     if (path.includes('calendar.html') || path === `${basePath}calendar.html`) {
       return <Calendar />;
