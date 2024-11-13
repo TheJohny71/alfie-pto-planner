@@ -1,0 +1,60 @@
+// Modern CSS Reset
+
+// Box sizing rules
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// Set root defaults
+html {
+  font-size: $base-font-size;
+  scroll-behavior: smooth;
+}
+
+// Set core body defaults
+body {
+  font-family: $font-family-sans;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Make images easier to work with
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+// Remove default styles on form elements
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+// Avoid text overflows
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+// Remove list styles
+ul, ol {
+  list-style: none;
+}
+
+// Remove underline from links
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+// Create a root stacking context
+#root, #__next {
+  isolation: isolate;
+}

@@ -1,18 +1,18 @@
 export interface Holiday {
-  date: string;
-  name: string;
-  type: 'regular' | 'observed';
-  region: 'US' | 'UK';
+    date: Date;
+    name: string;
+    type: HolidayType;
+    region: string;
 }
 
-export interface HolidayMap {
-  [key: string]: Holiday;
+export enum HolidayType {
+    Public = 'public',
+    Bank = 'bank',
+    Religious = 'religious',
+    Other = 'other'
 }
 
-export type Region = 'US' | 'UK';
-
-export interface DateSelection {
-  date: Date;
-  type: 'PTO' | 'Annual Leave';
-  status: 'pending' | 'approved' | 'rejected';
+export interface HolidayResponse {
+    holidays: Holiday[];
+    region: string;
 }

@@ -1,30 +1,76 @@
-// Utilities for calendar manipulation
+// View Mode Types
+export type ViewMode = 'day' | 'week' | 'month';
+export type Region = string;
 
-export type CalendarUtils = {
-  addDays: (date: Date, days: number) => Date;
-  subtractDays: (date: Date, days: number) => Date;
-  formatDate: (date: Date) => string;
-};
+// Calendar State Interface
+export interface CalendarState {
+    currentDate: Date;
+    selectedDate?: Date;
+    viewMode: ViewMode;
+    region: Region;
+}
 
-// Add a specific number of days to a date
-export const addDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
+// Calendar Action Types
+export type CalendarAction =
+    | { type: 'SET_DATE'; payload: Date }
+    | { type: 'SET_VIEW_MODE'; payload: ViewMode }
+    | { type: 'SET_REGION'; payload: Region }
+    | { type: 'SET_SELECTED_DATE'; payload: Date | undefined };
 
-// Subtract a specific number of days from a date
-export const subtractDays = (date: Date, days: number): Date => {
-  const result = new Date(date);
-  result.setDate(result.getDate() - days);
-  return result;
-};
+// Calendar Props Interface
+export interface CalendarProps {
+    state: CalendarState;
+    setDate: (date: Date) => void;
+    setViewMode: (mode: ViewMode) => void;
+    setRegion: (region: Region) => void;
+    setSelectedDate: (date: Date | undefined) => void;
+}
 
-// Format a date as 'Month Day, Year'
-export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-};
+// Holiday Types
+export interface Holiday {
+    date: Date;
+    name: string;
+    type: string;
+}
+
+// Week View Props Interface
+export interface WeekViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
+
+// Day View Props Interface
+export interface DayViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
+
+// Month View Props Interface
+export interface MonthViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
+
+// Calendar Event Interface
+export interface CalendarEvent {
+    id: string;
+    title: string;
+    startDate: Date;
+    endDate: Date;
+    type: 'holiday' | 'leave' | 'meeting';
+    description?: string;
+}
+
+// Calendar Navigation Props
+export interface CalendarNavigationProps {
+    currentDate: Date;
+    onNavigate: (direction: 'prev' | 'next') => void;
+}
+
+// Calendar Header Props
+export interface CalendarHeaderProps {
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
+    region: Region;
+    onRegionChange: (region: Region) => void;
+}

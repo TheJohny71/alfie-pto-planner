@@ -1,3 +1,9 @@
+// At the top of your file
+import Swal from 'sweetalert2';
+
+export const showAlert = () => {
+    // Your alert code
+}
 // Try this simpler import first
 import Swal from 'sweetalert2';
 import { Holiday } from '../types/holidays';

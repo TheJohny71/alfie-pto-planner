@@ -1,3 +1,10 @@
+// At the top of your file
+import { LeaveRequest, LeaveStatus } from '../types';
+import { Holiday } from '../types/holidays';
+
+export const someService = () => {
+    // Your service code
+}
 // src/utils/services.ts
 import { LeaveRequest, LeaveStatus } from '../types';
 import { CONFIG } from './config';

@@ -1,3 +1,13 @@
+// At the top of your file
+import { LeaveRequest, LeaveStatus, LeaveType } from '../../types';
+
+interface LeaveRequestFormProps {
+    onSubmit: (request: LeaveRequest) => void;
+}
+
+export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({ onSubmit }) => {
+    // Your component code
+}
 import React, { useState } from 'react';
 import { LeaveRequest, LeaveType, LeaveCategory } from '../types';
 

@@ -1,80 +1,76 @@
 import React from 'react';
+import { CalendarState } from '../types';
 
-interface WeekViewProps {
-  currentDate: Date;
-  holidays: any[];
-  teamAvailability: any[];
+interface Holiday {
+    date: Date;
+    name: string;
+    type: string;
 }
 
-const WeekView: React.FC<WeekViewProps> = ({
-  currentDate,
-  holidays,
-  teamAvailability,
-}) => {
-  // Get week dates
-  const getWeekDates = () => {
-    const dates = [];
-    const startDate = new Date(currentDate);
-    startDate.setDate(currentDate.getDate() - currentDate.getDay());
+interface WeekViewProps {
+    state: CalendarState;
+    holidays?: Holiday[];
+}
 
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
+export const WeekView: React.FC<WeekViewProps> = ({ state, holidays }) => {
+    const { currentDate, selectedDate, viewMode, region } = state;
 
-  const weekDates = getWeekDates();
-  const workHours = Array.from({ length: 9 }, (_, i) => i + 9); // 9 AM to 5 PM
+    const getWeekDays = (date: Date) => {
+        const week = [];
+        const current = new Date(date);
+        current.setDate(current.getDate() - current.getDay()); // Start of week (Sunday)
+        
+        for (let i = 0; i < 7; i++) {
+            week.push(new Date(current));
+            current.setDate(current.getDate() + 1);
+        }
+        return week;
+    };
 
-  return (
-    <div className="bg-white rounded-lg shadow">
-      {/* Week header */}
-      <div className="grid grid-cols-8 border-b">
-        <div className="p-4 border-r text-gray-500">Time</div>
-        {weekDates.map((date) => (
-          <div
-            key={date.toISOString()}
-            className={`p-4 text-center ${
-              date.toDateString() === new Date().toDateString()
-                ? 'bg-purple-50'
-                : ''
-            }`}
-          >
-            <div className="font-medium">
-              {date.toLocaleDateString('en-US', { weekday: 'short' })}
+    const weekDays = getWeekDays(currentDate);
+
+    return (
+        <div className="week-view">
+            <div className="week-header">
+                {weekDays.map((day, index) => (
+                    <div 
+                        key={day.toISOString()} 
+                        className={`day-header ${
+                            selectedDate && day.toDateString() === selectedDate.toDateString() 
+                                ? 'selected' 
+                                : ''
+                        }`}
+                    >
+                        <div className="day-name">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                        <div className="day-date">{day.getDate()}</div>
+                    </div>
+                ))}
             </div>
-            <div className="text-sm text-gray-500">
-              {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            
+            <div className="week-body">
+                {weekDays.map((day) => {
+                    const dayHolidays = holidays?.filter(
+                        holiday => holiday.date.toDateString() === day.toDateString()
+                    );
+                    
+                    return (
+                        <div 
+                            key={day.toISOString()} 
+                            className={`day-column ${
+                                selectedDate && day.toDateString() === selectedDate.toDateString()
+                                    ? 'selected'
+                                    : ''
+                            }`}
+                        >
+                            {dayHolidays?.map((holiday, index) => (
+                                <div key={index} className={`holiday-item ${holiday.type.toLowerCase()}`}>
+                                    {holiday.name}
+                                </div>
+                            ))}
+                        </div>
+                    );
+                })}
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Time grid */}
-      <div className="divide-y">
-        {workHours.map((hour) => (
-          <div key={hour} className="grid grid-cols-8 h-16">
-            {/* Time column */}
-            <div className="border-r p-2 text-right text-sm text-gray-500">
-              {hour % 12 || 12}:00 {hour >= 12 ? 'PM' : 'AM'}
-            </div>
-
-            {/* Day columns */}
-            {weekDates.map((date) => (
-              <div
-                key={`${date.toISOString()}-${hour}`}
-                className="border-r last:border-r-0 relative"
-              >
-                {/* You can add event rendering logic here */}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
-
-export default WeekView;

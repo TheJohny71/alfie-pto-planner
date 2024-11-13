@@ -4,6 +4,7 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -13,8 +14,13 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif']
+      },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
       }
     }
   },
-  plugins: []
+  plugins: [
+    require('@tailwindcss/forms'),
+  ]
 }
