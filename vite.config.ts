@@ -1,22 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
 
+// https://vitejs.dev/config/
 export default defineConfig({
+  base: '/alfie-pto-planner/',  // Add this line for GitHub Pages
   plugins: [react()],
-  base: '/alfie-pto-planner/',
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-      },
-    },
-  },
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-    },
-  },
 })
