@@ -2,63 +2,36 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['main']
+    branches: [ "main" ]  # Make sure this matches your main branch name
   workflow_dispatch:
-
-permissions:
-  contents: write
-  pages: write
-  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
-        
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          
-      - name: Clear npm cache
-        run: |
-          npm cache clean --force
-          rm -rf node_modules package-lock.json
-          
+          node-version: '18'
       - name: Install dependencies
-        run: |
-          npm install
-          npm install --save-dev @vitejs/plugin-react
-          npm install --save-dev vite
-          
+        run: npm ci
       - name: Build
-        run: |
-          npm run build
-        env:
-          CI: false
-          
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-        
+        run: npm run build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
