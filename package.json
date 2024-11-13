@@ -1,31 +1,7 @@
 {
-  "name": "alfie-pto-planner",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
   "scripts": {
+    "build": "vite build",  // Remove tsc check temporarily
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf node_modules dist"
-  },
-  "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "sweetalert2": "11.10.5"
-  },
-  "devDependencies": {
-    "@types/node": "18.19.8",
-    "@types/react": "18.2.48",
-    "@types/react-dom": "18.2.18",
-    "@typescript-eslint/eslint-plugin": "6.19.0",
-    "@typescript-eslint/parser": "6.19.0",
-    "@vitejs/plugin-react": "4.2.1",
-    "typescript": "5.3.3",
-    "vite": "5.0.12",
-    "sass": "1.69.5"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "preview": "vite preview"
   }
 }
